@@ -201,7 +201,7 @@ module.exports = class extends Generator {
 			this.composeWith(require.resolve('../cloud_foundry'), this.opts);
 		}
 
-		//this.composeWith(require.resolve('../service'), this.opts);
+		this.composeWith(require.resolve('../service'), this.opts);
 
 		console.log("end writing")
 
