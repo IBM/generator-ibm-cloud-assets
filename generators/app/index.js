@@ -16,29 +16,56 @@
 const Generator = require('yeoman-generator');
 const _ = require('lodash');
 const path = require('path');
-const os = require('os');
 const Utils = require('../lib/utils');
 
-const OPTION_BLUEMIX = 'bluemix';
-const OPTION_STARTER = 'starter';
+const DEPLOY_OPTIONS = 'deploy_options';
+const APPLICATION_OPTIONS = 'application';
+
+const portDefault = {
+	java: {
+		http: '9080',
+		https: '9443'
+	},
+	spring: {
+		http: '8080'
+	},
+	node: {
+		http: '3000'
+	},
+	python: {
+		http: '3000'
+	},
+	swift: {
+		http: '8080'
+	},
+	django: {
+		http: '3000'
+	},
+	go: {
+		http: '8080'
+	}
+}
 
 module.exports = class extends Generator {
 	constructor(args, opts) {
 		super(args, opts);
-
-		this._sanitizeOption(this.options, OPTION_BLUEMIX);
-		this._sanitizeOption(this.options, OPTION_STARTER);
-
 		this.opts = opts;
+
+		this._sanitizeOption(this.options, DEPLOY_OPTIONS);
+		this._sanitizeOption(this.options, APPLICATION_OPTIONS);
+		console.log("THIS.OPTS: ")
+		console.log(this.opts);
 
 		if (this.options.libertyVersion === 'beta') {
 			this.options.libertyBeta = true
 		}
 
+		this.opts.bluemix = this._makeBluemix(this.opts.deploy_options, this.opts.application);
+
 		this.shouldPrompt = this.opts.bluemix ? false : true;
 
 		/*
-		Yeoman copies the opts when doing compose with so create own object reference
+		Yeoman copies the opts when doing compose with to create own object reference
 		that can be updated in prompting
 		*/
 		if (this.opts.bluemix) {
@@ -58,29 +85,8 @@ module.exports = class extends Generator {
 		} else {
 			this.cloudDeploymentType = this.bluemix.cloudDeploymentType;
 		}
-	}
 
-	initializing() {
-		// Serverless Cloud Functions go through a different system of enablement than other patterns,
-		// see https://github.ibm.com/arf/generator-cloud-functions-usecase/
-		if (_.toLower(this.cloudDeploymentType) === 'functions') {
-
-			let context = this.parentContext || {};
-			//add bluemix options from this.options to existing bluemix options on parent context
-			context[OPTION_BLUEMIX] = Object.assign(context[OPTION_BLUEMIX] || {}, this.options[OPTION_BLUEMIX]);
-
-			// DevOps v2 Shim
-			context.deploymentOrg = this.options.deploymentOrg;
-			context.deploymentSpace = this.options.deploymentSpace;
-			context.deploymentRegion = this.options.deploymentRegion;
-			context.toolchainName = this.options.toolchainName;
-
-			this.composeWith(require.resolve('../functions'), context);		}
-		else {
-			this.composeWith(require.resolve('../dockertools'), this.opts);
-			this.composeWith(require.resolve('../kubernetes'), this.opts);
-			this.composeWith(require.resolve('../deployment'), this.opts);
-		}
+		console.log("end constructor")
 	}
 
 	prompting() {
@@ -88,12 +94,14 @@ module.exports = class extends Generator {
 			return;
 		}
 		const prompts = [];
+
 		prompts.push({
 			type: 'input',
 			name: 'name',
 			message: 'Project name',
 			default: path.basename(process.cwd())
 		});
+
 		prompts.push({
 			type: 'list',
 			name: 'language',
@@ -108,25 +116,12 @@ module.exports = class extends Generator {
 				'GO'
 			]
 		});
-		prompts.push({
-			type: 'input',
-			name: 'dockerRegistry',
-			message: 'Docker Registry (space for none)',
-			default: 'registry.ng.bluemix.net/' + os.userInfo().username
-		});
 
 		prompts.push({
 			type: 'input',
 			name: 'deploymentType',
-			message: 'Deployment Type (Kube, CF, etc.)',
+			message: 'Deployment Type (kube, cloud_foundry)',
 			default: path.basename(process.cwd())
-		});
-
-		prompts.push({
-			type: 'input',
-			name: 'kubeClusterNamespace',
-			message: 'Kube Cluster Namespace',
-			default: 'default'
 		});
 
 		prompts.push({
@@ -139,55 +134,136 @@ module.exports = class extends Generator {
 			]
 		});
 
-		prompts.push({
-			type: 'input',
-			name: 'createType',
-			message: 'App Type ie basic, blank, ect.',
-			default: path.basename(process.cwd())
-		});
-
 		return this.prompt(prompts).then(this._processAnswers.bind(this));
 	}
 
-	configuring() {}
+	configuring() {
+		console.log("configuring")
+		// process object for kube deployments
+		if (this.bluemix.cloudDeploymentType == "kube") {
+			// work out app name and language
+			this.opts.bluemix.language = _.toLower(this.bluemix.backendPlatform);
+			if(this.opts.bluemix.language === 'java' || this.opts.bluemix.language === 'spring') {
+				this.opts.bluemix.applicationName = this.opts.bluemix.appName || Utils.sanitizeAlphaNum(this.bluemix.name);
+			} else {
+				this.opts.bluemix.applicationName = Utils.sanitizeAlphaNum(this.bluemix.name);
+			}
+
+			this.opts.bluemix.chartName = Utils.sanitizeAlphaNumLowerCase(this.opts.bluemix.applicationName);
+
+			this.opts.bluemix.services = typeof(this.opts.bluemix.services) === 'string' ? JSON.parse(this.opts.bluemix.services || '[]') : this.opts.bluemix.services;
+
+			this.opts.bluemix.servicePorts = {};
+			//use port if passed in
+			if(this.opts.bluemix.port) {
+				this.opts.bluemix.servicePorts.http = this.opts.bluemix.port;
+			} else {
+				this.opts.bluemix.servicePorts.http = portDefault[this.opts.bluemix.language].http;
+				if(portDefault[this.opts.bluemix.language].https) {
+					this.opts.bluemix.servicePorts.https = portDefault[this.opts.bluemix.language].https;
+				}
+			}
+
+			if (this.bluemix.server && this.bluemix.server.cloudDeploymentOptions && this.bluemix.server.cloudDeploymentOptions.kubeDeploymentType) {
+					this.opts.bluemix.kubeDeploymentType = this.bluemix.server.cloudDeploymentOptions.kubeDeploymentType;
+			}
+
+		}
+
+		console.log("end configuring")
+
+
+	}
+
+	writing() {
+		console.log("writing")
+
+		console.log("BLUEMIX: ")
+		console.log(this.opts.bluemix);
+
+
+		// runs subgenerators
+
+		this.composeWith(require.resolve('../dockertools'), this.opts);
+
+		if ( this.bluemix.cloudDeploymentType == "kube" ) {
+
+			if ( this.bluemix.server.cloudDeploymentOptions.kubeDeploymentType == "KNATIVE" ) {
+				console.log("write knative")
+				this.composeWith(require.resolve('../knative'), this.opts);
+			} else {
+				console.log("write helm")
+				this.composeWith(require.resolve('../kubernetes'), this.opts);
+			}
+
+		} else if (this.bluemix.cloudDeploymentType == "cloud_foundry") {
+			console.log("write CF")
+			this.composeWith(require.resolve('../cloud_foundry'), this.opts);
+		}
+
+		//this.composeWith(require.resolve('../service'), this.opts);
+
+		console.log("end writing")
+
+	}
 
 	_processAnswers(answers) {
-		if (!this.bluemix.server) {
-			this.bluemix.server = {};
-			this.bluemix.server.cloudDeploymentOptions = {};
-		}
-		this.bluemix.backendPlatform = answers.language;
-		this.bluemix.name = answers.name;
-		this.bluemix.sanitizedName = Utils.sanitizeAlphaNumDash(answers.name);
-		answers.dockerRegistry = answers.dockerRegistry.trim();
-		this.bluemix.dockerRegistry = answers.dockerRegistry.length > 0 ? answers.dockerRegistry : '';
-		if (this.bluemix.dockerRegistry.length > 0) {
-			this.bluemix.server.cloudDeploymentOptions.imageRegistryNamespace = this.bluemix.dockerRegistry;
-		}
-		this.bluemix.cloudDeploymentType = answers.deploymentType;
-		this.bluemix.server.cloudDeploymentType = answers.deploymentType;
-		this.bluemix.server.cloudDeploymentOptions.kubeDeploymentType = answers.kubeDeploymentType;
-		if (this.bluemix.server && this.bluemix.server.cloudDeploymentOptions) {
-			this.bluemix.server.cloudDeploymentOptions.kubeClusterNamespace = answers.kubeClusterNamespace;
-		}
-		this.opts.createType = answers.createType;
+		// processes answers from the prompts, not part of production flow
+		_.extend(this.bluemix,
+			{
+				server: {
+					cloudDeploymentType: answers.deploymentType,
+					cloudDeploymentOptions:  { kubeDeploymentType: answers.kubeDeploymentType }
+				},
+				cloudDeploymentType: answers.deploymentType,
+				sanitizedName: Utils.sanitizeAlphaNumDash(answers.name),
+				name: answers.name,
+				backendPlatform: answers.language
+			}
+		);
 	}
 
 	_sanitizeOption(options, name) {
+		// console.log(options);
 		const optionValue = options[name];
+		console.log(`optionValue=${optionValue}`);
 		if (optionValue && _.isFunction(optionValue.indexOf) && optionValue.indexOf('file:') === 0) {
 			const fileName = optionValue.replace('file:', '');
 			const filePath = this.destinationPath(`./${fileName}`);
-			console.info(`Reading ${name} parameter from local file ${filePath}`);
+			console.info(`Reading '${name}' parameter from local file ${filePath} with contents: ${this.fs.readJSON(filePath)}`);
 			this.options[name] = this.fs.readJSON(filePath);
-			return;
+			console.log(`Saved this.options[${name}]=${this.options[name]}`);
+			return this.options[name];
 		}
 
 		try {
 			this.options[name] = typeof (this.options[name]) === 'string' ?
 				JSON.parse(this.options[name]) : this.options[name];
 		} catch (e) {
-			throw Error(`${name} parameter is expected to be a valid stringified JSON object`);
+			throw Error(`${name} parameter is expected to be a valid stringified JSON object: ${e}`);
 		}
 	}
-};
+
+	_makeBluemix(deployOpts, application){
+		let bluemix = {
+			name: application.name,
+			cloudDeploymentType: Object.keys(deployOpts)[0],
+			backendPlatform: application.language,
+			services: application.services,
+			server: {
+				"cloudDeploymentOptions": {
+					"kubeDeploymentType": (deployOpts.kube) ? deployOpts.kube.type : ""
+				}
+			}
+		};
+
+		if ( deployOpts.cloud_foundry ) {
+			_.extend(bluemix.server, deployOpts.cloud_foundry);
+			bluemix.server.host = bluemix.server.hostname;
+			bluemix.cloudDeploymentType = "cloud_foundry";
+		}
+
+		return bluemix
+
+	}
+}

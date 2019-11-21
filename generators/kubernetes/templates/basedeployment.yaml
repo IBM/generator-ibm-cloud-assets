@@ -35,5 +35,5 @@ spec:
             memory: "{{tag ' .Values.image.resources.requests.memory '}}"
         env:
           - name: PORT
-            value : "{{tag ' .Values.service.servicePort '}}"
+            value : {{tag ' .Values.service.servicePort '}}
 {{tag ' end '}}

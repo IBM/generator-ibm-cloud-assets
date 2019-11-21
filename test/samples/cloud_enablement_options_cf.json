@@ -1,0 +1,10 @@
+{
+        "CF": {
+            "disk_quota": "1G",
+            "domain": "mydomain.com",
+            "hostname": "my-app-hostname",
+            "instances": 3,
+            "memory": "512MB",
+            "services": ["serviceName"]
+        }
+}

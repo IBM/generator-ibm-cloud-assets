@@ -1,0 +1,6 @@
+{
+        "KUBE": {
+            "cloud_deployment_type": "HELM",
+            "services": ["serviceName"]
+        }
+}

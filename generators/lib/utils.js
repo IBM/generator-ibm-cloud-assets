@@ -25,6 +25,8 @@ const REGEX_LEADING_ALPHA = /^[^a-zA-Z]*/;
 const REGEX_ALPHA_NUM = /[^a-zA-Z0-9]/g;
 const REGEX_ALPHA_NUM_DASH = /[^a-zA-Z0-9-]/g;
 
+const PATH_KNATIVE_YAML = "./service-knative.yaml";
+
 const sanitizeAlphaNumLowerCase = (name) => {
 	return sanitizeAlphaNum(name).toLowerCase();
 };
@@ -82,5 +84,6 @@ module.exports = {
 	sanitizeAlphaNumLowerCase: sanitizeAlphaNumLowerCase,
 	sanitizeAlphaNumDash: sanitizeAlphaNumDash,
 	writeHandlebarsFile: _writeHandlebarsFile,
-	copyFiles: _copyFiles
+	copyFiles: _copyFiles,
+	PATH_KNATIVE_YAML: PATH_KNATIVE_YAML
 };

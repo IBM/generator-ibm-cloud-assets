@@ -3,7 +3,6 @@
 replicaCount: 1
 revisionHistoryLimit: 1
 image:
-  repository: {{repositoryURL}}{{#toLowerCase applicationName}}{{/toLowerCase}}
   tag: v1.0.0
   pullPolicy: Always
   resources:

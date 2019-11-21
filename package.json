@@ -1,7 +1,7 @@
 {
-  "name": "generator-ibm-cloud-enablement",
-  "version": "1.13.1",
-  "description": "This generator adds IBM Cloud enablement to applications",
+  "name": "generator-ibm-cloud-assets",
+  "version": "0.0.1",
+  "description": "Generate deployment assest for the IBM Cloud",
   "main": "generators/app/index.js",
   "license": "Apache-2.0",
   "files": [
@@ -12,9 +12,9 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ibm-developer/generator-ibm-cloud-enablement.git"
+    "url": "git+https://github.com/IBM/generator-ibm-cloud-assets.git"
   },
-  "homepage": "https://github.com/ibm-developer/generator-ibm-cloud-enablement#readme",
+  "homepage": "https://github.com/IBM/generator-ibm-cloud-assets#readme",
   "scripts": {
     "test": "npm run lint && npm run mocha",
     "testcf": "npm run mocha test/test-cloudfoundry.js",
@@ -47,6 +47,7 @@
     "standard-version": "^4.4.0",
     "xunit-file": "^1.0.0",
     "yeoman-assert": "^2.2.2",
-    "yeoman-test": "^2.0.0"
+    "yeoman-test": "^2.0.0",
+    "yo": "^3.1.0"
   }
 }
