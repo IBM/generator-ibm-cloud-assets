@@ -1,14 +1,6 @@
 # IBM Cloud Asset Generator
 
 [![IBM Cloud powered][img-ibmcloud-powered]][url-cloud]
-[![Travis][img-travis-master]][url-travis-master]
-[![Coveralls][img-coveralls-master]][url-coveralls-master]
-[![Codacy][img-codacy]][url-codacy]
-[![Version][img-version]][url-npm]
-[![DownloadsMonthly][img-npm-downloads-monthly]][url-npm]
-[![DownloadsTotal][img-npm-downloads-total]][url-npm]
-[![License][img-license]][url-npm]
-[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
 
 [img-ibmcloud-powered]: https://img.shields.io/badge/IBM%20Cloud-powered-blue.svg
 [url-cloud]: http://bluemix.net

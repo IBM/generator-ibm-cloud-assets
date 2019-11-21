@@ -1,6 +1,6 @@
 {
   "name": "generator-ibm-cloud-assets",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Generate deployment assest for the IBM Cloud",
   "main": "generators/app/index.js",
   "license": "Apache-2.0",
