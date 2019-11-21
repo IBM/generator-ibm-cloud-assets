@@ -1,5 +1,5 @@
 {
-  "name": "generator-ibm-cloud-assets",
+  "name": "generator-ibm-cloud-enablement",
   "version": "0.0.1",
   "description": "Generate deployment assest for the IBM Cloud",
   "main": "generators/app/index.js",
@@ -34,6 +34,7 @@
     "handlebars": "^4.4.3",
     "js-yaml": "^3.13.1",
     "lodash": "^4.17.15",
+    "log4js": "^4.4.0",
     "xml-js": "^1.6.11",
     "yeoman-generator": "^3.2.0"
   },
