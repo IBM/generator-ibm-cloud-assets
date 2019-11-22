@@ -13,10 +13,14 @@
 
 'use strict';
 
+const Log4js = require('log4js');
+const logger = Log4js.getLogger('generator-ibm-cloud-assets:app');
 const Generator = require('yeoman-generator');
 const _ = require('lodash');
 const path = require('path');
 const Utils = require('../lib/utils');
+
+const DEFAULT_LOG_LEVEL = "info";
 
 const DEPLOY_OPTIONS = 'deploy_options';
 const APPLICATION_OPTIONS = 'application';
@@ -50,11 +54,13 @@ module.exports = class extends Generator {
 	constructor(args, opts) {
 		super(args, opts);
 		this.opts = opts;
+		this._setLoggerLevel();
+		this.opts.loggerLevel = logger.level;
 
 		this._sanitizeOption(this.options, DEPLOY_OPTIONS);
 		this._sanitizeOption(this.options, APPLICATION_OPTIONS);
-		console.log("THIS.OPTS: ")
-		console.log(this.opts);
+		this.log("THIS.OPTS: ");
+		this.log(this.opts);
 
 		if (this.options.libertyVersion === 'beta') {
 			this.options.libertyBeta = true
@@ -86,7 +92,25 @@ module.exports = class extends Generator {
 			this.cloudDeploymentType = this.bluemix.cloudDeploymentType;
 		}
 
-		console.log("end constructor")
+		this.log("end constructor");
+	}
+
+	_setLoggerLevel(){
+		let level = (process.env.GENERATOR_LOG_LEVEL || DEFAULT_LOG_LEVEL).toUpperCase();
+		logger.info("Setting log level to", level);
+		/* istanbul ignore else */      //ignore for code coverage as the else block will set a known valid log level
+		if(Log4js.levels.hasOwnProperty(level)) {
+			logger.level = Log4js.levels[level];
+		} else {
+			logger.warn("Invalid log level specified (using default) : " + level);
+			logger.level = DEFAULT_LOG_LEVEL.toUpperCase();
+		}
+	}
+
+	intializing() {
+		this.log("intializing");
+
+		this.log("end intializing");
 	}
 
 	prompting() {
@@ -135,10 +159,13 @@ module.exports = class extends Generator {
 		});
 
 		return this.prompt(prompts).then(this._processAnswers.bind(this));
+
+		this.log("end prompting");
 	}
 
 	configuring() {
-		console.log("configuring")
+		this.log("configuring");
+
 		// process object for kube deployments
 		if (this.bluemix.cloudDeploymentType == "kube") {
 			// work out app name and language
@@ -170,16 +197,14 @@ module.exports = class extends Generator {
 
 		}
 
-		console.log("end configuring")
-
-
+		this.log("end configuring");
 	}
 
 	writing() {
-		console.log("writing")
+		this.log("writing");
 
-		console.log("BLUEMIX: ")
-		console.log(this.opts.bluemix);
+		this.log("BLUEMIX: ");
+		this.log(this.opts.bluemix);
 
 
 		// runs subgenerators
@@ -189,21 +214,21 @@ module.exports = class extends Generator {
 		if ( this.bluemix.cloudDeploymentType == "kube" ) {
 
 			if ( this.bluemix.server.cloudDeploymentOptions.kubeDeploymentType == "KNATIVE" ) {
-				console.log("write knative")
+				this.log("write knative")
 				this.composeWith(require.resolve('../knative'), this.opts);
 			} else {
-				console.log("write helm")
+				this.log("write helm")
 				this.composeWith(require.resolve('../kubernetes'), this.opts);
 			}
 
 		} else if (this.bluemix.cloudDeploymentType == "cloud_foundry") {
-			console.log("write CF")
+			this.log("write CF")
 			this.composeWith(require.resolve('../cloud_foundry'), this.opts);
 		}
 
 		this.composeWith(require.resolve('../service'), this.opts);
 
-		console.log("end writing")
+		this.log("end writing")
 
 	}
 
@@ -224,15 +249,15 @@ module.exports = class extends Generator {
 	}
 
 	_sanitizeOption(options, name) {
-		// console.log(options);
+		// this.log(options);
 		const optionValue = options[name];
-		console.log(`optionValue=${optionValue}`);
+		this.log(`optionValue=${optionValue}`);
 		if (optionValue && _.isFunction(optionValue.indexOf) && optionValue.indexOf('file:') === 0) {
 			const fileName = optionValue.replace('file:', '');
 			const filePath = this.destinationPath(`./${fileName}`);
 			console.info(`Reading '${name}' parameter from local file ${filePath} with contents: ${this.fs.readJSON(filePath)}`);
 			this.options[name] = this.fs.readJSON(filePath);
-			console.log(`Saved this.options[${name}]=${this.options[name]}`);
+			this.log(`Saved this.options[${name}]=${this.options[name]}`);
 			return this.options[name];
 		}
 
@@ -263,7 +288,6 @@ module.exports = class extends Generator {
 			bluemix.cloudDeploymentType = "cloud_foundry";
 		}
 
-		return bluemix
-
+		return bluemix;
 	}
 }

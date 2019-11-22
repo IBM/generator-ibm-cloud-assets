@@ -1,5 +1,5 @@
 'use strict';
-const logger = require('../go/node_modules/log4js').getLogger("generator-cloud-enablement-v2:language-swift-kitura");
+const logger = require('log4js').getLogger("generator-cloud-assets:languages-swift-kitura");
 const Generator = require('yeoman-generator');
 const handlebars = require('../java/node_modules/handlebars');
 const path = require('path');

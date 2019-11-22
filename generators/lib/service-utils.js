@@ -1,6 +1,6 @@
 'use strict'
 const Log4js = require('log4js');
-const logger = Log4js.getLogger("generator-ibm-service-enablement:Utils");
+const logger = Log4js.getLogger("generator-ibm-service-enablement:ServiceUtils");
 const readline = require('readline');
 const fs = require('fs');
 const yaml = require('js-yaml');
