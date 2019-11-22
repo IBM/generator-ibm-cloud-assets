@@ -1,31 +1,23 @@
-# IBM Cloud Enablement Generator
+# IBM Cloud Asset Generator
 
 [![IBM Cloud powered][img-ibmcloud-powered]][url-cloud]
-[![Travis][img-travis-master]][url-travis-master]
-[![Coveralls][img-coveralls-master]][url-coveralls-master]
-[![Codacy][img-codacy]][url-codacy]
-[![Version][img-version]][url-npm]
-[![DownloadsMonthly][img-npm-downloads-monthly]][url-npm]
-[![DownloadsTotal][img-npm-downloads-total]][url-npm]
-[![License][img-license]][url-npm]
-[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
 
 [img-ibmcloud-powered]: https://img.shields.io/badge/IBM%20Cloud-powered-blue.svg
 [url-cloud]: http://bluemix.net
-[url-npm]: https://www.npmjs.com/package/generator-ibm-cloud-enablement
-[img-license]: https://img.shields.io/npm/l/generator-ibm-cloud-enablement.svg
-[img-version]: https://img.shields.io/npm/v/generator-ibm-cloud-enablement.svg
-[img-npm-downloads-monthly]: https://img.shields.io/npm/dm/generator-ibm-cloud-enablement.svg
-[img-npm-downloads-total]: https://img.shields.io/npm/dt/generator-ibm-cloud-enablement.svg
+[url-npm]: https://www.npmjs.com/package/generator-ibm-cloud-assets
+[img-license]: https://img.shields.io/npm/l/generator-ibm-cloud-assets.svg
+[img-version]: https://img.shields.io/npm/v/generator-ibm-cloud-assets.svg
+[img-npm-downloads-monthly]: https://img.shields.io/npm/dm/generator-ibm-cloud-assets.svg
+[img-npm-downloads-total]: https://img.shields.io/npm/dt/generator-ibm-cloud-assets.svg
 
-[img-travis-master]: https://travis-ci.org/ibm-developer/generator-ibm-cloud-enablement.svg?branch=master
-[url-travis-master]: https://travis-ci.org/ibm-developer/generator-ibm-cloud-enablement/branches
+[img-travis-master]: https://travis-ci.org/ibm-developer/generator-ibm-cloud-assets.svg?branch=master
+[url-travis-master]: https://travis-ci.org/ibm-developer/generator-ibm-cloud-assets/branches
 
-[img-coveralls-master]: https://coveralls.io/repos/github/ibm-developer/generator-ibm-cloud-enablement/badge.svg
-[url-coveralls-master]: https://coveralls.io/github/ibm-developer/generator-ibm-cloud-enablement
+[img-coveralls-master]: https://coveralls.io/repos/github/ibm-developer/generator-ibm-cloud-assets/badge.svg
+[url-coveralls-master]: https://coveralls.io/github/ibm-developer/generator-ibm-cloud-assets
 
 [img-codacy]: https://api.codacy.com/project/badge/Grade/a5893a4622094dc8920c8a372a8d3588?branch=master
-[url-codacy]: https://www.codacy.com/app/ibm-developer/generator-ibm-cloud-enablement
+[url-codacy]: https://www.codacy.com/app/ibm-developer/generator-ibm-cloud-assets
 
 Creates the files required to deploy projects to Kubernetes (using Helm Charts) and/or Cloud Foundry (using a generated manifest). Also, provides scripts to initiate IBM Cloud’s DevOps Toolchain.
 
@@ -41,18 +33,18 @@ npm install -g yo
 ## Installation
 
 ```bash
-npm install -g generator-ibm-cloud-enablement
+npm install -g generator-ibm-cloud-assets
 ```
 
 ## Usage
 
 ```bash
-yo ibm-cloud-enablement
+yo ibm-cloud-assets
 ```
 
 Following command line arguments are supported:
-* `--bluemix {stringified-json}` -  used by Scaffolder to supply project information from `pman`. You can also supply a local file containing compatible JSON object by using `--bluemix file:path/to/file.json`. Other options include `--bluemix='{"name":"<project-name>","backendPlatform":"<platform>"}'`
-* `--services {stringified-array}` - used to add an extra service container for `docker-compose`.
+* `--deploy_options {stringified-json}` -  used by Scaffolder to supply project information from `pman`. You can also supply a local file containing compatible JSON object by using `--bluemix file:path/to/file.json`. Other options include `--bluemix='{"name":"<project-name>","backendPlatform":"<platform>"}'`
+* `--application {stringified-array}` - used to add an extra service container for `docker-compose`.
 * `--nodeCFMinMemory` - used to defined a minimum requirement for node CF deployment. (e.g 384M)
 
 **Note**: Adding the `--services` option will generate and use `docker-compose and docker-compose-tools` for docker containers.
@@ -77,15 +69,15 @@ manifest.yml | Yaml file with configuration to deploy to Cloud Foundry
 Clone this repository and link it via npm
 
 ```bash
-git clone https://github.com/ibm-developer/generator-ibm-cloud-enablement
-cd generator-ibm-cloud-enablement
+git clone https://github.com/ibm/generator-ibm-cloud-assets
+cd generator-ibm-cloud-assets
 npm link
 ```
 
 In a separate directory invoke the generator via
 
 ```bash
-yo ibm-cloud-enablement 
+yo ibm-cloud-assets 
 ```
 
 ## Supported Docker-Compose Services

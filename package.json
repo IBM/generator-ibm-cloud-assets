@@ -1,6 +1,6 @@
 {
-  "name": "generator-ibm-cloud-enablement",
-  "version": "0.0.1",
+  "name": "generator-ibm-cloud-assets",
+  "version": "0.0.2",
   "description": "Generate deployment assest for the IBM Cloud",
   "main": "generators/app/index.js",
   "license": "Apache-2.0",
@@ -50,5 +50,12 @@
     "yeoman-assert": "^2.2.2",
     "yeoman-test": "^2.0.0",
     "yo": "^3.1.0"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/IBM/generator-ibm-cloud-assets/issues"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "author": "Nick Steinhauser & Gabriel Valencia"
 }
