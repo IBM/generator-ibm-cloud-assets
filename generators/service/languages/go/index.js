@@ -15,7 +15,7 @@
  */
 'use strict';
 const Log4js = require('../java/node_modules/log4js');
-const logger = Log4js.getLogger("generator-ibm-cloud-enablement-v2:language-go");
+const logger = Log4js.getLogger("generator-ibm-cloud-assets:languages-go");
 let Generator = require('yeoman-generator');
 const path = require('path');
 const fs = require('fs');
@@ -83,6 +83,13 @@ module.exports = class extends Generator {
 				this.fs.append(this.destinationPath(PATH_GOPKG), dependency);
 			}
 		});
+		// Add PATH_LOCALDEV_CONFIG_FILE to .gitignore
+		let gitIgnorePath = this.destinationPath(PATH_GIT_IGNORE);
+		if (this.fs.exists(gitIgnorePath)){
+			this.fs.append(gitIgnorePath, PATH_LOCALDEV_CONFIG_FILE);
+		} else {
+			this.fs.write(gitIgnorePath, PATH_LOCALDEV_CONFIG_FILE);
+		}
 	}
 
 	_addDependencies(serviceDepdendenciesString) {

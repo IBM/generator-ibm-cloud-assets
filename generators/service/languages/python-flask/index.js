@@ -1,6 +1,6 @@
 'use strict';
-const Log4js = require('../go/node_modules/log4js');
-const logger = Log4js.getLogger("generator-ibm-cloud-enablement-v2:language-python-flask");
+const Log4js = require('log4js');
+const logger = Log4js.getLogger("generator-ibm-cloud-assets:languages-python-flask");
 let Generator = require('yeoman-generator');
 const fs = require('fs');
 const path = require('path');
@@ -60,6 +60,13 @@ module.exports = class extends Generator {
 			this.templatePath() + "/services_index.py",
 			this.destinationPath("./server/services/" + SERVICES_INIT_FILE)
 		);
+		// Add PATH_LOCALDEV_CONFIG_FILE to .gitignore
+		let gitIgnorePath = this.destinationPath(PATH_GIT_IGNORE);
+		if (this.fs.exists(gitIgnorePath)){
+			this.fs.append(gitIgnorePath, PATH_LOCALDEV_CONFIG_FILE);
+		} else {
+			this.fs.write(gitIgnorePath, PATH_LOCALDEV_CONFIG_FILE);
+		}
 	}
 
 	_addDependencies(serviceDepdendenciesString) {

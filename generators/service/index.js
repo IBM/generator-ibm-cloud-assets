@@ -15,8 +15,10 @@
  */
 'use strict';
 
-const log4js = require('log4js');
+const Log4js = require('log4js');
+const logger = Log4js.getLogger('generator-ibm-cloud-assets:service');
 const Generator = require('yeoman-generator');
+const Bundle = require("./../../package.json");
 const fs = require('fs');
 const camelCase = require('lodash/camelCase');
 const path = require('path');
@@ -26,42 +28,55 @@ const ServiceUtils = require('../lib/service-utils');
 const Utils = require('../lib/utils');
 
 const REGEX_HYPHEN = /-/g;
+const REGEX_LEADING_ALPHA = /^[^a-zA-Z]*/;
+const REGEX_ALPHA_NUM = /[^a-zA-Z0-9]/g;
 
 const OPTION_BLUEMIX = "bluemix";
 const OPTION_STARTER = "starter";
 
+const PATH_GIT_IGNORE = "./.gitignore";
+
 module.exports = class extends Generator {
-	constructor(args, opts, scaffolderName, cloudFoundryName, customServiceKey, customCredKeys) {
+	constructor(args, opts) {
 		super(args, opts);
-		this.scaffolderName = scaffolderName;
-		this.serviceKey = customServiceKey || scaffolderName;
-		this.customCredKeys = customCredKeys || [];
-		this.logger = log4js.getLogger("generator-ibm-service-enablement:" + scaffolderName);
-		this.context = opts.context;
-		this.cloudFoundryName = this.context.cloudLabel || cloudFoundryName;
-		this.serviceName = customServiceKey ? `service-${customServiceKey}` : `service-${scaffolderName}`;
-		this.logger.level = this.context.loggerLevel;
-		this.languageTemplatePath = this.templatePath() + "/" + this.context.language;
-		this.applicationType = (this.context.starter && this.context.starter.applicationType) ? this.context.starter.applicationType : "BLANK";
-	}
+		this.opts = opts;
+		logger.debug("Constructing");
+		if (opts.quiet) {
+			logger.level = Log4js.levels.OFF;
+		} else {
+			logger.info("Package info ::", Bundle.name, Bundle.version);
+			logger.level = opts.loggerLevel;
+		}
+		this.parentContext = opts.parentContext;
 
-	intializing() {
-		this._sanitizeOption(this.options, OPTION_BLUEMIX);
-		this._sanitizeOption(this.options, OPTION_STARTER);
-
+		this.log("Service opts.bluemix:");
+		this.log(opts.bluemix);
+		this.log(Object.keys(opts.bluemix));
 		let context = this.parentContext || {};
 		//add bluemix options from this.options to existing bluemix options on parent context
-		context[OPTION_BLUEMIX] = Object.assign(context[OPTION_BLUEMIX] || {}, this.options[OPTION_BLUEMIX]);
-		context[OPTION_STARTER] = this.options[OPTION_STARTER];
+		context.bluemix = {};
+		context.bluemix = Object.assign(context.bluemix, opts.bluemix);
+		context.starter = opts.starter || {}; //Object.assign(context.starter || {}, this.opts.starter || {});
 		context.loggerLevel = logger.level;
+		this.log('Service context.bluemix: %bmx', {bmx: context.bluemix});
+		this.log(Object.keys(context.bluemix));
+		this.log(Object.prototype.toString.call(context.bluemix));
 		context.language = context.bluemix.backendPlatform.toLowerCase();
 
-		if(context.language === 'django'){
+		if (context.language === 'django'){
 			context.language = 'python';
 		}
 		context.sanitizedAppName = this._sanitizeAppName(context.bluemix.name);
 
-		let languageGeneratorPath = "languages";
+		if (this.parentContext) {	// set a parent context to let the language generator know if there is a parent
+			context.parentContext = this.parentContext;
+		}
+		this.context = context;
+	}
+
+	intializing() {
+		let context = this.context;
+		let languageGeneratorPath = "./languages";
 		switch (context.language){
 			case "node":
 				languageGeneratorPath += '/node-express';
@@ -74,7 +89,7 @@ module.exports = class extends Generator {
 				context.language = 'java-liberty';
 				break;
 			case "spring":
-				languageGeneratorPath += '/language-java';
+				languageGeneratorPath += '/java';
 				context.language = 'java-spring';
 				break;
 			case "swift":
@@ -106,15 +121,24 @@ module.exports = class extends Generator {
 	 * @returns {undefined}
 	 */
 	configuring(config) {
+		this.context.addServices = false;
+		this.context.service_imports = [];
+		this.context.service_variables = [];
+		this.context.service_initializers = [];
+		this.context.dependencies = [];
+		this.context.addDependencies = this._addDependencies.bind(this);
+		this.context.addMappings = this._addMappings.bind(this);
+		this.context.addLocalDevConfig = this._addLocalDevConfig.bind(this);
+
 		this.hasBluemixProperty = this.context.bluemix.hasOwnProperty(this.scaffolderName);
 		this.hasTemplate = fs.existsSync(this.languageTemplatePath);
 		if (this.hasBluemixProperty && !this.hasTemplate) {
-			this.logger.info(`No available sdk available for ${this.scaffolderName} in ${this.context.language}; configuring credentials only`);
+			logger.info(`No available sdk available for ${this.scaffolderName} in ${this.context.language}; configuring credentials only`);
 			this._addMappings(config);
 			this._addLocalDevConfig();
 			return;
 		} else if (!this.hasBluemixProperty || !this.hasTemplate) {
-			this.logger.info(`Nothing to process for ${this.scaffolderName} in ${this.context.language}`);
+			logger.info(`Nothing to process for ${this.scaffolderName} in ${this.context.language}`);
 			return;
 		}
 		let serviceInfo = this._getServiceInfo();
@@ -215,7 +239,7 @@ module.exports = class extends Generator {
 	}
 
 	_addServicesToKubeDeploy(serviceInfo) {
-		this.logger.info(`adding Deployment service env info for ${this.scaffolderName}`);
+		logger.info(`adding Deployment service env info for ${this.scaffolderName}`);
 
 		let serviceEnv = {
 			name: this._sanitizeServiceName(this.serviceName),
@@ -237,7 +261,7 @@ module.exports = class extends Generator {
 	}
 
 	_addDependencies() {
-		this.logger.info("Adding dependencies");
+		logger.info("Adding dependencies");
 		if (Array.isArray(this.context.dependenciesFile)) {
 			for (let i = 0; i < this.context.dependenciesFile.length; i++) {
 				this.context.addDependencies(this.fs.read(this.languageTemplatePath + "/" + this.context.dependenciesFile[i]));
@@ -272,12 +296,12 @@ module.exports = class extends Generator {
 
 	_addMappings(config) {
 		if (this.context.language === "swift") return;
-		this.logger.info("Adding mappings");
+		logger.info("Adding mappings");
 
 		let serviceCredentials = Array.isArray(this.context.bluemix[this.scaffolderName])
 			? this.context.bluemix[this.scaffolderName][0] : this.context.bluemix[this.scaffolderName];
 		let scaffolderKeys = this._setCredentialMapping({}, serviceCredentials, this.serviceKey);
-		console.log("scaffolderKeys: " + JSON.stringify(scaffolderKeys, null, 3))
+		this.log("scaffolderKeys: " + JSON.stringify(scaffolderKeys, null, 3))
 		scaffolderKeys = Object.keys(scaffolderKeys).map(key => {
 			let scaffolderKey = key.split(`${this.serviceKey.replace(/-/g, '_')}_`);
 			if (Array.isArray(scaffolderKey) && scaffolderKey.length > 1) {
@@ -291,7 +315,7 @@ module.exports = class extends Generator {
 
 		scaffolderKeys.sort();
 		credentialKeys.sort();
-		console.log("credential keys: " + credentialKeys)
+		this.log("credential keys: " + credentialKeys)
 
 		credKeysToScaffolderKeysMap = this._mapCredentialKeysToScaffolderKeys(credentialKeys, scaffolderKeys);
 
@@ -315,7 +339,7 @@ module.exports = class extends Generator {
 				if (ServiceUtils.SPRING_BOOT_SERVICE_KEY_SEPARATOR in springMapping) {
 					serviceKeySeparator = springMapping[ServiceUtils.SPRING_BOOT_SERVICE_KEY_SEPARATOR]
 				}
-				console.log("Spring service cred map found for " + this.serviceKey + springMapping ? JSON.stringify(springMapping, null, 3) : springMapping)
+				this.log("Spring service cred map found for " + this.serviceKey + springMapping ? JSON.stringify(springMapping, null, 3) : springMapping)
 			}
 		}
 
@@ -336,17 +360,12 @@ module.exports = class extends Generator {
 				localCredentialKeys[i][1] = credentialKeys[i]
 			}
 		}
-		console.log("localServiceKey: " + localServiceKey)
-		console.log("localCredentialKeys: " + localCredentialKeys)
+		this.log("localServiceKey: " + localServiceKey)
+		this.log("localCredentialKeys: " + localCredentialKeys)
 
 		let context = {
-			serviceName: serviceCredentials.serviceInfo.name,
-			serviceKey: this.serviceKey.replace(/-/g, '_'),
-			localServiceKey: localServiceKey.replace(/-/g, '_'),
-			serviceKeySeparator: serviceKeySeparator,
 			credentialKeys: localCredentialKeys,
 			map: credKeysToScaffolderKeysMap,
-			cloudFoundryKey: this.cloudFoundryName,
 			generatorLocation: this.context.generatorLocation,
 			cloudFoundryIsArray: config.cloudFoundryIsArray,
 			nestedJSON: config.nestedJSON
@@ -359,7 +378,7 @@ module.exports = class extends Generator {
 	}
 
 	_addLocalDevConfig() {
-		this.logger.info("Adding local dev config");
+		logger.info("Adding local dev config");
 		let templateContent;
 		let serviceCredentials = Array.isArray(this.context.bluemix[this.scaffolderName])
 			? this.context.bluemix[this.scaffolderName][0] : this.context.bluemix[this.scaffolderName];
@@ -370,7 +389,7 @@ module.exports = class extends Generator {
 	}
 
 	_addHtml() {
-		this.logger.info("Adding AppID login html snippet to landing page");
+		logger.info("Adding AppID login html snippet to landing page");
 
 		this.fs.copy(
 			this.languageTemplatePath + "/appid.html",
@@ -397,15 +416,7 @@ module.exports = class extends Generator {
 		return templateContent;
 	}
 
-	end(){
-		// Add PATH_LOCALDEV_CONFIG_FILE to .gitignore
-		let gitIgnorePath = this.destinationPath(PATH_GIT_IGNORE);
-		if (this.fs.exists(gitIgnorePath)){
-			this.fs.append(gitIgnorePath, PATH_LOCALDEV_CONFIG_FILE);
-		} else {
-			this.fs.write(gitIgnorePath, PATH_LOCALDEV_CONFIG_FILE);
-		}
-
+	end() {
 		// add services secretKeyRefs to deployment.yaml &&
 		// add services properties and cf bind-service to pipeline.yml &&
 		// add services secretKeyRefs to values.yaml &&

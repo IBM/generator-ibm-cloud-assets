@@ -15,12 +15,12 @@
  */
 
 'use strict';
-const logger = require('../go/node_modules/log4js').getLogger("generator-ibm-cloud-enablement-v2:language-java");
+const logger = require('log4js').getLogger("generator-ibm-cloud-assets:languages-java");
 const Generator = require('yeoman-generator');
 const filesys = require('fs');
 const path = require('path');
 const handlebars = require('handlebars');
-const scaffolderMapping = require('../resources/scaffolderMapping.json');
+const scaffolderMapping = require('../../../resources/scaffolderMapping.json');
 
 const Utils = require('../../../lib/utils');
 
@@ -29,6 +29,7 @@ const PATH_LOCALDEV_FILE = './src/main/resources/localdev-config.json';
 const TEMPLATE_EXT = '.template';
 const GENERATOR_LOCATION = 'server';
 
+const PATH_GIT_IGNORE = "./.gitignore";
 
 module.exports = class extends Generator {
 
@@ -56,6 +57,13 @@ module.exports = class extends Generator {
 		// add missing pom.xml dependencies when running service enablement standalone
 		if (typeof this.context.parentContext === "undefined") {
 			this._addJavaDependencies();
+		}
+		// Add PATH_LOCALDEV_CONFIG_FILE to .gitignore
+		let gitIgnorePath = this.destinationPath(PATH_GIT_IGNORE);
+		if (this.fs.exists(gitIgnorePath)){
+			this.fs.append(gitIgnorePath, PATH_LOCALDEV_FILE);
+		} else {
+			this.fs.write(gitIgnorePath, PATH_LOCALDEV_FILE);
 		}
 	}
 
