@@ -6,7 +6,7 @@ let Generator = require('yeoman-generator');
 const fs = require('fs');
 
 const Utils = require('../../../lib/utils');
-const scaffolderMapping = require('../resources/scaffolderMapping.json');
+const scaffolderMapping = require('../../templates/scaffolderMapping.json');
 
 const GENERATE_HERE = "// GENERATE HERE";
 const GENERATOR_LOCATION = 'server';
@@ -14,7 +14,6 @@ const PATH_MAPPINGS_FILE = "./server/config/mappings.json";
 const PATH_LOCALDEV_CONFIG_FILE = "server/localdev-config.json";
 const PATH_PACKAGE_JSON = "./package.json";
 const PATH_GIT_IGNORE = "./.gitignore";
-
 
 module.exports = class extends Generator {
 	constructor(args, opts) {
@@ -39,6 +38,7 @@ module.exports = class extends Generator {
 			serviceKey;
 		this._addDependencies(this.fs.read(this.templatePath() + "/" + this.context.dependenciesFile));
 
+		/*
 		this.fs.copy(
 			this.templatePath() + "/service-manager.js",
 			this.destinationPath("./server/services/service-manager.js")
@@ -48,6 +48,7 @@ module.exports = class extends Generator {
 			this.templatePath() + "/services-index.js",
 			this.destinationPath("./server/services/index.js")
 		);
+		*/
 		// Add PATH_LOCALDEV_CONFIG_FILE to .gitignore
 		let gitIgnorePath = this.destinationPath(PATH_GIT_IGNORE);
 		if (this.fs.exists(gitIgnorePath)){
@@ -74,12 +75,13 @@ module.exports = class extends Generator {
 	}
 
 	end(){
+		/*
 		// Remove GENERATE_HERE from /server/services/index.js
 		let servicesIndexJsFilePath = this.destinationPath("./server/services/index.js");
 		let indexFileContent = this.fs.read(servicesIndexJsFilePath);
 		indexFileContent = indexFileContent.replace(GENERATE_HERE, "");
 		this.fs.write(servicesIndexJsFilePath, indexFileContent);
-
+	  */
 		// Add PATH_LOCALDEV_CONFIG_FILE to .gitignore
 		let gitIgnorePath = this.destinationPath(PATH_GIT_IGNORE);
 		if (this.fs.exists(gitIgnorePath)){

@@ -22,7 +22,7 @@ const fs = require('fs');
 
 const Utils = require('../../../lib/utils');
 const Handlebars = require('../../../lib/handlebars.js');
-const scaffolderMapping = require('../resources/scaffolderMapping.json');
+const scaffolderMapping = require('../../templates/scaffolderMapping.json');
 
 const GENERATOR_LOCATION = 'server';
 const PATH_MAPPINGS_FILE = "./server/config/mappings.json";

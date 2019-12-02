@@ -57,6 +57,7 @@ module.exports = class extends Generator {
 		this._setLoggerLevel();
 		this.opts.loggerLevel = logger.level;
 
+		if (this.opts.deployOptions) { this.opts.deploy_options = this.opts.deployOptions };
 		this._sanitizeOption(this.options, DEPLOY_OPTIONS);
 		this._sanitizeOption(this.options, APPLICATION_OPTIONS);
 		this.log("THIS.OPTS: ");
@@ -65,6 +66,8 @@ module.exports = class extends Generator {
 		if (this.options.libertyVersion === 'beta') {
 			this.options.libertyBeta = true
 		}
+
+		console.log(this.opts.deploy_options);
 
 		this.opts.bluemix = this._makeBluemix(this.opts.deploy_options, this.opts.application);
 
@@ -158,9 +161,10 @@ module.exports = class extends Generator {
 			]
 		});
 
+		this.log("end prompting");
+
 		return this.prompt(prompts).then(this._processAnswers.bind(this));
 
-		this.log("end prompting");
 	}
 
 	configuring() {
@@ -226,7 +230,7 @@ module.exports = class extends Generator {
 			this.composeWith(require.resolve('../cloud_foundry'), this.opts);
 		}
 
-		this.composeWith(require.resolve('../service'), this.opts);
+		//this.composeWith(require.resolve('../service'), this.opts);
 
 		this.log("end writing")
 
@@ -270,12 +274,14 @@ module.exports = class extends Generator {
 	}
 
 	_makeBluemix(deployOpts, application){
+
 		let bluemix = {
 			name: application.name,
 			cloudDeploymentType: Object.keys(deployOpts)[0],
 			backendPlatform: application.language,
-			services: application.services,
 			server: {
+				services: Object.keys(application.service_credentials),
+				cloudDeploymentType: Object.keys(deployOpts)[0],
 				"cloudDeploymentOptions": {
 					"kubeDeploymentType": (deployOpts.kube) ? deployOpts.kube.type : ""
 				}
@@ -286,6 +292,16 @@ module.exports = class extends Generator {
 			_.extend(bluemix.server, deployOpts.cloud_foundry);
 			bluemix.server.host = bluemix.server.hostname;
 			bluemix.cloudDeploymentType = "cloud_foundry";
+		}
+
+		for (let service of Object.keys(application.service_credentials)) {
+			let obj = {}
+			obj[service] = [application.service_credentials[service]];
+			obj[service]["serviceInfo"] = {
+				"name": deployOpts[bluemix.cloudDeploymentType]["service_bindings"][service],
+				"cloudLabel": service,
+			}
+			_.extend(bluemix, obj);
 		}
 
 		return bluemix;

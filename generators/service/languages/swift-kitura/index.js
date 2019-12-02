@@ -1,15 +1,15 @@
 'use strict';
 const logger = require('log4js').getLogger("generator-cloud-assets:languages-swift-kitura");
 const Generator = require('yeoman-generator');
-const handlebars = require('../java/node_modules/handlebars');
+const handlebars = require('handlebars');
 const path = require('path');
 const fs = require('fs');
 
 const Utils = require('../../../lib/utils');
-const scaffolderMapping = require('../resources/scaffolderMapping.json');
+const scaffolderMapping = require('../../templates/scaffolderMapping.json');
 
 // Load mappings between bluemix/scaffolder labels and the labels generated in the localdev-config.json files
-const bluemixLabelMappings = require('./bluemix-label-mappings.json.js.js');
+const bluemixLabelMappings = require('./bluemix-label-mappings.json');
 
 const PATH_MAPPINGS_FILE = "./config/mappings.json";
 const PATH_LOCALDEV_CONFIG_FILE = "./config/localdev-config.json";

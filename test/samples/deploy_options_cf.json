@@ -1,5 +1,5 @@
 {
-        "CF": {
+        "cloud_foundry": {
             "disk_quota": "1G",
             "domain": "mydomain.com",
             "hostname": "my-app-hostname",

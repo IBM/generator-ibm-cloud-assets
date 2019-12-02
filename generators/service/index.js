@@ -26,6 +26,7 @@ const path = require('path');
 const Handlebars = require('../lib/handlebars');
 const ServiceUtils = require('../lib/service-utils');
 const Utils = require('../lib/utils');
+const scaffolderMapping = require('./templates/scaffolderMapping.json');
 
 const REGEX_HYPHEN = /-/g;
 const REGEX_LEADING_ALPHA = /^[^a-zA-Z]*/;
@@ -130,6 +131,22 @@ module.exports = class extends Generator {
 		this.context.addMappings = this._addMappings.bind(this);
 		this.context.addLocalDevConfig = this._addLocalDevConfig.bind(this);
 
+		let allServiceKeys = [  "alert-notification",  "apache-spark",  "appid",  "autoscaling",  "cloud-object-storage",  "postgre",  "cloudant",  "hypersecure-dbaas-mongodb",  "watson-conversation",  "dashdb",  "db2",  "elephantsql",  "watson-discovery",  "watson-document-conversion",  "finance-historical-instrument-analytics",  "finance-instrument-analytics",  "finance-investment-portfolio",  "watson-language-translator",  "mongodb",  "watson-natural-language-classifier",  "watson-natural-language-understanding",  "object-storage",  "watson-personality-insights",  "finance-portfolio-optimization",  "finance-predictive-market-scenarios",  "push",  "redis",  "watson-retrieve-and-rank",  "finance-simulated-historical-instrument-analytics",  "finance-simulated-instrument-analytics",  "watson-speech-to-text",  "watson-text-to-speech",  "watson-tone-analyzer",  "watson-visual-recognition",  "weather-company-data" ]
+
+		allServiceKeys.forEach(serviceKey => {
+			let scaffolderKey = scaffolderMapping[serviceKey];
+			let serviceCredentials = Array.isArray(this.context.bluemix[scaffolderKey])
+				? this.context.bluemix[scaffolderKey][0] : this.context.bluemix[scaffolderKey];
+			logger.debug("Composing with service : " + serviceKey);
+			try {
+				this.context.cloudLabel = serviceCredentials && serviceCredentials.serviceInfo && serviceCredentials.serviceInfo.cloudLabel;
+			} catch (err) {
+				/* istanbul ignore next */	//ignore for code coverage as this is just a warning - if the service fails to load the subsequent service test will fail
+				logger.warn('Unable to compose with service', serviceKey, err);
+			}
+		});
+
+
 		this.hasBluemixProperty = this.context.bluemix.hasOwnProperty(this.scaffolderName);
 		this.hasTemplate = fs.existsSync(this.languageTemplatePath);
 		if (this.hasBluemixProperty && !this.hasTemplate) {
@@ -137,10 +154,8 @@ module.exports = class extends Generator {
 			this._addMappings(config);
 			this._addLocalDevConfig();
 			return;
-		} else if (!this.hasBluemixProperty || !this.hasTemplate) {
-			logger.info(`Nothing to process for ${this.scaffolderName} in ${this.context.language}`);
-			return;
 		}
+
 		let serviceInfo = this._getServiceInfo();
 
 		if (serviceInfo && this.scaffolderName !== "autoscaling") {
@@ -159,6 +174,7 @@ module.exports = class extends Generator {
 			this._addServicesToKubeDeploy(serviceInfo);
 			this._addServicesToPipeline(serviceInfo);
 		}
+
 	}
 
 	_sanitizeOption(options, name) {
@@ -219,6 +235,8 @@ module.exports = class extends Generator {
 	}
 
 	_getServiceInfo() {
+		console.log("this.scaffolderName")
+		console.log(this.scaffolderName)
 		let serviceInfo = {};
 		if (this.context.bluemix[this.scaffolderName]) {
 			let service = this.context.bluemix[this.scaffolderName];
@@ -327,9 +345,9 @@ module.exports = class extends Generator {
 
 		let template = Handlebars.compile(mapping);
 		let localServiceKey = this.serviceKey;
-		let serviceKeySeparator = '_'
+		let serviceKeySeparator = '_';
 		let localCredentialKeys = [];
-		let springMapping = null
+		let springMapping = null;
 		if (this.context.language === "java-spring") {
 			springMapping = ServiceUtils.getSpringServiceInfo(this.serviceKey)
 			if (springMapping) {
@@ -384,18 +402,17 @@ module.exports = class extends Generator {
 			? this.context.bluemix[this.scaffolderName][0] : this.context.bluemix[this.scaffolderName];
 		templateContent = this._setCredentialMapping({}, serviceCredentials, this.serviceKey);
 
-
 		this.context.addLocalDevConfig(templateContent);
 	}
 
-	_addHtml() {
+	/*_addHtml() {
 		logger.info("Adding AppID login html snippet to landing page");
 
 		this.fs.copy(
 			this.languageTemplatePath + "/appid.html",
 			this.destinationPath("./public/appid.html")
 		);
-	}
+	}*/
 
 	_setCredentialMapping(templateContent, serviceCredentials, currentKey) {
 		let key,
@@ -418,16 +435,12 @@ module.exports = class extends Generator {
 
 	end() {
 		// add services secretKeyRefs to deployment.yaml &&
-		// add services properties and cf bind-service to pipeline.yml &&
 		// add services secretKeyRefs to values.yaml &&
-		// add services form parameters to toolchain.yml &&
-		// add secretKeyRefs to helm commands in kube_deploy.sh &&
-		// add secretKeyRefs to service-knative.yaml
+		// add secretKeyRefs to service.yaml
+		console.log("service context")
+		console.log(this.context);
 		return ServiceUtils.addServicesEnvToHelmChartAsync({context: this.context, destinationPath: this.destinationPath()})
-			.then(() => ServiceUtils.addServicesToPipelineYamlAsync({context: this.context, destinationPath: this.destinationPath()}))
 			.then(() => ServiceUtils.addServicesEnvToValuesAsync({context: this.context, destinationPath: this.destinationPath()}))
-			.then(() => ServiceUtils.addServicesEnvToToolchainAsync({context: this.context, destinationPath: this.destinationPath()}))
-			.then(() => ServiceUtils.addServicesKeysToKubeDeployAsync({context: this.context, destinationPath: this.destinationPath()}))
 			.then(() => ServiceUtils.addServicesToServiceKnativeYamlAsync({context: this.context, destinationPath: this.destinationPath(Utils.PATH_KNATIVE_YAML)}));
 	}
 
