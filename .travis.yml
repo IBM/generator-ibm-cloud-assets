@@ -19,8 +19,7 @@ script:
 - $DEVOPS_SCRIPT_DIR/do_devops_insights_reporting.sh
 branches:
   only:
-  - master
-  - develop
+  - stage1
 env:
   global:
     - DEV_BRANCH=develop 

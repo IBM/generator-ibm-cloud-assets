@@ -26,7 +26,6 @@ if [ $TRAVIS_BRANCH = "master" ]; then
             node /tmp/changelog-generator-slack-notification/index.js --html "$HTML" --name "$PKG_NAME" --api "$SLACK_WEBHOOK" --v "$PKG_VER"
         fi
 
-
     fi
 
 fi
