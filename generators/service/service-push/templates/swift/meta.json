@@ -1,0 +1,6 @@
+{
+  "import":"IBMPushNotifications",
+  "variableName":"pushNotificationService",
+  "type":"PushNotifications",
+  "initParams":"cloudEnv: cloudEnv"
+}

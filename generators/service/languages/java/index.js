@@ -20,16 +20,14 @@ const Generator = require('yeoman-generator');
 const filesys = require('fs');
 const path = require('path');
 const handlebars = require('handlebars');
-const scaffolderMapping = require('../../templates/scaffolderMapping.json');
 
+const scaffolderMapping = require('../../templates/scaffolderMapping.json');
 const Utils = require('../../../lib/utils');
 
 const PATH_MAPPINGS_FILE = './src/main/resources/mappings.json';
 const PATH_LOCALDEV_FILE = './src/main/resources/localdev-config.json';
 const TEMPLATE_EXT = '.template';
 const GENERATOR_LOCATION = 'server';
-
-const PATH_GIT_IGNORE = "./.gitignore";
 
 module.exports = class extends Generator {
 
@@ -51,6 +49,31 @@ module.exports = class extends Generator {
 		this.context.addDependencies = this._addDependencies.bind(this);
 		this.context.addMappings = this._addMappings.bind(this);
 		this.context.addLocalDevConfig = this._addLocalDevConfig.bind(this);
+		this.context.addReadMe = this._addReadMe.bind(this);
+		this.context.srcFolders = [];
+		this.context.instrumentationAdded = false;
+		this.context.metainf = [];
+		this._addJavaDependencies = Utils.addJavaDependencies.bind(this);
+
+		//initializing ourselves by composing with the service generators
+		let root = path.dirname(require.resolve('../..'));
+		let folders = filesys.readdirSync(root);
+		folders.forEach(folder => {
+			if (folder.startsWith('service-')) {
+				serviceKey = folder.substring(folder.indexOf('-') + 1);
+				scaffolderKey = scaffolderMapping[serviceKey];
+				serviceCredentials = Array.isArray(this.context.bluemix[scaffolderKey])
+					? this.context.bluemix[scaffolderKey][0] : this.context.bluemix[scaffolderKey];
+				logger.debug('Composing with service : ' + folder);
+				try {
+					this.context.cloudLabel = serviceCredentials && serviceCredentials.serviceInfo && serviceCredentials.serviceInfo.cloudLabel;
+					this.composeWith(path.join(root, folder), { context: this.context });
+				} catch (err) {
+					/* istanbul ignore next */      //ignore for code coverage as this is just a warning - if the service fails to load the subsequent service test will fail
+					logger.warn('Unable to compose with service', folder, err);
+				}
+			}
+		});
 	}
 
 	writing() {
@@ -58,18 +81,10 @@ module.exports = class extends Generator {
 		if (typeof this.context.parentContext === "undefined") {
 			this._addJavaDependencies();
 		}
-		// Add PATH_LOCALDEV_CONFIG_FILE to .gitignore
-		let gitIgnorePath = this.destinationPath(PATH_GIT_IGNORE);
-		if (this.fs.exists(gitIgnorePath)){
-			this.fs.append(gitIgnorePath, PATH_LOCALDEV_FILE);
-		} else {
-			this.fs.write(gitIgnorePath, PATH_LOCALDEV_FILE);
-		}
 	}
 
 	_addDependencies(serviceDependenciesString) {
 		logger.debug('Adding dependencies', serviceDependenciesString);
-		this._processDependencyMetainf(serviceDependenciesString);
 		if (this.context._addDependencies) {
 			this.context._addDependencies(serviceDependenciesString);
 		}
@@ -99,6 +114,13 @@ module.exports = class extends Generator {
 		}
 	}
 
+	_addReadMe(options) {
+		this.fs.copy(
+			options.sourceFilePath,
+			`${this.destinationPath()}/docs/services/${options.targetFileName}`
+		);
+	}
+
 	_writeFiles(templatePath, data) {
 		//do not write out any files that are marked as processing templates
 		try {
@@ -110,62 +132,6 @@ module.exports = class extends Generator {
 			});
 		} catch (e) {
 			logger.warn(`No files to copy from ${this.templatePath(templatePath)}`);
-		}
-	}
-
-	_addJavaDependencies() {
-		let templateFilePath = this.templatePath(this.context.language+"/config.json.template");
-		let pomFilePath = this.destinationPath() + '/pom.xml';
-		if (this.fs.exists(templateFilePath) && this.fs.exists(pomFilePath)) {
-			logger.info("Adding service dependencies for Java from template " + templateFilePath);
-			let templateFile = this.fs.read(templateFilePath);
-			let template = JSON.parse(templateFile);
-			let pomContents = this.fs.read(pomFilePath, {encoding:'utf-8'});
-			let xDOM = new DOMParser().parseFromString(pomContents, 'application/xml');
-			// go through pom.xml and add missing non-provided dependencies from template
-			let xArtifactIds = xDOM.getElementsByTagName("artifactId");
-			let depsAdded = false;
-			if (template["dependencies"]) {
-				template["dependencies"].forEach(dep => {
-					let depFound = false;
-					let artifactId = dep["artifactId"];
-					for (let i = 0; i < xArtifactIds.length; i++) {
-						let xArtifactId = xArtifactIds[i];
-						if (xArtifactId.textContent === artifactId) {
-							depFound = true;
-						}
-					}
-					if (!depFound) { // add missing dependency to pom
-						let newXDep = xDOM.createElement("dependency");
-
-						let newXGroupId = xDOM.createElement("groupId");
-						newXGroupId.appendChild(xDOM.createTextNode(dep["groupId"]));
-						let newXArtifactId = xDOM.createElement("artifactId");
-						newXArtifactId.appendChild(xDOM.createTextNode(dep["artifactId"]));
-						let newXVersion = xDOM.createElement("version");
-						newXVersion.appendChild(xDOM.createTextNode(dep["version"]));
-
-						newXDep.appendChild(newXGroupId);
-						newXDep.appendChild(newXArtifactId);
-						newXDep.appendChild(newXVersion);
-						if (dep["scope"]) {
-							let newXScope = xDOM.createElement("scope");
-							newXScope.appendChild(xDOM.createTextNode(dep["scope"]));
-							newXDep.appendChild(newXScope);
-						}
-
-						let xDeps = xDOM.getElementsByTagName("dependencies")[0];
-						if (xDeps) {
-							xDeps.appendChild(newXDep);
-							depsAdded = true;
-						}
-					}
-				});
-			}
-			if (depsAdded) {
-				let newXml = prettifyxml(XMLSerializer.serializeToString(xDOM).replace(/ xmlns="null"/g, ''));
-				this.fs.write(this.destinationPath() + '/pom.xml', newXml);
-			}
 		}
 	}
 
