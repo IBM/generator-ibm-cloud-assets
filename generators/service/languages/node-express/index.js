@@ -29,6 +29,8 @@ module.exports = class extends Generator {
 		this.context.addDependencies = this._addDependencies.bind(this);
 		this.context.addMappings = this._addMappings.bind(this);
 		this.context.addLocalDevConfig = this._addLocalDevConfig.bind(this);
+		this.context.addReadMe = this._addReadMe.bind(this);
+		this.context.addInstrumentation = this._addInstrumentation.bind(this);
 
 		let serviceCredentials,
 			scaffolderKey,
@@ -82,6 +84,26 @@ module.exports = class extends Generator {
 	_addLocalDevConfig(serviceLocalDevConfigJSON){
 		let localDevConfigFilePath = this.destinationPath(PATH_LOCALDEV_CONFIG_FILE);
 		this.fs.extendJSON(localDevConfigFilePath, serviceLocalDevConfigJSON);
+	}
+
+	_addReadMe(options){
+		this.fs.copy(
+			options.sourceFilePath,
+			this.destinationPath() + "/docs/services/" + options.targetFileName
+		);
+	}
+
+	_addInstrumentation(options){
+		this.fs.copy(
+			options.sourceFilePath,
+			this.destinationPath() + "/server/services/" + options.targetFileName
+		);
+
+		let servicesIndexJsFilePath = this.destinationPath("./server/services/index.js");
+		let indexFileContent = this.fs.read(servicesIndexJsFilePath);
+		let contentToAdd = "\trequire('./" + options.targetFileName.replace(".js","") + "')(app, serviceManager);\n" + GENERATE_HERE;
+		indexFileContent = indexFileContent.replace(GENERATE_HERE, contentToAdd);
+		this.fs.write(servicesIndexJsFilePath, indexFileContent);
 	}
 
 	end(){

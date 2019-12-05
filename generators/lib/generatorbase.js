@@ -316,7 +316,7 @@ module.exports = class extends Generator {
 
 	_addInstrumentation() {
 		const instPath = this.languageTemplatePath + "/instrumentation" + this.context.languageFileExt;
-		if (this.fs.exists(instPath)) {
+		if (this.fs.exists(instPath) && this.context.addInstrumentation) {
 			this.logger.info(`Adding instrumentation for ${this.scaffolderName}`);
 			this.context.addInstrumentation({
 				sourceFilePath: instPath,

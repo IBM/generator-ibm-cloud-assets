@@ -79,3 +79,13 @@ echo "========================================================================="
 echo "Testing node express knative no svc"
 echo "========================================================================="
 ./test-combo.sh test-genv2-app-express-knative-no-svc.json https://github.com/IBM/nodejs-microservice.git
+
+echo "========================================================================="
+echo "Testing node express knative cloudant"
+echo "========================================================================="
+./test-combo.sh test-genv2-app-express-knative-cloudant.json https://github.com/IBM/nodejs-microservice.git
+
+echo "========================================================================="
+echo "Testing node express knative appid"
+echo "========================================================================="
+./test-combo.sh test-genv2-app-express-knative-appid.json https://github.com/IBM/nodejs-microservice.git
