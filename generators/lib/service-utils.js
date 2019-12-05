@@ -107,7 +107,7 @@ function addServicesToServiceKnativeYamlAsync(args) {
 	return new Promise((resolve) => {
 		console.log("knative yaml")
 		console.log(args)
-		let serviceYamlFilePath = args.destinationPath
+		let serviceYamlFilePath = "./service.yaml"; //args.destinationPath
 		let services = args.context.deploymentServicesEnv; //array of service objects
 
 		let hasServices = services && services.length > 0;

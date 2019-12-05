@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+source .env
 
 OPTS_FILE=$1
 GIT_REPO_URL=$2
@@ -23,4 +24,4 @@ echo "APP_OPTS: $APP_OPTS"
 
 cd $APP_DIR
 echo "Running cloud assets"
-node $DEBUG_OPTS /usr/local/bin/yo ibm-cloud-assets --deploy_options $DEPLOY_OPTS --application $APP_OPTS --force
+node $DEBUG_OPTS $YO_PATH ibm-cloud-assets --deploy_options $DEPLOY_OPTS --application $APP_OPTS --force
