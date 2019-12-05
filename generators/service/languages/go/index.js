@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 'use strict';
-const Log4js = require('../java/node_modules/log4js');
+const Log4js = require('log4js');
 const logger = Log4js.getLogger("generator-ibm-cloud-assets:languages-go");
 let Generator = require('yeoman-generator');
 const path = require('path');
@@ -27,7 +27,6 @@ const scaffolderMapping = require('../../templates/scaffolderMapping.json');
 const GENERATOR_LOCATION = 'server';
 const PATH_MAPPINGS_FILE = "./server/config/mappings.json";
 const PATH_LOCALDEV_CONFIG_FILE = "server/localdev-config.json";
-const PATH_GIT_IGNORE = "./.gitignore";
 const PATH_GOPKG = "Gopkg.toml"
 const PATH_GOPKG_TOML = "./Gopkg.toml";
 
@@ -121,14 +120,49 @@ module.exports = class extends Generator {
 		this.fs.extendJSON(localDevConfigFilePath, serviceLocalDevConfigJSON);
 	}
 
-	end(){
-		// Add PATH_LOCALDEV_CONFIG_FILE to .gitignore
-		let gitIgnorePath = this.destinationPath(PATH_GIT_IGNORE);
-		if (this.fs.exists(gitIgnorePath)){
-			this.fs.append(gitIgnorePath, PATH_LOCALDEV_CONFIG_FILE);
-		} else {
-			this.fs.write(gitIgnorePath, PATH_LOCALDEV_CONFIG_FILE);
+	_addReadMe(options){
+		this.fs.copy(
+			options.sourceFilePath,
+			this.destinationPath() + "/docs/services/" + options.targetFileName
+		);
+	}
+
+	_addInstrumentation(options) {
+		function pascalize(name) {
+			return name.split('-').map(part => part.charAt(0).toUpperCase() + part.substring(1).toLowerCase()).join('');
 		}
+
+		this.context.addServices = true;
+		let extension = path.extname(options.targetFileName);
+		let targetName = pascalize(path.basename(options.targetFileName, extension));
+		options.targetFileName = options.targetFileName.replace(/-/g, "_");
+
+		// Copy service instrumenation file to services/my_service.go
+		let targetFilePath = this.destinationPath('services', options.targetFileName);
+		this.fs.copyTpl(options.sourceFilePath, targetFilePath, this.context);
+
+		// Read metadata (imports, variable names, variable type) from each service's meta.json
+		let metaFile = options.sourceFilePath.substring(0, options.sourceFilePath.lastIndexOf("/")) + '/meta.json';
+		let metaData = this.fs.readJSON(metaFile);
+		let metaImport = metaData.import;
+
+		// Service imports that need to be injected at the top of services.go
+		if (typeof metaImport !== 'undefined') {
+			this.context.service_imports.push(`${metaImport}`);
+		}
+		// The instrumentation file defines a function as an entry point for initialization
+		// The function will have a name of the form: 'InitializeMyService()'.
+		// For example, if the targetFileName is 'service_watson_discovery.go'
+		// then the function will be 'InitializeServiceWatsonDiscovery()'
+		if (typeof metaData.variableName !== 'undefined' && typeof metaData.type !== 'undefined' && typeof targetName !== 'undefined') {
+			this.context.service_variables.push(`${metaData.variableName} *${metaData.type}`);
+			this.context.service_initializers.push(`${metaData.variableName}, err = Initialize${targetName}()`);
+		} else if (typeof targetName !== 'undefined') {
+			this.context.service_initializers.push(`Initialize${targetName}()`);
+		}
+	}
+
+	end(){
 	}
 
 	_writeHandlebarsFile(templateFile, destinationFile, data) {

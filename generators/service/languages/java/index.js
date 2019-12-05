@@ -50,6 +50,7 @@ module.exports = class extends Generator {
 		this.context.addMappings = this._addMappings.bind(this);
 		this.context.addLocalDevConfig = this._addLocalDevConfig.bind(this);
 		this.context.addReadMe = this._addReadMe.bind(this);
+		this.context.addInstrumentation = this._addInstrumentation.bind(this);
 		this.context.srcFolders = [];
 		this.context.instrumentationAdded = false;
 		this.context.metainf = [];
@@ -77,6 +78,31 @@ module.exports = class extends Generator {
 	}
 
 	writing() {
+		if (this.context.instrumentationAdded) {
+			this._writeFiles(this.context.language + '/**', this.conf);
+			this.context.srcFolders.forEach(folder => {
+				if (filesys.existsSync(folder)) {
+					this._writeFiles(folder + '/**', this.conf)
+				}
+			})
+		}
+
+		this.context.metainf.forEach((metainf) => {
+			let location = this.templatePath(this.context.language + '/' + PATH_METAINF + metainf.filepath);
+			let contents = filesys.readFileSync(location, 'utf8');
+			let compiledTemplate = handlebars.compile(contents);
+			let output = compiledTemplate({ data: metainf.data });
+			if (metainf.filepath.endsWith(TEMPLATE_EXT)) {
+				metainf.filepath = metainf.filepath.slice(0, metainf.filepath.length - (TEMPLATE_EXT).length);
+			}
+			let destPath = this.destinationPath(PATH_METAINF + metainf.filepath);
+			if (this.fs.exists(destPath)) {
+				this.fs.append(destPath, output);
+			} else {
+				this.fs.write(destPath, output);
+			}
+		});
+		
 		// add missing pom.xml dependencies when running service enablement standalone
 		if (typeof this.context.parentContext === "undefined") {
 			this._addJavaDependencies();
@@ -119,6 +145,14 @@ module.exports = class extends Generator {
 			options.sourceFilePath,
 			`${this.destinationPath()}/docs/services/${options.targetFileName}`
 		);
+	}
+
+	_addInstrumentation(instrumentation) {
+		if (!this.context.instrumentationAdded) {
+			this._addCoreDependencies();
+			this.context.instrumentationAdded = true;
+		}
+		this.context.srcFolders = this.context.srcFolders.concat(instrumentation.sourceFilePath);
 	}
 
 	_writeFiles(templatePath, data) {

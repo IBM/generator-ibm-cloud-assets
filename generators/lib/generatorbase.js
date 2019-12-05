@@ -85,7 +85,7 @@ module.exports = class extends Generator {
 		else {
 			this._addDependencies();
 			this._addReadMe();
-			// this._addInstrumentation();
+			this._addInstrumentation();
 		}
 
 		if (serviceInfo !== undefined) {
@@ -233,7 +233,7 @@ module.exports = class extends Generator {
 
 		scaffolderKeys.sort();
 		credentialKeys.sort();
-		console.log("credential keys: " + credentialKeys)
+		console.log("credential keys: " + credentialKeys);
 
 		credKeysToScaffolderKeysMap = this._mapCredentialKeysToScaffolderKeys(credentialKeys, scaffolderKeys);
 
@@ -315,12 +315,15 @@ module.exports = class extends Generator {
 	}
 
 	_addInstrumentation() {
-		this.logger.info(`Adding instrumentation for ${this.scaffolderName}`);
-		this.context.addInstrumentation({
-			sourceFilePath: this.languageTemplatePath + "/instrumentation" + this.context.languageFileExt,
-			targetFileName: `service-${this.serviceKey}` + this.context.languageFileExt,
-			servLabel: this.scaffolderName
-		});
+		const instPath = this.languageTemplatePath + "/instrumentation" + this.context.languageFileExt;
+		if (this.fs.exists(instPath)) {
+			this.logger.info(`Adding instrumentation for ${this.scaffolderName}`);
+			this.context.addInstrumentation({
+				sourceFilePath: instPath,
+				targetFileName: `service-${this.serviceKey}` + this.context.languageFileExt,
+				servLabel: this.scaffolderName
+			});
+		}
 	}
 
 	_addHtml() {
@@ -333,11 +336,14 @@ module.exports = class extends Generator {
 	}
 
 	_addReadMe() {
-		this.logger.info(`Adding Readme for ${this.scaffolderName}`);
-		this.context.addReadMe({
-			sourceFilePath: this.languageTemplatePath + "/README.md",
-			targetFileName: `service-${this.serviceKey}` + ".md"
-		});
+		let readmePath = this.languageTemplatePath + "/README.md";
+		if (this.fs.exists(readmePath)) {
+			this.logger.info(`Adding Readme for ${this.scaffolderName}`);
+			this.context.addReadMe({
+				sourceFilePath: readmePath,
+				targetFileName: `service-${this.serviceKey}` + ".md"
+			});
+		}
 	}
 
 	_setCredentialMapping(templateContent, serviceCredentials, currentKey) {
