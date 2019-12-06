@@ -84,14 +84,16 @@ module.exports = class extends Generator {
 		}
 		else {
 			this._addDependencies();
-			this._addReadMe();
-			this._addInstrumentation();
+			//this._addReadMe();
+			//this._addInstrumentation();
 		}
 
+		
 		if (serviceInfo !== undefined) {
-			this._addServicesToKubeDeploy(serviceInfo);
-			this._addServicesToPipeline(serviceInfo);
+			this._createObjectForKubeYamls(serviceInfo);
+			//this._addServicesToPipeline(serviceInfo);
 		}
+		
 	}
 
 	_handleAppidForNode() {
@@ -99,7 +101,7 @@ module.exports = class extends Generator {
 		// intended for web apps, they do not apply to MS or blank projects
 		if (this.applicationType.toLowerCase() === "web") {
 			this._addDependencies();
-			this._addReadMe();
+			//this._addReadMe();
 			this._addHtml();
 			this._addInstrumentation();
 		}
@@ -153,7 +155,7 @@ module.exports = class extends Generator {
 		this.context.servicesInfo.push(serviceInfo);
 	}
 
-	_addServicesToKubeDeploy(serviceInfo) {
+	_createObjectForKubeYamls(serviceInfo) {
 		this.logger.info(`adding Deployment service env info for ${this.scaffolderName}`);
 
 		let serviceEnv = {
