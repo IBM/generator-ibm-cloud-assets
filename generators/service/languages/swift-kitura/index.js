@@ -88,8 +88,8 @@ module.exports = class extends Generator {
 		if (!serviceMetaData) {
 			return null;
 		}
-		const instanceName = Array.isArray(serviceMetaData) ?
-			serviceMetaData[0].serviceInfo.name : serviceMetaData.serviceInfo.name;
+		const instanceName = serviceMetaData.hasOwnProperty('serviceInfo') ?
+			serviceMetaData.serviceInfo.name : serviceMetaData[0].serviceInfo.name;
 		return instanceName;
 	}
 

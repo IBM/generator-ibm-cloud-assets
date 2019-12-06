@@ -337,7 +337,7 @@ module.exports = class extends Generator {
 
 	_addReadMe() {
 		let readmePath = this.languageTemplatePath + "/README.md";
-		if (this.fs.exists(readmePath)) {
+		if (this.fs.exists(readmePath) && this.context.addReadMe) {
 			this.logger.info(`Adding Readme for ${this.scaffolderName}`);
 			this.context.addReadMe({
 				sourceFilePath: readmePath,
