@@ -45,19 +45,20 @@ function generateAppOpts(type, language) {
 
 function generateDeployOpts(type, cloud_deploy_type) {
     let deploy_opts = { deploy_options: {} };
-    deploy_opts[type] = {};
+    let cloud_deploy_opts = {}
+    deploy_opts[type] = cloud_deploy_opts;
     if (type === "cloud_foundry") {
-        deploy_opts[type]["disk_quote"] = "1G";
-        deploy_opts[type]["domain"] = "mydomain.com";
-        deploy_opts[type]["hostname"] = "my-app-hostname";
-        deploy_opts[type]["instances"] = "3";
-        deploy_opts[type]["memory"] = "256MB";
+        cloud_deploy_opts["disk_quote"] = "1G";
+        cloud_deploy_opts["domain"] = "mydomain.com";
+        cloud_deploy_opts["hostname"] = "my-app-hostname";
+        cloud_deploy_opts["instances"] = "3";
+        cloud_deploy_opts["memory"] = "256MB";
     } else if (type === "kube") {
-        deploy_opts["cluster_name"] = "my-test-kube-cluster";
-        deploy_opts["region"] = "ibm:ys1:us-south";
-        deploy_opts["type"] = cloud_deploy_type;
+        cloud_deploy_opts["cluster_name"] = "my-test-kube-cluster";
+        cloud_deploy_opts["region"] = "ibm:ys1:us-south";
+        cloud_deploy_opts["type"] = cloud_deploy_type;
     }
-    deploy_opts[type]["service_bindings"] = {};
+    cloud_deploy_opts["service_bindings"] = {};
     return deploy_opts;
 }
 
