@@ -13,7 +13,6 @@ const GENERATOR_LOCATION = 'server';
 const PATH_MAPPINGS_FILE = "./server/config/mappings.json";
 const PATH_LOCALDEV_CONFIG_FILE = "server/localdev-config.json";
 const PATH_PACKAGE_JSON = "./package.json";
-const PATH_GIT_IGNORE = "./.gitignore";
 
 module.exports = class extends Generator {
 	constructor(args, opts) {
@@ -30,32 +29,45 @@ module.exports = class extends Generator {
 		this.context.addDependencies = this._addDependencies.bind(this);
 		this.context.addMappings = this._addMappings.bind(this);
 		this.context.addLocalDevConfig = this._addLocalDevConfig.bind(this);
-	}
+		this.context.addReadMe = this._addReadMe.bind(this);
+		this.context.addInstrumentation = this._addInstrumentation.bind(this);
 
-	writing() {
 		let serviceCredentials,
 			scaffolderKey,
 			serviceKey;
 		this._addDependencies(this.fs.read(this.templatePath() + "/" + this.context.dependenciesFile));
 
-		/*
-		this.fs.copy(
-			this.templatePath() + "/service-manager.js",
-			this.destinationPath("./server/services/service-manager.js")
-		);
+		//initializing ourselves by composing with the service generators
+		let root = path.dirname(require.resolve('../..'));
+		let folders = fs.readdirSync(root);
+		folders.forEach(folder => {
+			if (folder.startsWith('service-')) {
+				serviceKey = folder.substring(folder.indexOf('-') + 1);
+				scaffolderKey = scaffolderMapping[serviceKey];
+				serviceCredentials = Array.isArray(this.context.bluemix[scaffolderKey])
+					? this.context.bluemix[scaffolderKey][0] : this.context.bluemix[scaffolderKey];
+				logger.debug("Composing with service : " + folder);
+				try {
+					this.context.cloudLabel = serviceCredentials && serviceCredentials.serviceInfo && serviceCredentials.serviceInfo.cloudLabel;
+					this.composeWith(path.join(root, folder), {context: this.context});
+				} catch (err) {
+					/* istanbul ignore next */	//ignore for code coverage as this is just a warning - if the service fails to load the subsequent service test will fail
+					logger.warn('Unable to compose with service', folder, err);
+				}
+			}
+		});
+	}
 
-		this.fs.copy(
-			this.templatePath() + "/services-index.js",
-			this.destinationPath("./server/services/index.js")
-		);
-		*/
-		// Add PATH_LOCALDEV_CONFIG_FILE to .gitignore
-		let gitIgnorePath = this.destinationPath(PATH_GIT_IGNORE);
-		if (this.fs.exists(gitIgnorePath)){
-			this.fs.append(gitIgnorePath, PATH_LOCALDEV_CONFIG_FILE);
-		} else {
-			this.fs.write(gitIgnorePath, PATH_LOCALDEV_CONFIG_FILE);
-		}
+	writing() {
+		// this.fs.copy(
+		// 	this.templatePath() + "/service-manager.js",
+		// 	this.destinationPath("./server/services/service-manager.js")
+		// );
+
+		// this.fs.copy(
+		// 	this.templatePath() + "/services-index.js",
+		// 	this.destinationPath("./server/services/index.js")
+		// );
 	}
 
 	_addDependencies(serviceDepdendenciesString){
@@ -74,20 +86,33 @@ module.exports = class extends Generator {
 		this.fs.extendJSON(localDevConfigFilePath, serviceLocalDevConfigJSON);
 	}
 
-	end(){
-		/*
-		// Remove GENERATE_HERE from /server/services/index.js
+	_addReadMe(options){
+		this.fs.copy(
+			options.sourceFilePath,
+			this.destinationPath() + "/docs/services/" + options.targetFileName
+		);
+	}
+
+	_addInstrumentation(options){
+		this.fs.copy(
+			options.sourceFilePath,
+			this.destinationPath() + "/server/services/" + options.targetFileName
+		);
+
 		let servicesIndexJsFilePath = this.destinationPath("./server/services/index.js");
 		let indexFileContent = this.fs.read(servicesIndexJsFilePath);
-		indexFileContent = indexFileContent.replace(GENERATE_HERE, "");
+		let contentToAdd = "\trequire('./" + options.targetFileName.replace(".js","") + "')(app, serviceManager);\n" + GENERATE_HERE;
+		indexFileContent = indexFileContent.replace(GENERATE_HERE, contentToAdd);
 		this.fs.write(servicesIndexJsFilePath, indexFileContent);
-	  */
-		// Add PATH_LOCALDEV_CONFIG_FILE to .gitignore
-		let gitIgnorePath = this.destinationPath(PATH_GIT_IGNORE);
-		if (this.fs.exists(gitIgnorePath)){
-			this.fs.append(gitIgnorePath, PATH_LOCALDEV_CONFIG_FILE);
-		} else {
-			this.fs.write(gitIgnorePath, PATH_LOCALDEV_CONFIG_FILE);
+	}
+
+	end(){
+		// Remove GENERATE_HERE from /server/services/index.js
+		let servicesIndexJsFilePath = this.destinationPath("./server/services/index.js");
+		if (this.fs.exists(servicesIndexJsFilePath)) {
+			let indexFileContent = this.fs.read(servicesIndexJsFilePath);
+			indexFileContent = indexFileContent.replace(GENERATE_HERE, "");
+			this.fs.write(servicesIndexJsFilePath, indexFileContent);
 		}
 	}
 };

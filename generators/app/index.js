@@ -230,7 +230,7 @@ module.exports = class extends Generator {
 			this.composeWith(require.resolve('../cloud_foundry'), this.opts);
 		}
 
-		//this.composeWith(require.resolve('../service'), this.opts);
+		this.composeWith(require.resolve('../service'), this.opts);
 
 		this.log("end writing")
 
@@ -275,12 +275,13 @@ module.exports = class extends Generator {
 
 	_makeBluemix(deployOpts, application){
 
+		const hasServiceCreds = application.hasOwnProperty("service_credentials");
 		let bluemix = {
 			name: application.name,
 			cloudDeploymentType: Object.keys(deployOpts)[0],
 			backendPlatform: application.language,
 			server: {
-				services: Object.keys(application.service_credentials),
+				services: hasServiceCreds ? Object.keys(application.service_credentials) : {},
 				cloudDeploymentType: Object.keys(deployOpts)[0],
 				"cloudDeploymentOptions": {
 					"kubeDeploymentType": (deployOpts.kube) ? deployOpts.kube.type : ""
@@ -293,15 +294,17 @@ module.exports = class extends Generator {
 			bluemix.server.host = bluemix.server.hostname;
 			bluemix.cloudDeploymentType = "cloud_foundry";
 		}
-
-		for (let service of Object.keys(application.service_credentials)) {
-			let obj = {}
-			obj[service] = [application.service_credentials[service]];
-			obj[service]["serviceInfo"] = {
-				"name": deployOpts[bluemix.cloudDeploymentType]["service_bindings"][service],
-				"cloudLabel": service,
+		
+		if (hasServiceCreds) {
+			for (let service of Object.keys(application.service_credentials)) {
+				let obj = {}
+				obj[service] = [application.service_credentials[service]];
+				obj[service]["serviceInfo"] = {
+					"name": deployOpts[bluemix.cloudDeploymentType]["service_bindings"][service],
+					"cloudLabel": service,
+				}
+				_.extend(bluemix, obj);
 			}
-			_.extend(bluemix, obj);
 		}
 
 		return bluemix;

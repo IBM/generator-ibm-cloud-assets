@@ -1,0 +1,7 @@
+{
+  "dependencies": [{
+    "groupId": "com.ibm.cos",
+    "artifactId": "cos-spring-boot-starter",
+    "version": "1.0.0"
+  }]
+}

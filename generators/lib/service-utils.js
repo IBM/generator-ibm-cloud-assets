@@ -107,7 +107,7 @@ function addServicesToServiceKnativeYamlAsync(args) {
 	return new Promise((resolve) => {
 		console.log("knative yaml")
 		console.log(args)
-		let serviceYamlFilePath = args.destinationPath
+		let serviceYamlFilePath = "./service.yaml"; //args.destinationPath
 		let services = args.context.deploymentServicesEnv; //array of service objects
 
 		let hasServices = services && services.length > 0;
@@ -123,20 +123,12 @@ function addServicesToServiceKnativeYamlAsync(args) {
 				service.valueFrom.secretKeyRef && service.valueFrom.secretKeyRef.key
 		});
 
-
-		/*
-		TODO: in future the service binding secretKeyRefName needs to be passed down here
-			from appman so that we can get the actual value here instead of guessing
-			because we do not know necessarily what sanitizing is being done etc, it is
-			better to get the data from the cluster (which appman does)
-		*/
 		services = services.map((service) => {
-			let secretKeyRefName = service.valueFrom.secretKeyRef.key + "-" + service.keyName
 			return {
 				name: service.name,
 				valueFrom: {
 					secretKeyRef: {
-						name: secretKeyRefName.toLowerCase(),
+						name: service.keyName.toLowerCase(),
 						key: service.valueFrom.secretKeyRef.key
 					}
 				}

@@ -21,6 +21,7 @@ coverage
 # unit test result
 xunit.xml
 devops_insights
+*.dir
 
 # Grunt intermediate storage (http://gruntjs.com/creating-plugins#storing-task-files)
 .grunt

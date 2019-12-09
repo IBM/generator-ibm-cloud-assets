@@ -1,0 +1,4 @@
+
+[[constraint]]
+  name = "https://github.com/IBM-Cloud/go-cloudant"
+  branch = "master"
