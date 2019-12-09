@@ -16,45 +16,10 @@
 
 const helpers = require('yeoman-test');
 const assert = require('yeoman-assert');
+const _ = require('lodash');
 const path = require('path');
 // const fs = require('fs');
 var memFs = require("mem-fs");
 var editor = require("mem-fs-editor");
 var store = memFs.create();
 var fs = editor.create(store);
-
-const PATH_SERVICE_CREDS_SAMPLES = "./samples/service_creds.json";
-
-function getServiceCreds(serviceKey) {
-    var serviceCreds = fs.readJSON(PATH_SERVICE_CREDS_SAMPLES);
-    return serviceCreds[serviceKey];
-}
-
-function generateAppOpts(type, language) {
-    return {
-        application: {
-            app_id: `1234-5678-${type}-${language}-0987654321`,
-            name: `test-genv2-app-${type}-${language}`,
-            language: language,
-            service_credentials: {}
-        }
-    };
-}
-
-function generateDeployOpts(type, cloud_deploy_type) {
-    let deploy_opts = { deploy_options: {} };
-    deploy_opts[type] = {};
-    if (type === "cloud_foundry") {
-        deploy_opts[type]["disk_quote"] = "1G";
-        deploy_opts[type]["domain"] = "mydomain.com";
-        deploy_opts[type]["hostname"] = "my-app-hostname";
-        deploy_opts[type]["instances"] = "3";
-        deploy_opts[type]["memory"] = "256MB";
-    }
-    deploy_opts[type]["service_bindings"] = {};
-    return deploy_opts;
-}
-
-function generatePayload(app_type, language, deploy_type, cloud_deploy_type, services) {
-    
-}
