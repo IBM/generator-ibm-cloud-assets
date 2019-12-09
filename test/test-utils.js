@@ -48,7 +48,7 @@ function generateDeployOpts(type, cloud_deploy_type) {
     let cloud_deploy_opts = {}
     deploy_opts[type] = cloud_deploy_opts;
     if (type === "cloud_foundry") {
-        cloud_deploy_opts["disk_quote"] = "1G";
+        cloud_deploy_opts["disk_quota"] = "1G";
         cloud_deploy_opts["domain"] = "mydomain.com";
         cloud_deploy_opts["hostname"] = "my-app-hostname";
         cloud_deploy_opts["instances"] = "3";
