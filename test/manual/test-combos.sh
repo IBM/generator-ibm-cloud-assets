@@ -91,7 +91,6 @@ echo "========================================================================="
 ./test-combo.sh test-genv2-app-express-knative-appid.json https://github.com/IBM/nodejs-microservice.git
 
 
-
 echo "========================================================================="
 echo "Testing swift knative no svc"
 echo "========================================================================="
@@ -106,3 +105,52 @@ echo "========================================================================="
 echo "Testing swift knative appid"
 echo "========================================================================="
 ./test-combo.sh test-genv2-app-swift-knative-appid.json https://github.com/IBM/swift-web-app.git
+
+
+
+echo "========================================================================="
+echo "Testing flask knative no svc"
+echo "========================================================================="
+./test-combo.sh test-genv2-app-python-knative-no-svc.json https://github.com/IBM/flask-web-app.git
+
+echo "========================================================================="
+echo "Testing flask knative cloudant"
+echo "========================================================================="
+./test-combo.sh test-genv2-app-python-knative-cloudant.json https://github.com/IBM/flask-web-app.git
+
+echo "========================================================================="
+echo "Testing flask knative appid"
+echo "========================================================================="
+./test-combo.sh test-genv2-app-python-knative-appid.json https://github.com/IBM/flask-web-app.git
+
+
+echo "========================================================================="
+echo "Testing flask helm no svc"
+echo "========================================================================="
+./test-combo.sh test-genv2-app-python-helm-no-svc.json https://github.com/IBM/flask-web-app.git
+
+echo "========================================================================="
+echo "Testing flask helm cloudant"
+echo "========================================================================="
+./test-combo.sh test-genv2-app-python-helm-cloudant.json https://github.com/IBM/flask-web-app.git
+
+echo "========================================================================="
+echo "Testing flask helm appid"
+echo "========================================================================="
+./test-combo.sh test-genv2-app-python-helm-appid.json https://github.com/IBM/flask-web-app.git
+
+
+echo "========================================================================="
+echo "Testing flask cf no svc"
+echo "========================================================================="
+./test-combo.sh test-genv2-app-python-cf-no-svc.json https://github.com/IBM/flask-web-app.git
+
+echo "========================================================================="
+echo "Testing flask cf cloudant"
+echo "========================================================================="
+./test-combo.sh test-genv2-app-python-cf-cloudant.json https://github.com/IBM/flask-web-app.git
+
+echo "========================================================================="
+echo "Testing flask cf appid"
+echo "========================================================================="
+./test-combo.sh test-genv2-app-python-cf-appid.json https://github.com/IBM/flask-web-app.git

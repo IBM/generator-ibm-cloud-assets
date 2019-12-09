@@ -51,7 +51,7 @@ module.exports = class extends Generator {
 			this._addDependencies(this.fs.read(this.templatePath() + "/" + this.context.dependenciesFile[i]));
 		}
 
-		
+		/*
 		this.fs.copy(
 			this.templatePath() + "/service_manager.py",
 			this.destinationPath("./server/services/service_manager.py")
@@ -61,6 +61,7 @@ module.exports = class extends Generator {
 			this.templatePath() + "/services_index.py",
 			this.destinationPath("./server/services/" + SERVICES_INIT_FILE)
 		);
+		*/
 
 		let root = path.dirname(require.resolve('../..'));
 		let folders = fs.readdirSync(root);
@@ -235,9 +236,11 @@ module.exports = class extends Generator {
 
 	end() {
 		// Remove GENERATE_HERE and GENERATE_IMPORT_HERE from SERVICES_INIT_FILE
+		/*
 		let servicesInitFilePath = this.destinationPath("./server/services/" + SERVICES_INIT_FILE);
 		let indexFileContent = this.fs.read(servicesInitFilePath);
 		indexFileContent = indexFileContent.replace(GENERATE_HERE, "").replace(GENERATE_IMPORT_HERE, "");
 		this.fs.write(servicesInitFilePath, indexFileContent);
+		*/
 	}
 };
