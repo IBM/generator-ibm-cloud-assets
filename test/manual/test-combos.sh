@@ -107,6 +107,7 @@ echo "========================================================================="
 ./test-combo.sh test-genv2-app-swift-knative-appid.json https://github.com/IBM/swift-web-app.git
 
 
+
 echo "========================================================================="
 echo "Testing flask knative no svc"
 echo "========================================================================="
