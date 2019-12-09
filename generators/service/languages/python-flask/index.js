@@ -51,7 +51,7 @@ module.exports = class extends Generator {
 			this._addDependencies(this.fs.read(this.templatePath() + "/" + this.context.dependenciesFile[i]));
 		}
 
-		/*
+		
 		this.fs.copy(
 			this.templatePath() + "/service_manager.py",
 			this.destinationPath("./server/services/service_manager.py")
@@ -61,15 +61,25 @@ module.exports = class extends Generator {
 			this.templatePath() + "/services_index.py",
 			this.destinationPath("./server/services/" + SERVICES_INIT_FILE)
 		);
-		*/
 
-		// Add PATH_LOCALDEV_CONFIG_FILE to .gitignore
-		let gitIgnorePath = this.destinationPath(PATH_GIT_IGNORE);
-		if (this.fs.exists(gitIgnorePath)){
-			this.fs.append(gitIgnorePath, PATH_LOCALDEV_CONFIG_FILE);
-		} else {
-			this.fs.write(gitIgnorePath, PATH_LOCALDEV_CONFIG_FILE);
-		}
+		let root = path.dirname(require.resolve('../..'));
+		let folders = fs.readdirSync(root);
+		folders.forEach(folder => {
+			if (folder.startsWith('service-')) {
+				serviceKey = folder.substring(folder.indexOf('-') + 1);
+				scaffolderKey = scaffolderMapping[serviceKey];
+				serviceCredentials = Array.isArray(this.context.bluemix[scaffolderKey])
+					? this.context.bluemix[scaffolderKey][0] : this.context.bluemix[scaffolderKey];
+				logger.debug("Composing with service : " + folder);
+				try {
+					this.context.cloudLabel = serviceCredentials && serviceCredentials.serviceInfo && serviceCredentials.serviceInfo.cloudLabel;
+					this.composeWith(path.join(root, folder), {context: this.context});
+				} catch (err) {
+					/* istanbul ignore next */		//ignore for code coverage as this is just a warning - if the service fails to load the subsequent service test will fail
+					logger.warn('Unable to compose with service', folder, err);
+				}
+			}
+		});
 	}
 
 	_addDependencies(serviceDepdendenciesString) {
@@ -225,19 +235,9 @@ module.exports = class extends Generator {
 
 	end() {
 		// Remove GENERATE_HERE and GENERATE_IMPORT_HERE from SERVICES_INIT_FILE
-		/*let servicesInitFilePath = this.destinationPath("./server/services/" + SERVICES_INIT_FILE);
+		let servicesInitFilePath = this.destinationPath("./server/services/" + SERVICES_INIT_FILE);
 		let indexFileContent = this.fs.read(servicesInitFilePath);
 		indexFileContent = indexFileContent.replace(GENERATE_HERE, "").replace(GENERATE_IMPORT_HERE, "");
-		this.fs.write(servicesInitFilePath, indexFileContent);*/
-
-		// Remove GENERATE_IMPORT_HERE from SERVICES_INIT_FILE
-
-		// Add PATH_LOCALDEV_CONFIG_FILE to .gitignore
-		let gitIgnorePath = this.destinationPath(PATH_GIT_IGNORE);
-		if (this.fs.exists(gitIgnorePath)) {
-			this.fs.append(gitIgnorePath, PATH_LOCALDEV_CONFIG_FILE);
-		} else {
-			this.fs.write(gitIgnorePath, PATH_LOCALDEV_CONFIG_FILE);
-		}
+		this.fs.write(servicesInitFilePath, indexFileContent);
 	}
 };

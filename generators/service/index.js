@@ -37,6 +37,11 @@ const OPTION_STARTER = "starter";
 
 const PATH_GIT_IGNORE = "./.gitignore";
 
+const config = {
+	cloudFoundryIsArray: true,
+	mappingVersion: 1
+};
+
 module.exports = class extends Generator {
 	constructor(args, opts) {
 		super(args, opts);
@@ -121,60 +126,46 @@ module.exports = class extends Generator {
 	 * @param config
 	 * @returns {undefined}
 	 */
-	configuring(config) {
-		this.context.addServices = false;
-		this.context.service_imports = [];
-		this.context.service_variables = [];
-		this.context.service_initializers = [];
-		this.context.dependencies = [];
-		this.context.addDependencies = this._addDependencies.bind(this);
-		this.context.addMappings = this._addMappings.bind(this);
-		this.context.addLocalDevConfig = this._addLocalDevConfig.bind(this);
+	configuring() {
+		// this.context.addServices = false;
+		// this.context.service_imports = [];
+		// this.context.service_variables = [];
+		// this.context.service_initializers = [];
+		// this.context.dependencies = [];
+		// this.context.addDependencies = this._addDependencies.bind(this);
+		// this.context.addMappings = this._addMappings.bind(this);
+		// this.context.addLocalDevConfig = this._addLocalDevConfig.bind(this);
 
-		let allServiceKeys = [  "alert-notification",  "apache-spark",  "appid",  "autoscaling",  "cloud-object-storage",  "postgre",  "cloudant",  "hypersecure-dbaas-mongodb",  "watson-conversation",  "dashdb",  "db2",  "elephantsql",  "watson-discovery",  "watson-document-conversion",  "finance-historical-instrument-analytics",  "finance-instrument-analytics",  "finance-investment-portfolio",  "watson-language-translator",  "mongodb",  "watson-natural-language-classifier",  "watson-natural-language-understanding",  "object-storage",  "watson-personality-insights",  "finance-portfolio-optimization",  "finance-predictive-market-scenarios",  "push",  "redis",  "watson-retrieve-and-rank",  "finance-simulated-historical-instrument-analytics",  "finance-simulated-instrument-analytics",  "watson-speech-to-text",  "watson-text-to-speech",  "watson-tone-analyzer",  "watson-visual-recognition",  "weather-company-data" ]
+		// this.hasBluemixProperty = this.context.bluemix.hasOwnProperty(this.scaffolderName);
+		// this.hasTemplate = fs.existsSync(this.languageTemplatePath);
+		// if (this.hasBluemixProperty && !this.hasTemplate) {
+		// 	logger.info(`No available sdk available for ${this.scaffolderName} in ${this.context.language}; configuring credentials only`);
+		// 	this._addMappings(config);
+		// 	this._addLocalDevConfig();
+		// 	return;
+		// }
 
-		allServiceKeys.forEach(serviceKey => {
-			let scaffolderKey = scaffolderMapping[serviceKey];
-			let serviceCredentials = Array.isArray(this.context.bluemix[scaffolderKey])
-				? this.context.bluemix[scaffolderKey][0] : this.context.bluemix[scaffolderKey];
-			logger.debug("Composing with service : " + serviceKey);
-			try {
-				this.context.cloudLabel = serviceCredentials && serviceCredentials.serviceInfo && serviceCredentials.serviceInfo.cloudLabel;
-			} catch (err) {
-				/* istanbul ignore next */	//ignore for code coverage as this is just a warning - if the service fails to load the subsequent service test will fail
-				logger.warn('Unable to compose with service', serviceKey, err);
-			}
-		});
+		// let serviceInfo = this._getServiceInfo();
 
+		// if (serviceInfo && this.scaffolderName !== "autoscaling") {
+		// 	this._addMappings(config);
+		// 	this._addLocalDevConfig();
+		// }
 
-		this.hasBluemixProperty = this.context.bluemix.hasOwnProperty(this.scaffolderName);
-		this.hasTemplate = fs.existsSync(this.languageTemplatePath);
-		if (this.hasBluemixProperty && !this.hasTemplate) {
-			logger.info(`No available sdk available for ${this.scaffolderName} in ${this.context.language}; configuring credentials only`);
-			this._addMappings(config);
-			this._addLocalDevConfig();
-			return;
-		}
+		// if (serviceInfo && this.scaffolderName === "appid" && this.context.language === "node") {
+		// 	this._handleAppidForNode();
+		// }
+		// else {
+		// 	this._addDependencies();
+		// }
 
-		let serviceInfo = this._getServiceInfo();
+		// if (serviceInfo !== undefined) {
+		// 	this._addServicesToKubeDeploy(serviceInfo);
+		// 	this._addServicesToPipeline(serviceInfo);
+		// }
+	}
 
-		if (serviceInfo && this.scaffolderName !== "autoscaling") {
-			this._addMappings(config);
-			this._addLocalDevConfig();
-		}
-
-		if (serviceInfo && this.scaffolderName === "appid" && this.context.language === "node") {
-			this._handleAppidForNode();
-		}
-		else {
-			this._addDependencies();
-		}
-
-		if (serviceInfo !== undefined) {
-			this._addServicesToKubeDeploy(serviceInfo);
-			this._addServicesToPipeline(serviceInfo);
-		}
-
+	writing() {
 	}
 
 	_sanitizeOption(options, name) {
@@ -235,8 +226,8 @@ module.exports = class extends Generator {
 	}
 
 	_getServiceInfo() {
-		console.log("this.scaffolderName")
-		console.log(this.scaffolderName)
+		this.log("this.scaffolderName")
+		this.log(this.scaffolderName)
 		let serviceInfo = {};
 		if (this.context.bluemix[this.scaffolderName]) {
 			let service = this.context.bluemix[this.scaffolderName];
@@ -318,6 +309,9 @@ module.exports = class extends Generator {
 
 		let serviceCredentials = Array.isArray(this.context.bluemix[this.scaffolderName])
 			? this.context.bluemix[this.scaffolderName][0] : this.context.bluemix[this.scaffolderName];
+		if (!serviceCredentials) {
+			serviceCredentials = {};
+		}
 		let scaffolderKeys = this._setCredentialMapping({}, serviceCredentials, this.serviceKey);
 		this.log("scaffolderKeys: " + JSON.stringify(scaffolderKeys, null, 3))
 		scaffolderKeys = Object.keys(scaffolderKeys).map(key => {

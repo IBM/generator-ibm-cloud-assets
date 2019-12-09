@@ -1,0 +1,6 @@
+{
+  "import":"AlertNotifications",
+  "variableName":"alertNotificationService",
+  "type":"AlertNotificationCredentials",
+  "initParams":"cloudEnv: cloudEnv"
+}

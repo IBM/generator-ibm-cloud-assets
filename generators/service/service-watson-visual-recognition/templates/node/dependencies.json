@@ -1,0 +1,5 @@
+{
+	"dependencies": {
+		"watson-developer-cloud": "^3.18.1"
+	}
+}

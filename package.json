@@ -36,6 +36,9 @@
     "lodash": "^4.17.15",
     "log4js": "^4.4.0",
     "node-pre-gyp": "^0.14.0",
+    "jsdom": "^15.1.1",
+    "prettify-xml": "^1.2.0",
+    "xmlserializer": "^0.6.1",
     "xml-js": "^1.6.11",
     "yeoman-generator": "^3.2.0"
   },
