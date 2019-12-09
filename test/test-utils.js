@@ -28,6 +28,9 @@ const SVC_CRED_SAMPLES = require("./samples/service_creds.json");
 
 const PREFIX_SVC_BINDING_NAME = "my-service-";
 
+const LANGS = [ "NODE", "PYTHON", "GO", "JAVA", "SWIFT" ];
+const SERVICES = [ 'appid','cloudant','cloudObjectStorage','db2OnCloud','mongodb','hypersecuredb','postgresql','push','redis','conversation','discovery','languageTranslator','naturalLanguageClassifier','naturalLanguageUnderstanding','personalityInsights','speechToText','textToSpeech','toneAnalyzer','visualRecognition' ];
+
 function getServiceCreds(serviceKey) {
     return SVC_CRED_SAMPLES[serviceKey];
 }
@@ -43,24 +46,30 @@ function generateAppOpts(type, language) {
     };
 }
 
-function generateDeployOpts(type, cloud_deploy_type) {
-    let deploy_opts = { deploy_options: {} };
-    let cloud_deploy_opts = {}
-    deploy_opts[type] = cloud_deploy_opts;
-    if (type === "cloud_foundry") {
-        cloud_deploy_opts["disk_quota"] = "1G";
-        cloud_deploy_opts["domain"] = "mydomain.com";
-        cloud_deploy_opts["hostname"] = "my-app-hostname";
-        cloud_deploy_opts["instances"] = "3";
-        cloud_deploy_opts["memory"] = "256MB";
-    } else if (type === "kube") {
-        cloud_deploy_opts["cluster_name"] = "my-test-kube-cluster";
-        cloud_deploy_opts["region"] = "ibm:ys1:us-south";
-        cloud_deploy_opts["type"] = cloud_deploy_type;
-    }
-    cloud_deploy_opts["service_bindings"] = {};
-    return deploy_opts;
-}
+const baseDeployObjects = {
+        "cloud_foundry": {
+            "cloud_foundry": {
+                "disk_quote": "1G",
+                "domain": "mydomain.com",
+                "hostname": "my-app-hostname",
+                "instances": "3",
+                "memory": "256MB",
+                "service_bindings": {}
+            }
+        },
+        "helm": { 
+            "kube": {
+                "type": "HELM",
+                "service_bindings": {}      
+            }
+        },
+        "knative": {
+            "kube": {
+                "type": "KNATIVE",
+                "service_bindings": {}      
+            }        
+        }
+    };
 
 function generateTestPayload(app_type, language, deploy_type, cloud_deploy_type, service_keys) {
     let payload = {};
@@ -78,5 +87,9 @@ function generateTestPayload(app_type, language, deploy_type, cloud_deploy_type,
 module.exports = {
     getServiceCreds: getServiceCreds,
     generateDeployOpts: generateDeployOpts,
-    generateTestPayload: generateTestPayload
+    generateTestPayload: generateTestPayload,
+    baseDeployObjects: baseDeployObjects,
+    LANGS: LANGS,
+    SERVICES: SERVICES
+
 };
