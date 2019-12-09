@@ -1,12 +1,14 @@
 {
-  "deploy_options": {
-    "kube": {
-      "cluster_name": "gv-devx-classic-dal1",
-      "region": "ibm:ys1:us-south",
-      "type": "KNATIVE",
-      "service_bindings": {
-          "cloudant": "cloudant-gv-spring-ms-test-co1436hv30tbd0j"
-      }
+    "deploy_options": {
+        "cloud_foundry": {
+            "disk_quota": "1G",
+            "domain": "mydomain.com",
+            "hostname": "my-app-hostname",
+            "instances": 3,
+            "memory": "512MB",
+            "service_bindings": {
+            "cloudant": "cloudant-gv-spring-ms-test-co1436hv30tbd0j"
+        }
     }
   },
   "application": {
