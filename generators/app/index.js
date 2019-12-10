@@ -171,7 +171,7 @@ module.exports = class extends Generator {
 		this.log("configuring");
 
 		// process object for kube deployments
-		if (this.bluemix.cloudDeploymentType == "kube") {
+		if (this.opts.deploy_options && this.bluemix.cloudDeploymentType == "kube") {
 			// work out app name and language
 			this.opts.bluemix.language = _.toLower(this.bluemix.backendPlatform);
 			if(this.opts.bluemix.language === 'java' || this.opts.bluemix.language === 'spring') {
@@ -215,19 +215,21 @@ module.exports = class extends Generator {
 
 		this.composeWith(require.resolve('../dockertools'), this.opts);
 
-		if ( this.bluemix.cloudDeploymentType == "kube" ) {
+		if (this.opts.deploy_options) {
+			if ( this.bluemix.cloudDeploymentType == "kube" ) {
 
-			if ( this.bluemix.server.cloudDeploymentOptions.kubeDeploymentType == "KNATIVE" ) {
-				this.log("write knative")
-				this.composeWith(require.resolve('../knative'), this.opts);
-			} else {
-				this.log("write helm")
-				this.composeWith(require.resolve('../kubernetes'), this.opts);
+				if ( this.bluemix.server.cloudDeploymentOptions.kubeDeploymentType == "KNATIVE" ) {
+					this.log("write knative")
+					this.composeWith(require.resolve('../knative'), this.opts);
+				} else {
+					this.log("write helm")
+					this.composeWith(require.resolve('../kubernetes'), this.opts);
+				}
+
+			} else if (this.bluemix.cloudDeploymentType == "cloud_foundry") {
+				this.log("write CF")
+				this.composeWith(require.resolve('../cloud_foundry'), this.opts);
 			}
-
-		} else if (this.bluemix.cloudDeploymentType == "cloud_foundry") {
-			this.log("write CF")
-			this.composeWith(require.resolve('../cloud_foundry'), this.opts);
 		}
 
 		this.composeWith(require.resolve('../service'), this.opts);
@@ -278,33 +280,36 @@ module.exports = class extends Generator {
 		const hasServiceCreds = application.hasOwnProperty("service_credentials");
 		let bluemix = {
 			name: application.name,
-			cloudDeploymentType: Object.keys(deployOpts)[0],
+			cloudDeploymentType: (deployOpts) ? Object.keys(deployOpts)[0] : false,
 			backendPlatform: application.language,
 			server: {
 				services: hasServiceCreds ? Object.keys(application.service_credentials) : {},
-				cloudDeploymentType: Object.keys(deployOpts)[0],
+				cloudDeploymentType: (deployOpts) ? Object.keys(deployOpts)[0] : false,
 				"cloudDeploymentOptions": {
-					"kubeDeploymentType": (deployOpts.kube) ? deployOpts.kube.type : ""
+					"kubeDeploymentType": (deployOpts && deployOpts.kube) ? deployOpts.kube.type : false
 				}
 			}
 		};
 
-		if ( deployOpts.cloud_foundry ) {
+		if ( deployOpts && deployOpts.cloud_foundry ) {
 			_.extend(bluemix.server, deployOpts.cloud_foundry);
 			bluemix.server.host = bluemix.server.hostname;
 			bluemix.cloudDeploymentType = "cloud_foundry";
 		}
 		
 		if (hasServiceCreds) {
+			let bindings = (deployOpts) ? deployOpts[bluemix.cloudDeploymentType]["service_bindings"] : {};
 			for (let service of Object.keys(application.service_credentials)) {
+				let binding = ( bindings ) ? bindings[service] : "REPLACEME-binding-" + service;
 				let obj = {}
 				obj[service] = [application.service_credentials[service]];
 				obj[service]["serviceInfo"] = {
-					"name": deployOpts[bluemix.cloudDeploymentType]["service_bindings"][service],
+					"name": binding,
 					"cloudLabel": service,
 				}
 				_.extend(bluemix, obj);
 			}
+
 		}
 
 		return bluemix;
