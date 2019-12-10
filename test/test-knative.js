@@ -16,11 +16,11 @@
 
 const helpers = require('yeoman-test');
 const assert = require('yeoman-assert');
+const utils = require('./test-utils');
 const path = require('path');
 const yml = require('js-yaml');
 const fs = require('fs');
 const _ = require('lodash');
-const utils = require('./test-utils');
 
 let knativeOptions = utils.generateTestPayload("knative", "NODE", ['appid', 'cloudant']);
 
