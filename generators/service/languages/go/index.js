@@ -83,8 +83,6 @@ module.exports = class extends Generator {
 	writing() {
 		// Generate services.go, which acts like a service manager
 		if (this.context.addServices) {
-			// Add the ibm-cloud-env-golang dependency
-			this._addDependencies(this.fs.read(this.templatePath() + "/" + this.context.dependenciesFile));
 			this._writeHandlebarsFile('services.go', "services/services.go", {
 				service_imports: this.context.service_imports,
 				service_variables:this.context.service_variables,
@@ -92,6 +90,8 @@ module.exports = class extends Generator {
 			});
 		}
 
+		// Add the ibm-cloud-env-golang dependency
+		this._addDependencies(this.fs.read(this.templatePath() + "/" + this.context.dependenciesFile));
 		// Append dependencies to the Gopkg.toml
 		let goPkgPath = this.destinationPath(PATH_GOPKG_TOML);
 		// Write a Gopkg.toml if one doesn't exist

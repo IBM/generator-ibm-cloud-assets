@@ -112,7 +112,7 @@ function addServicesToServiceKnativeYamlAsync(args) {
 
 		let hasServices = services && services.length > 0;
 		if (!fs.existsSync(serviceYamlFilePath) || !hasServices) {
-			logger.info("Not adding service env to service-knative.yaml");
+			logger.info("Not adding service env to service.yaml");
 			return resolve()
 		}
 

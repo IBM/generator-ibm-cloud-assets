@@ -41,6 +41,12 @@ module.exports = class extends Generator {
 		this.manifestConfig = {};
 		this.manifestConfig.env = {};
 		this.toolchainConfig = {};
+		this.pipelineConfig = {
+			buildJobProps: {
+				artifact_dir: "''"
+			},
+			triggersType: 'commit'
+		};
 		this.deployment = {
 			type: 'CF',
 			name: this.bluemix.name,
