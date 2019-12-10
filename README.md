@@ -43,11 +43,7 @@ yo ibm-cloud-assets
 ```
 
 Following command line arguments are supported:
-* `--deploy_options {stringified-json}` -  used by Scaffolder to supply project information from `pman`. You can also supply a local file containing compatible JSON object by using `--bluemix file:path/to/file.json`. Other options include `--bluemix='{"name":"<project-name>","backendPlatform":"<platform>"}'`
-* `--application {stringified-array}` - used to add an extra service container for `docker-compose`.
-* `--nodeCFMinMemory` - used to defined a minimum requirement for node CF deployment. (e.g 384M)
-
-**Note**: Adding the `--services` option will generate and use `docker-compose and docker-compose-tools` for docker containers.
+* `--deploy_options {stringified-json} --application {stringified-array}` -  used by Scaffolder to supply project information from `pman`. You can also supply a local file containing compatible JSON object by using `--deploy_options file:<path/to/file.json> --application file:<path/to/file.json>`.
 
 ## Artifacts
 
@@ -62,14 +58,13 @@ docker-compose-tools.yml | Configuration file for the tool container, *if servic
 Jenkinsfile | Groovy script used in conjunction with deploying to Cloud Foundry
 chart/* | Folder containing all the Helm yaml files required to deploy to Kubernetes
 cli-config.yml | Yaml file containing mappings for various commands, files, and settings, utilized by the cli commands
-manifest.yml | Yaml file with configuration to deploy to Cloud Foundry
 
 ## Development Environment
 
 Clone this repository and link it via npm
 
 ```bash
-git clone https://github.com/ibm/generator-ibm-cloud-assets
+git clone https://github.com/IBM/generator-ibm-cloud-assets
 cd generator-ibm-cloud-assets
 npm link
 ```
@@ -79,17 +74,6 @@ In a separate directory invoke the generator via
 ```bash
 yo ibm-cloud-assets 
 ```
-
-## Supported Docker-Compose Services
-You can use Docker images to create instances for somes services services. By passing in the `--services` option the generator will create the `docker-compose` and `docker-compose-tools.yml`.
-Below is the services using `docker-compose`.
-
-| Service Name | Key Name |           Example            |
-|--------------|----------|------------------------------|
-| Mongo        | mongodb  | `--services "[\"mongodb\"]"` |
-
-
-**Note**: Currently only supported by *Node*, *Swift*, and *Python*.
 
 ## Testing
 

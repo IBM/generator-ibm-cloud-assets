@@ -221,7 +221,6 @@ module.exports = class extends Generator {
 			serviceCredentials['serviceInfo'] = this.context.bluemix[this.scaffolderName]['serviceInfo'];
 		}
 		let scaffolderKeys = this._setCredentialMapping({}, serviceCredentials, this.serviceKey);
-		console.log("scaffolderKeys: " + JSON.stringify(scaffolderKeys, null, 3))
 		scaffolderKeys = Object.keys(scaffolderKeys).map(key => {
 			let scaffolderKey = key.split(`${this.serviceKey.replace(/-/g, '_')}_`);
 			if (Array.isArray(scaffolderKey) && scaffolderKey.length > 1) {
@@ -235,7 +234,6 @@ module.exports = class extends Generator {
 
 		scaffolderKeys.sort();
 		credentialKeys.sort();
-		console.log("credential keys: " + credentialKeys);
 
 		credKeysToScaffolderKeysMap = this._mapCredentialKeysToScaffolderKeys(credentialKeys, scaffolderKeys);
 
@@ -282,8 +280,6 @@ module.exports = class extends Generator {
 				localCredentialKeys[i][1] = credentialKeys[i]
 			} 
 		}
-		console.log("localServiceKey: " + localServiceKey)
-		console.log("localCredentialKeys: " + localCredentialKeys)
 
 		let context = {
 			serviceName: serviceCredentials.serviceInfo.name,
