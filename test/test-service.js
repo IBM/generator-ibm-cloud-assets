@@ -31,8 +31,16 @@ const fse = require('fs-extra');
 const SERVICES = utils.SERVICES;
 const DEPLOY_OBJECTS = utils.baseDeployObjects;
 
-function validateHelmChart(lang, deploy_type, service) {
-
+function validateHelmChart(lang, deploy_type, service, applicationName) {
+    const chartLocation = 'chart/' + applicationName.toLowerCase();
+    let chartFile = chartLocation + '/Chart.yaml';
+    assert.file(chartFile);
+    let valuesFile = chartLocation + '/values.yaml';
+    assert.file(valuesFile);
+    assert.file(chartLocation + '/templates/deployment.yaml');
+    assert.file(chartLocation + '/templates/service.yaml');
+    assert.file(chartLocation + '/templates/hpa.yaml');
+    assert.file(chartLocation + '/templates/basedeployment.yaml');
 }
 
 function validateKnativeService(lang, deploy_type, services) {
@@ -47,12 +55,12 @@ function validateCF(lang, deploy_type, services) {
     ]);
 }
 
-function validateDeployAssets(lang, deploy_type, services) {
+function validateDeployAssets(lang, deploy_type, services, applicationName) {
     it('validateDeployAssets', function () {
         if (deploy_type === "knative") {
             validateKnativeService(lang, deploy_type, services);
         } else if (deploy_type === "helm") {
-            validateHelmChart(lang, deploy_type, services);
+            validateHelmChart(lang, deploy_type, services, applicationName);
         } else {
             validateCF(lang, deploy_type, services);
         }
@@ -124,7 +132,7 @@ describe("cloud-assets:service", function() {
                                         application: JSON.stringify(go_payload.application)});
                 });
 
-                validateDeployAssets(goLang, deploy_type, service);
+                validateDeployAssets(goLang, deploy_type, service, go_payload.application.name);
                 validateCreds(goLang, service);
         
                 it('Gopkg.toml with Cloud Env', function () {
@@ -147,7 +155,7 @@ describe("cloud-assets:service", function() {
                                         application: JSON.stringify(node_payload.application)});
                 });
 
-                validateDeployAssets(nodeLang, deploy_type, service);
+                validateDeployAssets(nodeLang, deploy_type, service, node_payload.application.name);
                 validateCreds(nodeLang, service);
         
                 it('package.json with Cloud Env', function () {
@@ -170,7 +178,7 @@ describe("cloud-assets:service", function() {
                                         application: JSON.stringify(python_payload.application)});
                 });
 
-                validateDeployAssets(pythonLang, deploy_type, service);
+                validateDeployAssets(pythonLang, deploy_type, service, python_payload.application.name);
                 validateCreds(pythonLang, service);
         
                 it('Pipfile with Cloud Env', function () {
@@ -203,7 +211,7 @@ describe("cloud-assets:service", function() {
                                         application: JSON.stringify(java_payload.application)});
                 });
 
-                validateDeployAssets(javaLang, deploy_type, service);
+                validateDeployAssets(javaLang, deploy_type, service, java_payload.application.name);
                 validateCreds(javaLang, service);
         
                 it('pom.xml with Cloud Env', function () {
@@ -231,7 +239,7 @@ describe("cloud-assets:service", function() {
                                         application: JSON.stringify(spring_payload.application)});
                 });
 
-                validateDeployAssets(springLang, deploy_type, service);
+                validateDeployAssets(springLang, deploy_type, service, spring_payload.application.name);
                 validateCreds(springLang, service);
         
                 it('pom.xml with Cloud Env', function () {
@@ -258,7 +266,7 @@ describe("cloud-assets:service", function() {
                                         application: JSON.stringify(swift_payload.application)});
                 });
 
-                validateDeployAssets(swiftLang, deploy_type, service);
+                validateDeployAssets(swiftLang, deploy_type, service, swift_payload.application.name);
                 validateCreds(swiftLang, service);
         
                 it('Package.swift with Cloud Env', function () {
