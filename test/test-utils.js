@@ -28,7 +28,7 @@ const SVC_CRED_SAMPLES = require("./samples/service_creds.json");
 
 const PREFIX_SVC_BINDING_NAME = "my-service-";
 
-const LANGS = [ "NODE", "PYTHON", "GO", "JAVA", "SWIFT" ];
+const LANGS = [ "NODE", "PYTHON", "GO", "JAVA", "SPRING", "SWIFT" ];
 const SERVICES = [ 'appid','cloudant','cloudObjectStorage','db2OnCloud','mongodb','hypersecuredb','postgresql','push','redis','conversation','discovery','languageTranslator','naturalLanguageClassifier','naturalLanguageUnderstanding','personalityInsights','speechToText','textToSpeech','toneAnalyzer','visualRecognition' ];
 
 function getServiceCreds(serviceKey) {
@@ -47,7 +47,7 @@ function generateAppOpts(type, language) {
 }
 
 const baseDeployObjects = {
-        "cloud_foundry": {
+        "cf": {
             "cloud_foundry": {
                 "disk_quote": "1G",
                 "domain": "mydomain.com",
@@ -71,12 +71,12 @@ const baseDeployObjects = {
         }
     };
 
-function generateTestPayload(app_type, language, deploy_type, cloud_deploy_type, service_keys) {
+function generateTestPayload(tc_type, language, service_keys) {
     let payload = {};
-    deploy_opts = generateDeployOpts(deploy_type, cloud_deploy_type);
-    app_opts = generateAppOpts(app_type, language);
+    deploy_opts = baseDeployObjects[tc_type];
+    app_opts = generateAppOpts(tc_type, language);
     _.forEach(service_keys, (key) => {
-        deploy_opts[deploy_type]["service_bindings"][key] = PREFIX_SVC_BINDING_NAME + value;
+        deploy_opts[Object.keys(deploy_opts)[0]]["service_bindings"][key] = PREFIX_SVC_BINDING_NAME + value;
         app_opts["service_credentials"][key] = getServiceCreds(key);
     });
     _.extend(payload, deploy_opts);
@@ -86,7 +86,6 @@ function generateTestPayload(app_type, language, deploy_type, cloud_deploy_type,
 
 module.exports = {
     getServiceCreds: getServiceCreds,
-    generateDeployOpts: generateDeployOpts,
     generateTestPayload: generateTestPayload,
     baseDeployObjects: baseDeployObjects,
     LANGS: LANGS,
