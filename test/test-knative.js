@@ -16,26 +16,82 @@
 
 const helpers = require('yeoman-test');
 const assert = require('yeoman-assert');
+const utils = require('./test-utils');
 const path = require('path');
-// const fs = require('fs');
+const yml = require('js-yaml');
+const fs = require('fs');
+const _ = require('lodash');
 
-const scaffolderSample = require('./samples/scaffolder-sample');
-// const serviceYamlSample = fs.readFileSync(path.join(__dirname, 'samples/service-knative.yml'), 'utf-8');
+let knativeOptions = utils.generateTestPayload("knative", "NODE", ['appid', 'cloudant']);
 
-describe('cloud-enablement:knative', function () {
+describe('cloud-assets:knative', function () {
 	this.timeout(5000);
 	const lang = 'NODE';
-	let kubeOptions = {
-		bluemix: JSON.stringify(scaffolderSample.getJsonServerWithDeployment(lang, 'Kube', 'KNATIVE'))
-	};
 
-	beforeEach(function () {
+	before(function () {
 		return helpers.run(path.join(__dirname, '../generators/app'))
 			.inDir(path.join(__dirname, './tmp'))
-			.withOptions(kubeOptions);
+			.withOptions(knativeOptions);
 	});
 
-	it('has service.yml', function () {
-		assert.file('./service-knative.yml');
+	it('has service.yaml', function () {
+		assert.file('./service.yaml');
 	});
+
+	it('has correct service.yaml contents', function () {
+		let serviceYamlFilePath = './service.yaml';
+		const targetServiceYaml = {
+			"apiVersion": "serving.knative.dev/v1alpha1",
+			"kind": "Service",
+			"metadata": {
+			  "name": "IMAGE_NAME",
+			  "namespace": "CLUSTER_NAMESPACE"
+			},
+			"spec": {
+			  "template": {
+				"spec": {
+				  "containers": [
+					{
+					  "image": "REGISTRY_URL/REGISTRY_NAMESPACE/IMAGE_NAME:BUILD_NUMBER",
+					  "ports": [
+						{
+						  "containerPort": 3000
+						}
+					  ],
+					  "env": [
+						{
+						  "name": "service_appid",
+						  "valueFrom": {
+							"secretKeyRef": {
+							  "name": "my-service-appid",
+							  "key": "binding"
+							}
+						  }
+						},
+						{
+						  "name": "service_cloudant",
+						  "valueFrom": {
+							"secretKeyRef": {
+							  "name": "my-service-cloudant",
+							  "key": "binding"
+							}
+						  }
+						}
+					  ]
+					}
+				  ]
+				}
+			  }
+			}
+		  }
+
+		let generatedYamlContents = yml.safeLoad(fs.readFileSync(serviceYamlFilePath, 'utf8'));
+		assert(_.isEqual(generatedYamlContents, targetServiceYaml));
+	});
+
+	it('does not have helm charts', function () {
+
+		assert.noFile('./chart')
+	});
+
 });
