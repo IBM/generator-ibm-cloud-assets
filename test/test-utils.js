@@ -37,12 +37,10 @@ function getServiceCreds(serviceKey) {
 
 function generateAppOpts(type, language) {
     return {
-        application: {
-            app_id: `1234-5678-${type}-${language}-0987654321`,
-            name: `test-genv2-app-${type}-${language}`,
-            language: language,
-            service_credentials: {}
-        }
+        app_id: `1234-5678-${type}-${language}-0987654321`,
+        name: `test-genv2-app-${type}-${language}`,
+        language: language,
+        service_credentials: {}
     };
 }
 
@@ -73,15 +71,15 @@ const baseDeployObjects = {
 
 function generateTestPayload(tc_type, language, service_keys) {
     let payload = {};
-    deploy_opts = baseDeployObjects[tc_type];
-    app_opts = generateAppOpts(tc_type, language);
+    let deploy_opts = baseDeployObjects[tc_type];
+    let app_opts = generateAppOpts(tc_type, language);
     _.forEach(service_keys, (key) => {
-        deploy_opts[Object.keys(deploy_opts)[0]]["service_bindings"][key] = PREFIX_SVC_BINDING_NAME + value;
+        deploy_opts[Object.keys(deploy_opts)[0]]["service_bindings"][key] = PREFIX_SVC_BINDING_NAME + key;
         app_opts["service_credentials"][key] = getServiceCreds(key);
     });
     _.extend(payload, deploy_opts);
     _.extend(payload, app_opts);
-    return payload;
+    return {"deploy_options": deploy_opts, "application": app_opts};
 }
 
 module.exports = {
@@ -90,5 +88,4 @@ module.exports = {
     baseDeployObjects: baseDeployObjects,
     LANGS: LANGS,
     SERVICES: SERVICES
-
 };
