@@ -296,6 +296,7 @@ module.exports = class extends Generator {
 		}
 		
 		if (hasServiceCreds) {
+
 			for (let service of Object.keys(application.service_credentials)) {
 				let obj = {}
 				obj[service] = [application.service_credentials[service]];
@@ -305,6 +306,7 @@ module.exports = class extends Generator {
 				}
 				_.extend(bluemix, obj);
 			}
+
 		}
 
 		return bluemix;
