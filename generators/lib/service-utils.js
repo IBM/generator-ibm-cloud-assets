@@ -112,7 +112,7 @@ function addServicesToServiceKnativeYamlAsync(args) {
 
 		let hasServices = services && services.length > 0;
 		if (!fs.existsSync(serviceYamlFilePath) || !hasServices) {
-			logger.info("Not adding service env to service-knative.yaml");
+			logger.info("Not adding service env to service.yaml");
 			return resolve()
 		}
 
@@ -136,12 +136,12 @@ function addServicesToServiceKnativeYamlAsync(args) {
 		})
 
 		if (serviceYamlContents.spec.template.spec.containers[0].env) {
-			logger.info("Env already exists in service-knative.yaml, not overwriting with services");
+			logger.info("Env already exists in service.yaml, not overwriting with services");
 			return resolve()
 		}
 		serviceYamlContents.spec.template.spec.containers[0].env = services
 
-		logger.info("Adding service env to service-knative.yaml");
+		logger.info("Adding service env to service.yaml");
 
 		fs.writeFileSync(serviceYamlFilePath, yaml.safeDump(serviceYamlContents))
 
