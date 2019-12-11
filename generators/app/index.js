@@ -282,12 +282,19 @@ module.exports = class extends Generator {
 		if (hasServiceCreds) {
 			let bindings = (deployOpts) ? deployOpts[bluemix.cloudDeploymentType]["service_bindings"] : {};
 			for (let service of Object.keys(application.service_credentials)) {
-				let binding = ( bindings ) ? bindings[service] : "REPLACEME-binding-" + service;
 				let obj = {}
 				obj[service] = [application.service_credentials[service]];
-				obj[service]["serviceInfo"] = {
-					"name": binding,
-					"cloudLabel": service,
+				let binding = ( bindings ) ? bindings[service] : "REPLACEME-binding-" + service;
+				if (bluemix.cloudDeploymentType === "cloud_foundry") {
+					obj[service]["serviceInfo"] = {
+						"name": binding.name,
+						"cloudLabel": binding.label,
+					}
+				} else {
+					obj[service]["serviceInfo"] = {
+						"name": binding,
+						"cloudLabel": service,
+					}
 				}
 				_.extend(bluemix, obj);
 			}
