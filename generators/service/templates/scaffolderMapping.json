@@ -32,6 +32,5 @@
   "watson-speech-to-text": "speechToText",
   "watson-text-to-speech": "textToSpeech",
   "watson-tone-analyzer": "toneAnalyzer",
-  "watson-visual-recognition": "visualRecognition",
-  "weather-company-data": "weatherInsights"
+  "watson-visual-recognition": "visualRecognition"
 }
