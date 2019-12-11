@@ -431,8 +431,6 @@ module.exports = class extends Generator {
 		// add services secretKeyRefs to deployment.yaml &&
 		// add services secretKeyRefs to values.yaml &&
 		// add secretKeyRefs to service.yaml
-		console.log("service context")
-		console.log(this.context);
 		return ServiceUtils.addServicesEnvToHelmChartAsync({context: this.context, destinationPath: this.destinationPath()})
 			.then(() => ServiceUtils.addServicesEnvToValuesAsync({context: this.context, destinationPath: this.destinationPath()}))
 			.then(() => ServiceUtils.addServicesToServiceKnativeYamlAsync({context: this.context, destinationPath: this.destinationPath(Utils.PATH_KNATIVE_YAML)}));

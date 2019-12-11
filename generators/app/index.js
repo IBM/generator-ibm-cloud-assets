@@ -67,8 +67,6 @@ module.exports = class extends Generator {
 			this.options.libertyBeta = true
 		}
 
-		console.log(this.opts.deploy_options);
-
 		this.opts.bluemix = this._makeBluemix(this.opts.deploy_options, this.opts.application);
 
 		this.shouldPrompt = this.opts.bluemix ? false : true;
@@ -95,7 +93,6 @@ module.exports = class extends Generator {
 			this.cloudDeploymentType = this.bluemix.cloudDeploymentType;
 		}
 
-		this.log("end constructor");
 	}
 
 	_setLoggerLevel(){
@@ -111,9 +108,6 @@ module.exports = class extends Generator {
 	}
 
 	intializing() {
-		this.log("intializing");
-
-		this.log("end intializing");
 	}
 
 	prompting() {
@@ -160,16 +154,11 @@ module.exports = class extends Generator {
 				'KNATIVE'
 			]
 		});
-
-		this.log("end prompting");
-
 		return this.prompt(prompts).then(this._processAnswers.bind(this));
 
 	}
 
 	configuring() {
-		this.log("configuring");
-
 		// process object for kube deployments
 		if (this.opts.deploy_options && this.bluemix.cloudDeploymentType == "kube") {
 			// work out app name and language
@@ -200,17 +189,9 @@ module.exports = class extends Generator {
 			}
 
 		}
-
-		this.log("end configuring");
 	}
 
 	writing() {
-		this.log("writing");
-
-		this.log("BLUEMIX: ");
-		this.log(this.opts.bluemix);
-
-
 		// runs subgenerators
 
 		this.composeWith(require.resolve('../dockertools'), this.opts);
@@ -280,6 +261,7 @@ module.exports = class extends Generator {
 		const hasServiceCreds = application.hasOwnProperty("service_credentials");
 		let bluemix = {
 			name: application.name,
+			applicationName: application.name,
 			cloudDeploymentType: (deployOpts) ? Object.keys(deployOpts)[0] : false,
 			backendPlatform: application.language,
 			server: {
