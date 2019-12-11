@@ -20,7 +20,8 @@ const _ = require('lodash');
 const path = require('path');
 const yaml = require('js-yaml');
 
-const utils = require('./test-utils');
+const utils = require('../generators/lib/utils');
+const testUtils = require('./test-utils');
 // const fs = require('fs');
 var memFs = require("mem-fs");
 var editor = require("mem-fs-editor");
@@ -28,11 +29,11 @@ var store = memFs.create();
 var fs = editor.create(store);
 const fse = require('fs-extra');
 
-const SERVICES = utils.SERVICES;
-const DEPLOY_OBJECTS = utils.baseDeployObjects;
+const SERVICES = testUtils.SERVICES;
+const DEPLOY_OBJECTS = testUtils.baseDeployObjects;
 
 function validateHelmChart(lang, deploy_type, service, applicationName) {
-    const chartLocation = 'chart/' + applicationName.toLowerCase();
+    const chartLocation = 'chart/' + utils.sanitizeAlphaNumLowerCase(applicationName);
     let chartFile = chartLocation + '/Chart.yaml';
     assert.file(chartFile);
     let valuesFile = chartLocation + '/values.yaml';
@@ -49,66 +50,60 @@ function validateKnativeService(lang, deploy_type, services) {
     ]);
 }
 
-function validateCF(lang, deploy_type, services) {
+function validateCF(lang, deploy_type, services, applicationName) {
     assert.file([
         'manifest.yml'
     ]);
+    assert.fileContent('manifest.yml', testUtils.PREFIX_SVC_BINDING_NAME + services);
+    assert.fileContent('manifest.yml', 'name: ' + utils.sanitizeAlphaNumLowerCase(applicationName));
 }
 
-function validateDeployAssets(lang, deploy_type, services, applicationName) {
+function validateDeployAssets(lang, deploy_type, services) {
+    let applicationName = `test-genv2-app-${deploy_type}-${lang}`;
     it('validateDeployAssets', function () {
         if (deploy_type === "knative") {
             validateKnativeService(lang, deploy_type, services);
         } else if (deploy_type === "helm") {
             validateHelmChart(lang, deploy_type, services, applicationName);
         } else {
-            validateCF(lang, deploy_type, services);
+            validateCF(lang, deploy_type, services, applicationName);
         }
     });
 }
 
 function validateCreds(lang, services) {
     it('mappings.json and localdev-config.json exist', function () {
+        var mappings_path = "";
+        var localdev_path = "";
         if (lang === "NODE") {
-            assert.file([
-                'server/config/mappings.json'
-            ]);
-            assert.file([
-                'server/localdev-config.json'
-            ]);
+            mappings_path = 'server/config/mappings.json';
+            localdev_path = 'server/localdev-config.json';
     
         } else if (lang === "PYTHON") {
-            assert.file([
-                'server/config/mappings.json'
-            ]);
-            assert.file([
-                'server/localdev-config.json'
-            ]);
+            mappings_path = 'server/config/mappings.json';
+            localdev_path = 'server/localdev-config.json';
     
         } else if (lang === "JAVA" || lang === "SPRING") {
-            assert.file([
-                'src/main/resources/mappings.json'
-            ]);
-            assert.file([
-                'src/main/resources/localdev-config.json'
-            ]);
+            mappings_path = 'src/main/resources/mappings.json';
+            localdev_path = 'src/main/resources/localdev-config.json';
     
         } else if (lang === "SWIFT") {
-            assert.file([
-                'config/mappings.json'
-            ]);
-            assert.file([
-                'config/localdev-config.json'
-            ]);
+            mappings_path = 'config/mappings.json';
+            localdev_path = 'config/localdev-config.json';
     
         } else if (lang === "GO") {
-            assert.file([
-                'server/config/mappings.json'
-            ]);
-            assert.file([
-                'server/localdev-config.json'
-            ]);
+            mappings_path = 'server/config/mappings.json';
+            localdev_path = 'server/localdev-config.json';
         }
+        assert.file([mappings_path]);
+        // these language and service combos are not supported
+        if (lang !== "SWIFT" && services !== "cloudObjectStorage" && services !== "db2OnCloud" && services !== "conversation"
+            && services !== "discovery" && services !== "languageTranslator" && services !== "naturalLanguageClassifier"
+            && services !== "naturalLanguageUnderstanding" && services !== "personalityInsights" && services !== "speechToText"
+            && services !== "textToSpeech" && services != "toneAnalyzer" && services !== "visualRecognition") {
+            assert.fileContent(mappings_path, testUtils.PREFIX_SVC_BINDING_NAME + services);
+        }
+        assert.file([localdev_path]);
     });
 }
 
@@ -121,18 +116,17 @@ describe("cloud-assets:service", function() {
     _.forEach(SERVICES, (service) => {
         _.forEach(Object.keys(DEPLOY_OBJECTS), (deploy_type) => {
             const goLang = "GO";
-            const go_payload = utils.generateTestPayload(deploy_type, goLang, [service]);
             describe(`cloud-assets:service-${service} with ${goLang} project deployed with ${deploy_type}`, function () {
                 console.log(`beginning test suite ${this.title}`);
                 beforeEach(function () {
                     return helpers.run(main_gen)
                         .inTmpDir(function (dir) {
+                            console.log(`generator temp dir: ${dir}`);
                         })
-                        .withOptions({deploy_options: JSON.stringify(go_payload.deploy_options),
-                                        application: JSON.stringify(go_payload.application)});
+                        .withOptions(testUtils.generateTestPayload(deploy_type, goLang, [service]));
                 });
 
-                validateDeployAssets(goLang, deploy_type, service, go_payload.application.name);
+                validateDeployAssets(goLang, deploy_type, service);
                 validateCreds(goLang, service);
         
                 it('Gopkg.toml with Cloud Env', function () {
@@ -144,18 +138,17 @@ describe("cloud-assets:service", function() {
             });
 
             const nodeLang = "NODE";
-            const node_payload = utils.generateTestPayload(deploy_type, nodeLang, [service]);
             describe(`cloud-assets:service-${service} with ${nodeLang} project deployed with ${deploy_type}`, function () {
                 console.log(`beginning test suite ${this.title}`);
                 beforeEach(function () {
                     return helpers.run(main_gen)
                         .inTmpDir(function (dir) {
+                            console.log(`generator temp dir: ${dir}`);
                         })
-                        .withOptions({deploy_options: JSON.stringify(node_payload.deploy_options),
-                                        application: JSON.stringify(node_payload.application)});
+                        .withOptions(testUtils.generateTestPayload(deploy_type, nodeLang, [service]));
                 });
 
-                validateDeployAssets(nodeLang, deploy_type, service, node_payload.application.name);
+                validateDeployAssets(nodeLang, deploy_type, service);
                 validateCreds(nodeLang, service);
         
                 it('package.json with Cloud Env', function () {
@@ -167,18 +160,17 @@ describe("cloud-assets:service", function() {
             });
             
             const pythonLang = "PYTHON";
-            const python_payload = utils.generateTestPayload(deploy_type, pythonLang, [service]);
             describe(`cloud-assets:service-${service} with ${pythonLang} project deployed with ${deploy_type}`, function () {
                 console.log(`beginning test suite ${this.title}`);
                 beforeEach(function () {
                     return helpers.run(main_gen)
                         .inTmpDir(function (dir) {
+                            console.log(`generator temp dir: ${dir}`);
                         })
-                        .withOptions({deploy_options: JSON.stringify(python_payload.deploy_options),
-                                        application: JSON.stringify(python_payload.application)});
+                        .withOptions(testUtils.generateTestPayload(deploy_type, pythonLang, [service]));
                 });
 
-                validateDeployAssets(pythonLang, deploy_type, service, python_payload.application.name);
+                validateDeployAssets(pythonLang, deploy_type, service);
                 validateCreds(pythonLang, service);
         
                 it('Pipfile with Cloud Env', function () {
@@ -199,19 +191,18 @@ describe("cloud-assets:service", function() {
             });
             
             const javaLang = "JAVA";
-            const java_payload = utils.generateTestPayload(deploy_type, javaLang, [service]);
             describe(`cloud-assets:service-${service} with ${javaLang} project deployed with ${deploy_type}`, function () {
                 console.log(`beginning test suite ${this.title}`);
                 beforeEach(function () {
                     return helpers.run(main_gen)
                         .inTmpDir(function (dir) {
+                            console.log(`generator temp dir: ${dir}`);
                             fse.copySync(path.join(__dirname, `/templates/${javaLang.toLowerCase()}`), dir);
                         })
-                        .withOptions({deploy_options: JSON.stringify(java_payload.deploy_options),
-                                        application: JSON.stringify(java_payload.application)});
+                        .withOptions(testUtils.generateTestPayload(deploy_type, javaLang, [service]));
                 });
 
-                validateDeployAssets(javaLang, deploy_type, service, java_payload.application.name);
+                validateDeployAssets(javaLang, deploy_type, service);
                 validateCreds(javaLang, service);
         
                 it('pom.xml with Cloud Env', function () {
@@ -227,19 +218,18 @@ describe("cloud-assets:service", function() {
             });
             
             const springLang = "SPRING";
-            const spring_payload = utils.generateTestPayload(deploy_type, springLang, [service]);
             describe(`cloud-assets:service-${service} with ${springLang} project deployed with ${deploy_type}`, function () {
                 console.log(`beginning test suite ${this.title}`);
                 beforeEach(function () {
                     return helpers.run(main_gen)
                         .inTmpDir(function (dir) {
+                            console.log(`generator temp dir: ${dir}`);
                             fse.copySync(path.join(__dirname, `/templates/${springLang.toLowerCase()}`), dir);
                         })
-                        .withOptions({deploy_options: JSON.stringify(spring_payload.deploy_options),
-                                        application: JSON.stringify(spring_payload.application)});
+                        .withOptions(testUtils.generateTestPayload(deploy_type, springLang, [service]));
                 });
 
-                validateDeployAssets(springLang, deploy_type, service, spring_payload.application.name);
+                validateDeployAssets(springLang, deploy_type, service);
                 validateCreds(springLang, service);
         
                 it('pom.xml with Cloud Env', function () {
@@ -254,19 +244,18 @@ describe("cloud-assets:service", function() {
             });
 
             const swiftLang = "SWIFT";
-            const swift_payload = utils.generateTestPayload(deploy_type, swiftLang, [service]);
             describe(`cloud-assets:service-${service} with ${swiftLang} project deployed with ${deploy_type}`, function () {
                 console.log(`beginning test suite ${this.title}`);
                 beforeEach(function () {
                     return helpers.run(main_gen)
                         .inTmpDir(function (dir) {
+                            console.log(`generator temp dir: ${dir}`);
                             fse.copySync(path.join(__dirname, `/templates/${swiftLang.toLowerCase()}`), dir);
                         })
-                        .withOptions({deploy_options: JSON.stringify(swift_payload.deploy_options),
-                                        application: JSON.stringify(swift_payload.application)});
+                        .withOptions(testUtils.generateTestPayload(deploy_type, swiftLang, [service]));
                 });
 
-                validateDeployAssets(swiftLang, deploy_type, service, swift_payload.application.name);
+                validateDeployAssets(swiftLang, deploy_type, service);
                 validateCreds(swiftLang, service);
         
                 it('Package.swift with Cloud Env', function () {
