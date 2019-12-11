@@ -1,0 +1,28 @@
+{
+    "deploy_options": {
+        "kube": {
+        "type": "HELM"
+        }
+    },
+    "application": {
+        "app_id": "a447f5bf-40bb-422e-9a54-85ab24392830",
+        "cache_id": "31140467-afaa-3254-988c-0b17f2aaa895",
+        "name": "ondeck-nodejs-web",
+        "language": "SPRING",
+        "service_credentials": {
+            "cloudant": {
+                "apikey": "REPLACEME.UNKNOWN_SERVICE_NAME.apikey",
+                "host": "REPLACEME.UNKNOWN_SERVICE_NAME.host",
+                "iam_apikey_description": "REPLACEME.UNKNOWN_SERVICE_NAME.iam_apikey_description",
+                "iam_apikey_name": "REPLACEME.UNKNOWN_SERVICE_NAME.iam_apikey_name",
+                "iam_role_crn": "crn:v1:bluemix:public:iam::::serviceRole:Manager",
+                "iam_serviceid_crn": "REPLACEME.UNKNOWN_SERVICE_NAME.iam_serviceid_crn",
+                "password": "REPLACEME.UNKNOWN_SERVICE_NAME.password",
+                "port": 443,
+                "url": "REPLACEME.UNKNOWN_SERVICE_NAME.url",
+                "username": "REPLACEME.UNKNOWN_SERVICE_NAME.username"
+            }
+        }
+    }
+}
+  

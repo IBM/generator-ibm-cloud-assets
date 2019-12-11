@@ -1,0 +1,31 @@
+{
+  "deploy_options": {
+    "kube": {
+      "cluster_name": "gv-devx-classic-dal1",
+      "region": "ibm:ys1:us-south",
+      "type": "KNATIVE",
+      "service_bindings": {
+          "cloudant": "cloudant-gv-spring-ms-test-co1436hv30tbd0j"
+      }
+    }
+  },
+  "application": {
+    "app_id": "4b3e5cc4-5149-48e2-b711-b3dd80cf3f11",
+    "name": "test-genv2-app",
+    "language": "SPRING",
+    "service_credentials": {
+        "cloudant": {
+            "apikey": "REPLACEME.UNKNOWN_SERVICE_NAME.apikey",
+            "host": "REPLACEME.UNKNOWN_SERVICE_NAME.host",
+            "iam_apikey_description": "REPLACEME.UNKNOWN_SERVICE_NAME.iam_apikey_description",
+            "iam_apikey_name": "REPLACEME.UNKNOWN_SERVICE_NAME.iam_apikey_name",
+            "iam_role_crn": "crn:v1:bluemix:public:iam::::serviceRole:Manager",
+            "iam_serviceid_crn": "REPLACEME.UNKNOWN_SERVICE_NAME.iam_serviceid_crn",
+            "password": "REPLACEME.UNKNOWN_SERVICE_NAME.password",
+            "port": 443,
+            "url": "REPLACEME.UNKNOWN_SERVICE_NAME.url",
+            "username": "REPLACEME.UNKNOWN_SERVICE_NAME.username"
+        }
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "deploy_options": {
+      "cloud_foundry": {
+          "disk_quota": "1G",
+          "domain": "mydomain.com",
+          "hostname": "my-app-hostname",
+          "instances": 3,
+          "memory": "512MB",
+          "service_bindings": {}
+    }
+  },
+  "application": {
+    "app_id": "4b3e5cc4-5149-48e2-b711-b3dd80cf3f11",
+    "name": "test-genv2-app-python",
+    "language": "PYTHON",
+    "service_credentials": {}
+  },
+  "metadata": {
+    "git_url": "https://github.com/IBM/flask-web-app"
+  }
+}
