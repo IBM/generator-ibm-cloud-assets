@@ -333,7 +333,7 @@ module.exports = class extends Generator {
 		}
 		let dir = this.bluemix.backendPlatform.toLowerCase();
 
-		this.opts.appNameRefreshed = this.bluemix.name.toLowerCase();
+		this.opts.appNameRefreshed = Utils.sanitizeAlphaNum(this.bluemix.name.toLowerCase());
 		this.opts.buildType = this.opts.buildType ? this.opts.buildType : 'maven';
 		this.opts.version = this.opts.version ? this.opts.version : "1.0-SNAPSHOT";
 

@@ -24,16 +24,6 @@ const exec = require('child_process').exec;
 const _ = require('lodash');
 const utils = require('./test-utils');
 
-const scaffolderSample = require('./samples/scaffolder-sample');
-const scaffolderSampleNode = scaffolderSample.getJson('NODE');
-const scaffolderSampleNodeNoServer = scaffolderSample.getJsonNoServer('NODE');
-const scaffolderSampleSwift = scaffolderSample.getJson('SWIFT');
-const scaffolderSampleJava = scaffolderSample.getJson('JAVA');
-const scaffolderSampleSpring = scaffolderSample.getJson('SPRING');
-const scaffolderSamplePython = scaffolderSample.getJson('PYTHON');
-const scaffolderSampleGo = scaffolderSample.getJson('GO');
-const scaffolderSampleGoNoServer = scaffolderSample.getJsonNoServer('GO');
-
 function testOutput(applicationName, chartLocation) {
 
 	it('has kubernetes config for Chart.yaml', function () {
