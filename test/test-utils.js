@@ -48,7 +48,7 @@ function generateAppOpts(type, language) {
 const baseDeployObjects = {
         "cf": {
             "cloud_foundry": {
-                "disk_quote": "1G",
+                "disk_quota": "1G",
                 "domain": "mydomain.com",
                 "hostname": "my-app-hostname",
                 "instances": "3",
@@ -75,9 +75,11 @@ function generateTestPayload(tc_type, language, service_keys) {
     let deploy_opts = baseDeployObjects[tc_type];
     let app_opts = generateAppOpts(tc_type, language);
     _.forEach(service_keys, (key) => {
-        if (tc_type === "cloud_foundry") {
-            deploy_opts[Object.keys(deploy_opts)[0]]["service_bindings"][key]["name"] = PREFIX_SVC_BINDING_NAME + key;
-            deploy_opts[Object.keys(deploy_opts)[0]]["service_bindings"][key]["label"] = CF_SVC_MAPPINGS[key];
+        if (tc_type === "cf") {
+            let binding = {}
+            binding["name"] = PREFIX_SVC_BINDING_NAME + key;
+            binding["label"] = CF_SVC_MAPPINGS[key];
+            deploy_opts[Object.keys(deploy_opts)[0]]["service_bindings"][key] = binding;
         } else {
             deploy_opts[Object.keys(deploy_opts)[0]]["service_bindings"][key] = PREFIX_SVC_BINDING_NAME + key;
         }
@@ -93,5 +95,6 @@ module.exports = {
     generateTestPayload: generateTestPayload,
     baseDeployObjects: baseDeployObjects,
     LANGS: LANGS,
-    SERVICES: SERVICES
+    SERVICES: SERVICES,
+    PREFIX_SVC_BINDING_NAME: PREFIX_SVC_BINDING_NAME
 };
