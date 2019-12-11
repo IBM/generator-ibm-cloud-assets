@@ -55,7 +55,7 @@ module.exports = class extends Generator {
 		};
 
 		this.name = undefined;
-			this.manifestConfig.name = Utils.sanitizeAlphaNumLowerCase(this.bluemix.name);
+		this.manifestConfig.name = Utils.sanitizeAlphaNumLowerCase(this.bluemix.name);
 		if (this.bluemix.server) {
 			this.name = this.bluemix.server.name;
 			this.manifestConfig = Object.assign(this.manifestConfig, this.bluemix.server);
