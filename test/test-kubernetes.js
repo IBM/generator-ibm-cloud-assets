@@ -24,16 +24,6 @@ const exec = require('child_process').exec;
 const _ = require('lodash');
 const utils = require('./test-utils');
 
-const scaffolderSample = require('./samples/scaffolder-sample');
-const scaffolderSampleNode = scaffolderSample.getJson('NODE');
-const scaffolderSampleNodeNoServer = scaffolderSample.getJsonNoServer('NODE');
-const scaffolderSampleSwift = scaffolderSample.getJson('SWIFT');
-const scaffolderSampleJava = scaffolderSample.getJson('JAVA');
-const scaffolderSampleSpring = scaffolderSample.getJson('SPRING');
-const scaffolderSamplePython = scaffolderSample.getJson('PYTHON');
-const scaffolderSampleGo = scaffolderSample.getJson('GO');
-const scaffolderSampleGoNoServer = scaffolderSample.getJsonNoServer('GO');
-
 function testOutput(applicationName, chartLocation) {
 
 	it('has kubernetes config for Chart.yaml', function () {
@@ -195,12 +185,14 @@ describe('cloud-assets:kubernetes', function () {
 				let templateValuesYml;
 				if (language === 'JAVA') {
 					templateValuesYml = {"replicaCount":1,"revisionHistoryLimit":1,"image":{"repository":"testgenv2apphelmjava","tag":"v1.0.0","pullPolicy":"IfNotPresent","resources":{"requests":{"cpu":"200m","memory":"300Mi"}}},"service":{"name":"Node","type":"NodePort","servicePort":9080,"servicePortHttps":9443},"hpa":{"enabled":false,"minReplicas":1,"maxReplicas":2,"metrics":{"cpu":{"targetAverageUtilization":70},"memory":{"targetAverageUtilization":70}}},"base":{"enabled":false,"replicaCount":1,"image":{"tag":"v0.9.9"},"weight":100},"istio":{"enabled":false,"weight":100},"services":{"cloudant":{"secretKeyRef":"my-service-cloudant"}}}
+					assert( _.isEqual(templateValuesYml, valuesyml) )
 				} else if (language === 'SPRING') {
 					templateValuesYml = {"replicaCount":1,"revisionHistoryLimit":1,"image":{"repository":"testgenv2apphelmspring","tag":"v1.0.0","pullPolicy":"IfNotPresent","resources":{"requests":{"cpu":"200m","memory":"300Mi"}}},"service":{"name":"Node","type":"NodePort","servicePort":8080},"hpa":{"enabled":false,"minReplicas":1,"maxReplicas":2,"metrics":{"cpu":{"targetAverageUtilization":70},"memory":{"targetAverageUtilization":70}}},"base":{"enabled":false,"replicaCount":1,"image":{"tag":"v0.9.9"},"weight":100},"istio":{"enabled":false,"weight":100},"services":{"cloudant":{"secretKeyRef":"my-service-cloudant"}}}
+					assert( _.isEqual(templateValuesYml, valuesyml) )
 				} else if (language === 'NODE') {
 					templateValuesYml = {"replicaCount":1,"revisionHistoryLimit":1,"image":{"tag":"v1.0.0","pullPolicy":"Always","resources":{"requests":{"cpu":"200m","memory":"300Mi"}}},"livenessProbe":{"initialDelaySeconds":30,"periodSeconds":10},"service":{"name":"node","type":"NodePort","servicePort":3000},"hpa":{"enabled":false,"minReplicas":1,"maxReplicas":2,"metrics":{"cpu":{"targetAverageUtilization":70},"memory":{"targetAverageUtilization":70}}},"base":{"enabled":false,"replicaCount":1,"image":{"tag":"v0.9.9"},"weight":100},"istio":{"enabled":false,"weight":100},"services":{"appid":{"secretKeyRef":"my-service-appid"},"cloudant":{"secretKeyRef":"my-service-cloudant"}}}
+					assert( _.isEqual(templateValuesYml, valuesyml) )
 				}
-				assert( _.isEqual(templateValuesYml, valuesyml) )
 			});
 
 			it('has basedeployment.yaml with correct content', function () {
