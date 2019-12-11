@@ -21,6 +21,8 @@ const path = require('path');
 const fs = require('fs');
 const yml = require('js-yaml');
 const exec = require('child_process').exec;
+const _ = require('lodash');
+const utils = require('./test-utils');
 
 const scaffolderSample = require('./samples/scaffolder-sample');
 const scaffolderSampleNode = scaffolderSample.getJson('NODE');
@@ -32,10 +34,7 @@ const scaffolderSamplePython = scaffolderSample.getJson('PYTHON');
 const scaffolderSampleGo = scaffolderSample.getJson('GO');
 const scaffolderSampleGoNoServer = scaffolderSample.getJsonNoServer('GO');
 
-const applicationName = 'AcmeProject'; // from sample json files
-const chartLocation = 'chart/' + applicationName.toLowerCase();
-
-function testOutput() {
+function testOutput(applicationName, chartLocation) {
 
 	it('has kubernetes config for Chart.yaml', function () {
 		let chartFile = chartLocation + '/Chart.yaml';
@@ -60,7 +59,7 @@ function testOutput() {
 	it('has kubernetes config for HPA', function () {
 		assert.file(chartLocation + '/templates/hpa.yaml');
 	});
-	assertHpaYmlContent();
+	assertHpaYmlContent(chartLocation);
 
 	it('has kubernetes config for basedeployment', function () {
 		assert.file(chartLocation + '/templates/basedeployment.yaml');
@@ -111,20 +110,7 @@ function getSafeYaml(fileName) {
 	return  yml.safeLoad(newyml);
 }
 
-function assertYmlMongoContent() {
-	it('should have env variables for mongo in deployment and values', function () {
-		const valuesyml = getSafeYaml(chartLocation + '/values.yaml');
-		assert.fileContent(chartLocation + '/templates/deployment.yaml', '- name: MONGO_URL\n            value: {{ .Values.services.mongo.url }}');
-		assert.fileContent(chartLocation + '/templates/deployment.yaml', '- name: MONGO_DB_NAME\n            value: {{ .Values.services.mongo.name }}');
-		assertYmlContentExists(valuesyml.services.mongo, 'services.mongo');
-		assertYmlContent(valuesyml.services.mongo.url, 'mongo', 'services.mongo.url');
-		assertYmlContent(valuesyml.services.mongo.name, 'comments', 'services.mongo.name');
-		assertYmlContent(valuesyml.services.mongo.env, 'production', 'services.mongo.env');
-
-	});
-}
-
-function assertHpaYmlContent() {
+function assertHpaYmlContent(chartLocation) {
 	it('has templates/hpa.yaml file with correct contents', function () {
 		assert.fileContent(chartLocation + '/templates/hpa.yaml', '{{ if .Values.hpa.enabled }}');
 		assert.fileContent(chartLocation + '/templates/hpa.yaml', '{{ if and (eq .Capabilities.KubeVersion.Major "1") (ge .Capabilities.KubeVersion.Minor "8") }}');
@@ -137,21 +123,24 @@ function assertHpaYmlContent() {
 	});
 }
 
-describe('cloud-enablement:kubernetes', function () {
+describe('cloud-assets:kubernetes', function () {
 	this.timeout(5000);
 
-	let languages = ['JAVA', 'SPRING', 'NODE', 'GO'];
+	let languages = [ 'JAVA', 'SPRING', 'NODE', 'GO', 'SWIFT', 'PYTHON' ];
+	
 	languages.forEach(language => {
 		describe('kubernetes:app with ' + language + ' project', function () {
-			let bluemix = language === 'SPRING' ? JSON.stringify(scaffolderSampleSpring) : language === 'JAVA' ? JSON.stringify(scaffolderSampleJava) : language === 'NODE' ? JSON.stringify(scaffolderSampleNode) : JSON.stringify(scaffolderSampleGo);
 			beforeEach(function () {
 				return helpers.run(path.join(__dirname, '../generators/app'))
 					.inDir(path.join(__dirname, './tmp'))
-					.withOptions({bluemix: bluemix});
+					.withOptions(utils.generateTestPayload("helm", language, ['appid', 'cloudant']));
 			});
 
-			testOutput();
-			it('has deployment.yaml with correct readinessProbe', function () {
+			let applicationName = `testgenv2apphelm${language}`;
+			let chartLocation = 'chart/' + applicationName.toLowerCase();
+		
+			testOutput(applicationName, chartLocation);
+			it('has deployment.yaml with readiness probe in liberty & spring', function () {
 				let deploymentyml = getSafeYaml(chartLocation + '/templates/deployment.yaml');
 				let readinessProbe = deploymentyml.spec.template.spec.containers[0].readinessProbe;
 				if (language === 'JAVA') {
@@ -171,14 +160,23 @@ describe('cloud-enablement:kubernetes', function () {
 				assertYmlContentExists(resources.requests.memory, 'resources.requests.memory');
 			});
 
-			it('has deployment.yaml with correct env settings for APM', () => {
+			it('has deployment.yaml with correct env settings', () => {
 				let deploymentyml = getSafeYaml(chartLocation + '/templates/deployment.yaml');
-				let spec = deploymentyml.spec.template.spec;
-				assertYmlContent(spec.containers[0].env[1].name, 'APPLICATION_NAME', 'spec.containers[0].env[1].name');
+				let envTemplate;
+				if (language === 'NODE' || language === 'PYTHON' || language === 'SWIFT') {
+					// these languages support app_id, other languages do not
+					envTemplate = [{"name":"service_appid","valueFrom":{"secretKeyRef":{"name":{"[object Object]":null},"key":"binding","optional":true}}},{"name":"service_cloudant","valueFrom":{"secretKeyRef":{"name":{"[object Object]":null},"key":"binding","optional":true}}},{"name":"PORT","value":"{{ .Values.service.servicePort }}"},{"name":"APPLICATION_NAME","value":"{{ .Release.Name }}"}]
+				} else {
+					envTemplate = [{"name":"service_cloudant","valueFrom":{"secretKeyRef":{"name":{"[object Object]":null},"key":"binding","optional":true}}},{"name":"PORT","value":"{{ .Values.service.servicePort }}"},{"name":"APPLICATION_NAME","value":"{{ .Release.Name }}"}]
+				}
+				assert( _.isEqual(deploymentyml.spec.template.spec.containers[0].env, envTemplate) )
 			});
 
 			it('has service.yaml with correct content', function () {
 				let serviceyml = getSafeYaml(chartLocation + '/templates/service.yaml');
+				console.log(chartLocation + " service.yml")
+				console.log(JSON.stringify(serviceyml))
+
 				if (language === 'JAVA') {
 					assertYmlContent(serviceyml.spec.ports[0].name, 'http', 'serviceyml.spec.ports[0].name');
 					assertYmlContent(serviceyml.spec.ports[1].name, 'https', 'serviceyml.spec.ports[1].name');
@@ -194,21 +192,22 @@ describe('cloud-enablement:kubernetes', function () {
 
 			it('has values.yaml with correct content', function () {
 				let valuesyml = getSafeYaml(chartLocation + '/values.yaml');
+				let templateValuesYml;
 				if (language === 'JAVA') {
-					assertYmlContent(valuesyml.service.servicePort, 9080, 'valuesyml.service.servicePort');
-					assertYmlContent(valuesyml.service.servicePortHttps, 9443, 'valuesyml.service.servicePortHttps');
+					templateValuesYml = {"replicaCount":1,"revisionHistoryLimit":1,"image":{"repository":"testgenv2apphelmjava","tag":"v1.0.0","pullPolicy":"IfNotPresent","resources":{"requests":{"cpu":"200m","memory":"300Mi"}}},"service":{"name":"Node","type":"NodePort","servicePort":9080,"servicePortHttps":9443},"hpa":{"enabled":false,"minReplicas":1,"maxReplicas":2,"metrics":{"cpu":{"targetAverageUtilization":70},"memory":{"targetAverageUtilization":70}}},"base":{"enabled":false,"replicaCount":1,"image":{"tag":"v0.9.9"},"weight":100},"istio":{"enabled":false,"weight":100},"services":{"cloudant":{"secretKeyRef":"my-service-cloudant"}}}
+				} else if (language === 'SPRING') {
+					templateValuesYml = {"replicaCount":1,"revisionHistoryLimit":1,"image":{"repository":"testgenv2apphelmspring","tag":"v1.0.0","pullPolicy":"IfNotPresent","resources":{"requests":{"cpu":"200m","memory":"300Mi"}}},"service":{"name":"Node","type":"NodePort","servicePort":8080},"hpa":{"enabled":false,"minReplicas":1,"maxReplicas":2,"metrics":{"cpu":{"targetAverageUtilization":70},"memory":{"targetAverageUtilization":70}}},"base":{"enabled":false,"replicaCount":1,"image":{"tag":"v0.9.9"},"weight":100},"istio":{"enabled":false,"weight":100},"services":{"cloudant":{"secretKeyRef":"my-service-cloudant"}}}
+				} else if (language === 'NODE') {
+					templateValuesYml = {"replicaCount":1,"revisionHistoryLimit":1,"image":{"tag":"v1.0.0","pullPolicy":"Always","resources":{"requests":{"cpu":"200m","memory":"300Mi"}}},"livenessProbe":{"initialDelaySeconds":30,"periodSeconds":10},"service":{"name":"node","type":"NodePort","servicePort":3000},"hpa":{"enabled":false,"minReplicas":1,"maxReplicas":2,"metrics":{"cpu":{"targetAverageUtilization":70},"memory":{"targetAverageUtilization":70}}},"base":{"enabled":false,"replicaCount":1,"image":{"tag":"v0.9.9"},"weight":100},"istio":{"enabled":false,"weight":100},"services":{"appid":{"secretKeyRef":"my-service-appid"},"cloudant":{"secretKeyRef":"my-service-cloudant"}}}
 				}
-				if (language === 'SPRING') {
-					assertYmlContent(valuesyml.service.servicePort, 8080, 'valuesyml.service.servicePort');
-					assertYmlContent(valuesyml.service.servicePortHttps, undefined, 'valuesyml.service.servicePortHttps');
-				}
-				assertYmlContent(valuesyml.hpa.enabled, false, 'valuesyml.hpa.enabled');
-				assertYmlContent(valuesyml.base.enabled, false, 'valuesyml.base.enabled');
-				assertYmlContent(valuesyml.image.resources.requests.cpu, '200m', 'valuesyml.image.resources.requests.cpu');
+				assert( _.isEqual(templateValuesYml, valuesyml) )
 			});
 
 			it('has basedeployment.yaml with correct content', function () {
 				let basedeploymentyml = getSafeYaml(chartLocation + '/templates/basedeployment.yaml');
+
+				console.log(chartLocation + " basedeployment.yml")
+				console.log(JSON.stringify(basedeploymentyml))
 
 				assert.fileContent(chartLocation + '/templates/basedeployment.yaml', 'replicas: {{ .Values.base.replicaCount }}');
 
@@ -219,323 +218,59 @@ describe('cloud-enablement:kubernetes', function () {
 			});
 		});
 	});
+	
 
-	describe('kubernetes:app with Java project and custom health endpoint', function () {
-		beforeEach(function () {
-			return helpers.run(path.join(__dirname, '../generators/app'))
-				.inDir(path.join(__dirname, './tmp'))
-				.withOptions({bluemix: JSON.stringify(scaffolderSampleSpring), healthEndpoint: 'customHealth'})
-		});
-	});
-
-	describe('kubernetes:app with Java-liberty project and NO platforms specified', function () {
+	describe('kubernetes:app with Java-liberty ', function () {
 
 		beforeEach(function () {
 			return helpers.run(path.join(__dirname, '../generators/app'))
 				.inDir(path.join(__dirname, './tmp'))
-				.withOptions({bluemix: JSON.stringify(scaffolderSampleJava), platforms: []})
+				.withOptions(utils.generateTestPayload("helm", "JAVA", ['appid', 'cloudant']))
 		});
+
+		  
 
 		it('should not have kubernetes files', function () {
-			assert.noFile(chartLocation + '/templates/service.yaml');
-			assert.noFile(chartLocation + '/templates/deployment.yaml');
-			assert.noFile(chartLocation + '/templates/hpa.yaml');
-			assert.noFile(chartLocation + '/templates/mongodb.deploy.yaml');
-			assert.noFile(chartLocation + '/templates/istio.yaml');
-			assert.noFile(chartLocation + '/values.yaml');
-			assert.noFile(chartLocation + '/Chart.yaml');
-		});
-	});
-
-	describe('kubernetes:app with Java-liberty project and mongo and platforms specified including kube', function () {
-
-		beforeEach(function () {
-			return helpers.run(path.join(__dirname, '../generators/app'))
-				.inDir(path.join(__dirname, './tmp'))
-				.withOptions({bluemix: JSON.stringify(scaffolderSampleJava), platforms: ['kube'], services: JSON.stringify(['mongodb'])})
-		});
-
-		it('should not have kubernetes files', function () {
+			let applicationName = `testgenv2apphelmjava`;
+			let chartLocation = 'chart/' + applicationName.toLowerCase();
+	
+			fs.readdir("./chart/testgenv2apphelmjava/templates", (err, files) => {
+				files.forEach(file => {
+				  console.log(file);
+				});
+			  });
+	
 			assert.file(chartLocation + '/templates/service.yaml');
 			assert.file(chartLocation + '/templates/deployment.yaml');
 			assert.file(chartLocation + '/templates/hpa.yaml');
-			assert.file(chartLocation + '/templates/mongodb.deploy.yaml');
 			assert.file(chartLocation + '/templates/istio.yaml');
 			assert.file(chartLocation + '/values.yaml');
 			assert.file(chartLocation + '/Chart.yaml');
 		});
 	});
 
-	describe('kubernetes:app with Java project and mongo deployment', function () {
-
+	describe('kubernetes:app with Node ', function () {
 		beforeEach(function () {
 			return helpers.run(path.join(__dirname, '../generators/app'))
 				.inDir(path.join(__dirname, './tmp'))
-				.withOptions({bluemix: JSON.stringify(scaffolderSampleJava), services: JSON.stringify(['mongodb'])})
+				.withOptions(utils.generateTestPayload("helm", "NODE", ['appid', 'cloudant']));
 		});
+		let applicationName = `testgenv2apphelmnode`;
+		let chartLocation = 'chart/' + applicationName.toLowerCase();
 
-		it('should have mongodb.deploy.yaml', function () {
-			assert.file(chartLocation + '/templates/mongodb.deploy.yaml');
-			assert.fileContent(chartLocation + '/templates/mongodb.deploy.yaml', "{{  .Chart.Name }}-mongo-service");
-			assert.fileContent(chartLocation + '/templates/mongodb.deploy.yaml', "mongo-service");
-		});
-
-		it('should have deployment.yaml', function () {
-			assert.file(chartLocation + '/templates/deployment.yaml');
-		});
-
-		assertYmlMongoContent();
+		testOutput(applicationName, chartLocation);
 	});
 
-	describe('kubernetes:app with Java project and  unsupported deployment', function () {
-		const WRONG_DEPLOY = 'NOTAVALIDSTORAGE';
-
+	describe('kubernetes:app with Swift ', function () {
 		beforeEach(function () {
 			return helpers.run(path.join(__dirname, '../generators/app'))
 				.inDir(path.join(__dirname, './tmp'))
-				.withOptions({bluemix: JSON.stringify(scaffolderSampleJava), services: JSON.stringify(['mongodb'])})
+				.withOptions(utils.generateTestPayload("helm", "SWIFT", ['appid', 'cloudant']))
 		});
+		let applicationName = `testgenv2apphelmswift`;
+		let chartLocation = 'chart/' + applicationName.toLowerCase();
 
-		it('should not have ' + WRONG_DEPLOY + '.deploy.yaml', function () {
-			assert.noFile(chartLocation + '/' + WRONG_DEPLOY + '.deploy.yaml');
-		});
-
+		testOutput(applicationName, chartLocation);
 	});
 
-	describe('kubernetes:app with Java project and mongo deployment with opts as a string', function () {
-		beforeEach(function () {
-			return helpers.run(path.join(__dirname, '../generators/app'))
-				.inDir(path.join(__dirname, './tmp'))
-				.withOptions({bluemix: JSON.stringify(scaffolderSampleJava), services: JSON.stringify(['mongodb'])})
-		});
-
-		it('should have mongodb.deploy.yaml', function () {
-			assert.file(chartLocation + '/templates/mongodb.deploy.yaml');
-			assert.fileContent(chartLocation + '/templates/mongodb.deploy.yaml', "{{  .Chart.Name }}-mongo-service");
-
-		});
-
-		assertYmlMongoContent();
-
-	});
-
-	describe('kubernetes:app with Node project', function () {
-		beforeEach(function () {
-			return helpers.run(path.join(__dirname, '../generators/app'))
-				.inDir(path.join(__dirname, './tmp'))
-				.withOptions({bluemix: JSON.stringify(scaffolderSampleNode)});
-		});
-
-		testOutput();
-	});
-
-	describe('kubernetes:app with Node project and mongo deployment', function () {
-
-		beforeEach(function () {
-			return helpers.run(path.join(__dirname, '../generators/app'))
-				.inDir(path.join(__dirname, './tmp'))
-				.withOptions({bluemix: JSON.stringify(scaffolderSampleNode), services: JSON.stringify(['mongodb'])})
-		});
-
-		it('should have mongodb.deploy.yaml', function () {
-			assert.file(chartLocation + '/templates/mongodb.deploy.yaml');
-			assert.fileContent(chartLocation + '/templates/mongodb.deploy.yaml', "{{  .Chart.Name }}-mongo-service");
-		});
-
-		it('should have deployment.yaml', function () {
-			assert.file(chartLocation + '/templates/deployment.yaml');
-		});
-
-		assertYmlMongoContent();
-	});
-
-	describe('kubernetes:app with Node project and  unsupported deployment', function () {
-		const WRONG_DEPLOY = 'NOTAVALIDSTORAGE';
-
-		beforeEach(function () {
-			return helpers.run(path.join(__dirname, '../generators/app'))
-				.inDir(path.join(__dirname, './tmp'))
-				.withOptions({bluemix: JSON.stringify(scaffolderSampleNode), services: JSON.stringify(['mongodb'])})
-		});
-
-		it('should not have ' + WRONG_DEPLOY + '.deploy.yaml', function () {
-			assert.noFile(chartLocation + '/' + WRONG_DEPLOY + '.deploy.yaml');
-		});
-
-	});
-
-	describe('kubernetes:app with Node project and mongo deployment with opts as a string', function () {
-
-		beforeEach(function () {
-			return helpers.run(path.join(__dirname, '../generators/app'))
-				.inDir(path.join(__dirname, './tmp'))
-				.withOptions({bluemix: JSON.stringify(scaffolderSampleNode), services: JSON.stringify(['mongodb'])})
-		});
-
-		it('should have mongodb.deploy.yaml', function () {
-			assert.file(chartLocation + '/templates/mongodb.deploy.yaml');
-			assert.fileContent(chartLocation + '/templates/mongodb.deploy.yaml', "{{  .Chart.Name }}-mongo-service");
-		});
-
-		assertYmlMongoContent();
-	});
-
-	describe('kubernetes:app with Swift project', function () {
-		beforeEach(function () {
-			return helpers.run(path.join(__dirname, '../generators/app'))
-				.inDir(path.join(__dirname, './tmp'))
-				.withOptions({bluemix: JSON.stringify(scaffolderSampleSwift)})
-		});
-
-		testOutput();
-	});
-
-	describe('kubernetes:app with Swift project and mongo deployment', function () {
-
-		beforeEach(function () {
-			return helpers.run(path.join(__dirname, '../generators/app'))
-				.inDir(path.join(__dirname, './tmp'))
-				.withOptions({bluemix: JSON.stringify(scaffolderSampleSwift), services: JSON.stringify(['mongodb'])})
-		});
-
-		it('should have mongodb.deploy.yaml', function () {
-			assert.file(chartLocation + '/templates/mongodb.deploy.yaml');
-			assert.fileContent(chartLocation + '/templates/mongodb.deploy.yaml', "{{  .Chart.Name }}-mongo-service");
-		});
-
-		it('should have deployment.yaml', function () {
-			assert.file(chartLocation + '/templates/deployment.yaml');
-		});
-
-		assertYmlMongoContent();
-	});
-
-	describe('kubernetes:app with Swift project and  unsupported deployment', function () {
-		const WRONG_DEPLOY = 'NOTAVALIDSTORAGE';
-
-		beforeEach(function () {
-			return helpers.run(path.join(__dirname, '../generators/app'))
-				.inDir(path.join(__dirname, './tmp'))
-				.withOptions({bluemix: JSON.stringify(scaffolderSampleSwift), services: JSON.stringify(['mongodb'])})
-		});
-
-		it('should not have ' + WRONG_DEPLOY + '.deploy.yaml', function () {
-			assert.noFile(chartLocation + '/' + WRONG_DEPLOY + '.deploy.yaml');
-		});
-
-	});
-
-	describe('kubernetes:app with Swift project and mongo deployment with opts as a string', function () {
-
-		beforeEach(function () {
-			return helpers.run(path.join(__dirname, '../generators/app'))
-				.inDir(path.join(__dirname, './tmp'))
-				.withOptions({bluemix: JSON.stringify(scaffolderSampleSwift), services: JSON.stringify(['mongodb'])})
-		});
-
-		it('should have mongodb.deploy.yaml', function () {
-			assert.file(chartLocation + '/templates/mongodb.deploy.yaml');
-			assert.fileContent(chartLocation + '/templates/mongodb.deploy.yaml', "{{  .Chart.Name }}-mongo-service");
-		});
-
-		assertYmlMongoContent();
-
-	});
-
-	describe('kubernetes:app with Python project and mongo deployment', function () {
-
-		beforeEach(function () {
-			return helpers.run(path.join(__dirname, '../generators/app'))
-				.inDir(path.join(__dirname, './tmp'))
-				.withOptions({bluemix: JSON.stringify(scaffolderSamplePython), services: JSON.stringify(['mongodb'])})
-		});
-
-		it('should have mongodb.deploy.yaml', function () {
-			assert.file(chartLocation + '/templates/mongodb.deploy.yaml');
-			assert.fileContent(chartLocation + '/templates/mongodb.deploy.yaml', "{{  .Chart.Name }}-mongo-service");
-		});
-
-		it('should have deployment.yaml', function () {
-			assert.file(chartLocation + '/templates/deployment.yaml');
-		});
-
-		assertYmlMongoContent();
-	});
-
-	describe('kubernetes:app with Python project and  unsupported deployment', function () {
-		const WRONG_DEPLOY = 'NOTAVALIDSTORAGE';
-
-		beforeEach(function () {
-			return helpers.run(path.join(__dirname, '../generators/app'))
-				.inDir(path.join(__dirname, './tmp'))
-				.withOptions({bluemix: JSON.stringify(scaffolderSamplePython), services: JSON.stringify(['mongodb'])})
-		});
-
-		it('should not have ' + WRONG_DEPLOY + '.deploy.yaml', function () {
-			assert.noFile(chartLocation + '/' + WRONG_DEPLOY + '.deploy.yaml');
-		});
-
-	});
-
-	describe('kubernetes:app with Python project and mongo deployment with opts as a string', function () {
-
-		beforeEach(function () {
-			return helpers.run(path.join(__dirname, '../generators/app'))
-				.inDir(path.join(__dirname, './tmp'))
-				.withOptions({bluemix: JSON.stringify(scaffolderSamplePython), services: JSON.stringify(['mongodb'])})
-		});
-
-		it('should have mongodb.deploy.yaml', function () {
-			assert.file(chartLocation + '/templates/mongodb.deploy.yaml');
-			assert.fileContent(chartLocation + '/templates/mongodb.deploy.yaml', "{{  .Chart.Name }}-mongo-service");
-		});
-
-		assertYmlMongoContent();
-
-	});
-
-	describe('kubernetes:app with Node with NO server', function () {
-		beforeEach(function () {
-			return helpers.run(path.join(__dirname, '../generators/app'))
-				.inDir(path.join(__dirname, './tmp'))
-				.withOptions({bluemix: JSON.stringify(scaffolderSampleNodeNoServer)});
-		});
-
-		testOutput();
-	});
-
-	describe('kubernetes:app with Go project with NO server', function () {
-		beforeEach(function () {
-			return helpers.run(path.join(__dirname, '../generators/app'))
-				.inDir(path.join(__dirname, './tmp'))
-				.withOptions({bluemix: JSON.stringify(scaffolderSampleGoNoServer)});
-		});
-
-		testOutput();
-	});
-
-	describe('cloud-enablement:kubernetes with empty bluemix object', function () {
-		beforeEach(function () {
-			return helpers.run(path.join(__dirname, '../generators/kubernetes'))
-				.withOptions({
-					bluemix: JSON.stringify(
-						{
-							backendPlatform: "NODE",
-							server: {cloudDeploymentOptions: {imageRegistryNamespace: 'some-test-namespace'}}
-						}
-					), port: '9876'
-				})
-		});
-		it('should give us the default output with no project name', function () {
-			assert.file('chart/app');
-		});
-
-		it('should use a custom port if set', function () {
-			assert.fileContent('chart/app/values.yaml', 'servicePort: 9876');
-		});
-
-		it('should use a custom namespace if set', function () {
-			assert.fileContent('chart/app/values.yaml', 'some-test-namespace');
-		});
-	});
 });

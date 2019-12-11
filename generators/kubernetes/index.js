@@ -18,15 +18,6 @@ let _ = require('lodash');
 const Handlebars = require('../lib/handlebars.js');
 const Utils = require('../lib/utils');
 
-// suffix for other deployment
-const DEPLOYMENT_SUFFIX = '.deploy.yaml';
-
-// list of supporting services
-const supportingServicesTypes = ['mongodb'];
-
-// storage directory
-const SERVICE_DIR = 'services/';
-
 module.exports = class extends Generator {
 
 	constructor(args, opts) {
@@ -60,7 +51,9 @@ module.exports = class extends Generator {
 
 	configuring() {
 		// work out app name and language
-		this.opts.chartName = Utils.sanitizeAlphaNumLowerCase(this.opts.applicationName);
+		this.opts.chartName = Utils.sanitizeAlphaNumLowerCase(this.opts.bluemix.name);
+		this.opts.services = typeof(this.opts.services) === 'string' ? JSON.parse(this.opts.services || '[]') : this.opts.services;
+
 	}
 
 	writing() {
@@ -72,7 +65,7 @@ module.exports = class extends Generator {
 		// chart/<applicationName>/...
 		let chartDir = 'chart/' + this.opts.chartName;
 
-		if (this.opts.language === 'java' || this.opts.language === 'spring') {
+		if (this.opts.bluemix.backendPlatform.toLowerCase() === 'java' || this.opts.bluemix.backendPlatform.toLowerCase() === 'spring') {
 			this.fileLocations.deployment.source = 'java/deployment.yaml';
 			this.fileLocations.basedeployment.source = 'java/basedeployment.yaml';
 			this.fileLocations.service.source = 'java/service.yaml';
@@ -97,16 +90,6 @@ module.exports = class extends Generator {
 				);
 			}
 		});
-
-		if(this.opts.services){
-			this.opts.services.forEach(service => {
-				if(_.includes(supportingServicesTypes, service)){
-					this._writeHandlebarsFile(SERVICE_DIR + service + DEPLOYMENT_SUFFIX, chartDir + '/templates/' + service + DEPLOYMENT_SUFFIX, {});
-				} else {
-					console.error(service + ' is not supported');
-				}
-			})
-		}
 	}
 
 	_writeHandlebarsFile(templateFile, destinationFile, data) {
