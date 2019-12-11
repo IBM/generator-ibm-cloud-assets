@@ -73,46 +73,37 @@ function validateDeployAssets(lang, deploy_type, services) {
 
 function validateCreds(lang, services) {
     it('mappings.json and localdev-config.json exist', function () {
+        var mappings_path = "";
+        var localdev_path = "";
         if (lang === "NODE") {
-            assert.file([
-                'server/config/mappings.json'
-            ]);
-            assert.file([
-                'server/localdev-config.json'
-            ]);
+            mappings_path = 'server/config/mappings.json';
+            localdev_path = 'server/localdev-config.json';
     
         } else if (lang === "PYTHON") {
-            assert.file([
-                'server/config/mappings.json'
-            ]);
-            assert.file([
-                'server/localdev-config.json'
-            ]);
+            mappings_path = 'server/config/mappings.json';
+            localdev_path = 'server/localdev-config.json';
     
         } else if (lang === "JAVA" || lang === "SPRING") {
-            assert.file([
-                'src/main/resources/mappings.json'
-            ]);
-            assert.file([
-                'src/main/resources/localdev-config.json'
-            ]);
+            mappings_path = 'src/main/resources/mappings.json';
+            localdev_path = 'src/main/resources/localdev-config.json';
     
         } else if (lang === "SWIFT") {
-            assert.file([
-                'config/mappings.json'
-            ]);
-            assert.file([
-                'config/localdev-config.json'
-            ]);
+            mappings_path = 'config/mappings.json';
+            localdev_path = 'config/localdev-config.json';
     
         } else if (lang === "GO") {
-            assert.file([
-                'server/config/mappings.json'
-            ]);
-            assert.file([
-                'server/localdev-config.json'
-            ]);
+            mappings_path = 'server/config/mappings.json';
+            localdev_path = 'server/localdev-config.json';
         }
+        assert.file([mappings_path]);
+        // these language and service combos are not supported
+        if (lang !== "SWIFT" && services !== "cloudObjectStorage" && services !== "db2OnCloud" && services !== "conversation"
+            && services !== "discovery" && services !== "languageTranslator" && services !== "naturalLanguageClassifier"
+            && services !== "naturalLanguageUnderstanding" && services !== "personalityInsights" && services !== "speechToText"
+            && services !== "textToSpeech" && services != "toneAnalyzer" && services !== "visualRecognition") {
+            assert.fileContent(mappings_path, testUtils.PREFIX_SVC_BINDING_NAME + services);
+        }
+        assert.file([localdev_path]);
     });
 }
 
