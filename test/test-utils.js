@@ -25,6 +25,7 @@ var store = memFs.create();
 var fs = editor.create(store);
 
 const SVC_CRED_SAMPLES = require("./samples/service_creds.json");
+const CF_SVC_MAPPINGS = require("./../generators/service/templates/cfServiceMapping.json");
 
 const PREFIX_SVC_BINDING_NAME = "my-service-";
 
@@ -74,7 +75,12 @@ function generateTestPayload(tc_type, language, service_keys) {
     let deploy_opts = baseDeployObjects[tc_type];
     let app_opts = generateAppOpts(tc_type, language);
     _.forEach(service_keys, (key) => {
-        deploy_opts[Object.keys(deploy_opts)[0]]["service_bindings"][key] = PREFIX_SVC_BINDING_NAME + key;
+        if (tc_type === "cloud_foundry") {
+            deploy_opts[Object.keys(deploy_opts)[0]]["service_bindings"][key]["name"] = PREFIX_SVC_BINDING_NAME + key;
+            deploy_opts[Object.keys(deploy_opts)[0]]["service_bindings"][key]["label"] = CF_SVC_MAPPINGS[key];
+        } else {
+            deploy_opts[Object.keys(deploy_opts)[0]]["service_bindings"][key] = PREFIX_SVC_BINDING_NAME + key;
+        }
         app_opts["service_credentials"][key] = getServiceCreds(key);
     });
     _.extend(payload, deploy_opts);
