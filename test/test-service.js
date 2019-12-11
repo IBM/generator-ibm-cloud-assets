@@ -20,7 +20,8 @@ const _ = require('lodash');
 const path = require('path');
 const yaml = require('js-yaml');
 
-const utils = require('./test-utils');
+const utils = require('../generators/lib/utils');
+const testUtils = require('./test-utils');
 // const fs = require('fs');
 var memFs = require("mem-fs");
 var editor = require("mem-fs-editor");
@@ -28,11 +29,11 @@ var store = memFs.create();
 var fs = editor.create(store);
 const fse = require('fs-extra');
 
-const SERVICES = utils.SERVICES;
-const DEPLOY_OBJECTS = utils.baseDeployObjects;
+const SERVICES = testUtils.SERVICES;
+const DEPLOY_OBJECTS = testUtils.baseDeployObjects;
 
 function validateHelmChart(lang, deploy_type, service, applicationName) {
-    const chartLocation = 'chart/' + applicationName.toLowerCase();
+    const chartLocation = 'chart/' + utils.sanitizeAlphaNumLowerCase(applicationName);
     let chartFile = chartLocation + '/Chart.yaml';
     assert.file(chartFile);
     let valuesFile = chartLocation + '/values.yaml';
@@ -121,9 +122,9 @@ describe("cloud-assets:service", function() {
     _.forEach(SERVICES, (service) => {
         _.forEach(Object.keys(DEPLOY_OBJECTS), (deploy_type) => {
             const goLang = "GO";
-            const go_payload = utils.generateTestPayload(deploy_type, goLang, [service]);
             describe(`cloud-assets:service-${service} with ${goLang} project deployed with ${deploy_type}`, function () {
                 console.log(`beginning test suite ${this.title}`);
+                let go_payload = testUtils.generateTestPayload(deploy_type, goLang, [service]);
                 beforeEach(function () {
                     return helpers.run(main_gen)
                         .inTmpDir(function (dir) {
@@ -144,9 +145,9 @@ describe("cloud-assets:service", function() {
             });
 
             const nodeLang = "NODE";
-            const node_payload = utils.generateTestPayload(deploy_type, nodeLang, [service]);
             describe(`cloud-assets:service-${service} with ${nodeLang} project deployed with ${deploy_type}`, function () {
                 console.log(`beginning test suite ${this.title}`);
+                let node_payload = testUtils.generateTestPayload(deploy_type, nodeLang, [service]);
                 beforeEach(function () {
                     return helpers.run(main_gen)
                         .inTmpDir(function (dir) {
@@ -167,9 +168,9 @@ describe("cloud-assets:service", function() {
             });
             
             const pythonLang = "PYTHON";
-            const python_payload = utils.generateTestPayload(deploy_type, pythonLang, [service]);
             describe(`cloud-assets:service-${service} with ${pythonLang} project deployed with ${deploy_type}`, function () {
                 console.log(`beginning test suite ${this.title}`);
+                let python_payload = testUtils.generateTestPayload(deploy_type, pythonLang, [service]);
                 beforeEach(function () {
                     return helpers.run(main_gen)
                         .inTmpDir(function (dir) {
@@ -199,9 +200,9 @@ describe("cloud-assets:service", function() {
             });
             
             const javaLang = "JAVA";
-            const java_payload = utils.generateTestPayload(deploy_type, javaLang, [service]);
             describe(`cloud-assets:service-${service} with ${javaLang} project deployed with ${deploy_type}`, function () {
                 console.log(`beginning test suite ${this.title}`);
+                let java_payload = testUtils.generateTestPayload(deploy_type, javaLang, [service]);
                 beforeEach(function () {
                     return helpers.run(main_gen)
                         .inTmpDir(function (dir) {
@@ -227,9 +228,9 @@ describe("cloud-assets:service", function() {
             });
             
             const springLang = "SPRING";
-            const spring_payload = utils.generateTestPayload(deploy_type, springLang, [service]);
             describe(`cloud-assets:service-${service} with ${springLang} project deployed with ${deploy_type}`, function () {
                 console.log(`beginning test suite ${this.title}`);
+                let spring_payload = testUtils.generateTestPayload(deploy_type, springLang, [service]);
                 beforeEach(function () {
                     return helpers.run(main_gen)
                         .inTmpDir(function (dir) {
@@ -254,9 +255,9 @@ describe("cloud-assets:service", function() {
             });
 
             const swiftLang = "SWIFT";
-            const swift_payload = utils.generateTestPayload(deploy_type, swiftLang, [service]);
             describe(`cloud-assets:service-${service} with ${swiftLang} project deployed with ${deploy_type}`, function () {
                 console.log(`beginning test suite ${this.title}`);
+                let swift_payload = testUtils.generateTestPayload(deploy_type, swiftLang, [service]);
                 beforeEach(function () {
                     return helpers.run(main_gen)
                         .inTmpDir(function (dir) {
