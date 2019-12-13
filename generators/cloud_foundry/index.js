@@ -15,6 +15,7 @@
 
 const Handlebars = require('../lib/handlebars.js');
 const Generator = require('yeoman-generator');
+const _ = require('lodash');
 const Utils = require('../lib/utils');
 const xmljs = require('xml-js');
 const jsyaml = require('js-yaml');
@@ -54,16 +55,21 @@ module.exports = class extends Generator {
 		};
 
 		this.name = undefined;
+		this.manifestConfig.name = Utils.sanitizeAlphaNumLowerCase(this.bluemix.name);
 		if (this.bluemix.server) {
 			this.name = this.bluemix.server.name;
 			this.manifestConfig = Object.assign(this.manifestConfig, this.bluemix.server);
+			// use service instance names in manifest
+			this.manifestConfig.services = {};
+			_.forEach(this.bluemix.server.service_bindings, (service) => {
+				this.manifestConfig.services[service] = service["name"];
+			});
 			this.deployment = Object.assign(this.deployment, this.bluemix.server.cloudDeploymentOptions);
 			this.manifestConfig.instances = this.manifestConfig.instances || '1';
 			this.deployment.type = this.bluemix.server.cloudDeploymentType || 'CF';
 			this.deployment.hasMongo = this.opts.createType === 'mern' || this.opts.createType === 'mean';
 		} else {
 			this.name = this.bluemix.name;
-			this.manifestConfig.name = this.bluemix.name;
 			this.deployment.type = this.bluemix.cloudDeploymentType || 'CF';
 		}
 
@@ -293,6 +299,10 @@ module.exports = class extends Generator {
 			return;
 		}
 		// write manifest.yml file
+		this.manifestConfig.hasServices = false;
+		if (this.manifestConfig.services && !_.isEmpty(this.manifestConfig.services) ) {
+			this.manifestConfig.hasServices = true;
+		}
 		this._writeHandlebarsFile('manifest_master.yml', 'manifest.yml', this.manifestConfig)
 
 		// if cfIgnnoreContent exists, create/write .cfignore file

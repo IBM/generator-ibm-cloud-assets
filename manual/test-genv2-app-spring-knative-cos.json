@@ -1,0 +1,28 @@
+{
+  "deploy_options": {
+    "kube": {
+      "cluster_name": "gv-devx-classic-dal1",
+      "region": "ibm:ys1:us-south",
+      "type": "KNATIVE",
+      "service_bindings": {
+          "cloudObjectStorage": "cos-testing"
+      }
+    }
+  },
+  "application": {
+    "app_id": "4b3e5cc4-5149-48e2-b711-b3dd80cf3f11",
+    "name": "test-genv2-app",
+    "language": "SPRING",
+    "service_credentials": {
+        "cloudObjectStorage": {
+            "apikey": "REPLACEME.UNKNOWN_SERVICE_NAME.apikey",
+            "endpoints": "REPLACEME.UNKNOWN_SERVICE_NAME.cos",
+            "iam_apikey_description": "REPLACEME.UNKNOWN_SERVICE_NAME.iam_apikey_description",
+            "iam_apikey_name": "REPLACEME.UNKNOWN_SERVICE_NAME.iam_apikey_name",
+            "iam_role_crn": "crn:v1:bluemix:public:iam::::serviceRole:Manager",
+            "iam_serviceid_crn": "REPLACEME.UNKNOWN_SERVICE_NAME.iam_serviceid_crn",
+            "resource_instance_id": "REPLACEME"
+        }
+    }
+  }
+}

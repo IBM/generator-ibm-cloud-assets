@@ -85,7 +85,37 @@
         "type": "uri"
     },
     "hypersecuredb": {
-
+        "authentication": {
+          "method": "direct",
+          "password": "mypass",
+          "username": "myuser"
+        },
+        "certificate": {
+          "certificate_base64": "base64_cert==",
+          "name": "cert_name_uuid"
+        },
+        "composed": [
+          "mongodb://myuser:mypass@my-mongodb.cloud:30997,cert_name_uuid-1.my-mongodb.cloud:30997/ibmclouddb?authSource=admin&replicaSet=replset"
+        ],
+        "database": "ibmclouddb",
+        "hosts": [
+          {
+            "hostname": "cert_name_uuid-0.my-mongodb.cloud",
+            "port": 30997
+          },
+          {
+            "hostname": "cert_name_uuid-1.my-mongodb.cloud",
+            "port": 30997
+          }
+        ],
+        "path": "/ibmclouddb",
+        "query_options": {
+          "authSource": "admin",
+          "replicaSet": "replset"
+        },
+        "replica_set": "replset",
+        "scheme": "mongodb",
+        "type": "uri"
     },
     "postgresql": {
         "db_type": "postgresql",
