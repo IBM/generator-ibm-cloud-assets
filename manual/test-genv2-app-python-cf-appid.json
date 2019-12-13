@@ -7,7 +7,10 @@
       "instances": 3,
       "memory": "512MB",
       "service_bindings": {
-      "cloudant": "cloudant-gv-spring-ms-test-co1436hv30tbd0j"
+        "appid": {
+          "name": "nick-flaskknativewbi-appid-1568998962198",
+          "label": "AppID"
+        }
       }
     }
   },
