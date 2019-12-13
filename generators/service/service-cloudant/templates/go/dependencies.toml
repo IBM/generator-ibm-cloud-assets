@@ -1,4 +1,4 @@
 
 [[constraint]]
-  name = "https://github.com/IBM-Cloud/go-cloudant"
+  name = "github.com/IBM-Cloud/go-cloudant"
   branch = "master"
