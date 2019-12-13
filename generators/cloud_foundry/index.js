@@ -300,7 +300,7 @@ module.exports = class extends Generator {
 		}
 		// write manifest.yml file
 		this.manifestConfig.hasServices = false;
-		if (this.manifestConfig.services && Object.keys(this.manifestConfig.services)) {
+		if (this.manifestConfig.services && !_.isEmpty(this.manifestConfig.services) ) {
 			this.manifestConfig.hasServices = true;
 		}
 		this._writeHandlebarsFile('manifest_master.yml', 'manifest.yml', this.manifestConfig)
