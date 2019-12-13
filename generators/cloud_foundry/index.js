@@ -299,6 +299,10 @@ module.exports = class extends Generator {
 			return;
 		}
 		// write manifest.yml file
+		this.manifestConfig.hasServices = false;
+		if (this.manifestConfig.services && Object.keys(this.manifestConfig.services)) {
+			this.manifestConfig.hasServices = true;
+		}
 		this._writeHandlebarsFile('manifest_master.yml', 'manifest.yml', this.manifestConfig)
 
 		// if cfIgnnoreContent exists, create/write .cfignore file
