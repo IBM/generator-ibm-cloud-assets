@@ -13,9 +13,9 @@ livenessProbe:
   initialDelaySeconds: 30
   periodSeconds: 10
 service:
-  name: {{language}}
+  name: {{#toLowerCase application.language}}{{/toLowerCase}}
   type: NodePort
-  servicePort: {{servicePorts.http}}
+  servicePort: {{deploy_options.servicePorts.http}}
 hpa:
   enabled: false
   minReplicas: 1

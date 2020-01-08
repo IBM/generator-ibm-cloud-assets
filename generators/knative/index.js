@@ -22,24 +22,12 @@ module.exports = class extends Generator {
 
 	constructor(args, opts) {
 		super(args, opts);
-
-		if (typeof (opts.bluemix) === 'string') {
-			this.bluemix = JSON.parse(opts.bluemix || '{}');
-		} else {
-			this.bluemix = opts.bluemix;
-		}
-
-		if(typeof (opts) === 'string'){
-			this.opts = JSON.parse(opts || '{}');
-		} else {
-			this.opts = opts.cloudContext || opts;
-		}
 	}
 
 	initializing() {}
 
 	writing() {
-		this._writeHandlebarsFile('service.yaml', './service.yaml', this.opts.bluemix);
+		this._writeHandlebarsFile('service.yaml', './service.yaml', this.options);
 	}
 
 	_writeHandlebarsFile(templateFile, destinationFile, data) {
