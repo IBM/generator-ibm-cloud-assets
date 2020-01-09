@@ -159,6 +159,9 @@ module.exports = class extends Generator {
 	}
 
 	configuring() {
+
+		this.opts.application.sanitizedName = Utils.sanitizeAlphaNumLowerCase(this.opts.application.name);
+
 		// process object for kube deployments
 		if (this.opts.deploy_options && this.bluemix.cloudDeploymentType == "kube") {
 			// work out app name and language

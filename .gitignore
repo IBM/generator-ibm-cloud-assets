@@ -57,3 +57,5 @@ test/tmp
 # .bluemix
 helm
 
+manual/test.json
+
