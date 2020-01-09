@@ -1,2 +1,0 @@
-# Apache Spark Python SDK is not available yet
-# Docs - https://www.ng.bluemix.net/docs/services/AnalyticsforApacheSpark

@@ -1,8 +1,0 @@
-{
-  "dependencies" : [
-    {"groupId" : "com.cloudant", "artifactId" : "cloudant-client", "version" : "2.7.0"}
-  ],
-  "frameworkDependencies" : [
-    {"feature" : "mpConfig-1.1"}
-  ]
-}

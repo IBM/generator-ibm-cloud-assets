@@ -1,7 +1,0 @@
-{
-  "[[source]]": "",
-  "[dev-packages]": "",
-  "[packages]": {
-    "pymongo": "~=3.5.0"
-  }
-}

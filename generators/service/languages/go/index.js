@@ -53,31 +53,6 @@ module.exports = class extends Generator {
 		this.context.addLocalDevConfig = this._addLocalDevConfig.bind(this);
 		this.context.addReadMe = this._addReadMe.bind(this);
 		this.context.addInstrumentation = this._addInstrumentation.bind(this);
-
-		let serviceCredentials,
-			scaffolderKey,
-			serviceKey;
-
-		//initializing ourselves by composing with the service generators
-		let root = path.dirname(require.resolve('../..'));
-		let folders = fs.readdirSync(root);
-		folders.forEach(folder => {
-			if (folder.startsWith('service-')) {
-				serviceKey = folder.substring(folder.indexOf('-') + 1);
-				scaffolderKey = scaffolderMapping[serviceKey];
-				serviceCredentials = this.context.bluemix[scaffolderKey];
-				if (serviceCredentials) {
-					logger.debug("Composing with service : " + folder);
-					try {
-						this.context.cloudLabel = serviceCredentials && serviceCredentials.serviceInfo && serviceCredentials.serviceInfo.cloudLabel;
-						this.composeWith(path.join(root, folder), {context: this.context});
-					} catch (err) {
-						/* istanbul ignore next */	//ignore for code coverage as this is just a warning - if the service fails to load the subsequent service test will fail
-						logger.warn('Unable to compose with service', folder, err);
-					}
-				}
-			}
-		});
 	}
 
 	writing() {

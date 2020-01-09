@@ -1,7 +1,0 @@
-{
-  "[[source]]": "",
-  "[dev-packages]": "",
-  "[packages]": {
-    "requests": "*"
-  }
-}

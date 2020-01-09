@@ -57,7 +57,7 @@ module.exports = class extends Generator {
 		this._setLoggerLevel();
 		this.opts.loggerLevel = logger.level;
 
-		if (this.opts.deployOptions) { this.opts.deploy_options = this.opts.deployOptions };
+		if (this.opts.deployOptions) { this.opts.deploy_options = this.opts.deployOptions }
 		this._sanitizeOption(this.options, DEPLOY_OPTIONS);
 		this._sanitizeOption(this.options, APPLICATION_OPTIONS);
 		this.log("THIS.OPTS: ");
@@ -185,7 +185,7 @@ module.exports = class extends Generator {
 			}
 
 			if (this.bluemix.server && this.bluemix.server.cloudDeploymentOptions && this.bluemix.server.cloudDeploymentOptions.kubeDeploymentType) {
-					this.opts.bluemix.kubeDeploymentType = this.bluemix.server.cloudDeploymentOptions.kubeDeploymentType;
+				this.opts.bluemix.kubeDeploymentType = this.bluemix.server.cloudDeploymentOptions.kubeDeploymentType;
 			}
 
 		}
