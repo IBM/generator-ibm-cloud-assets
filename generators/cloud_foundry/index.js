@@ -50,30 +50,30 @@ module.exports = class extends Generator {
 		};
 		this.deployment = {
 			type: 'CF',
-			name: this.bluemix.name,
-			language: this.bluemix.backendPlatform
+			name: this.opts.application.name,
+			language: this.opts.application.language
 		};
 
 		this.name = undefined;
-		this.manifestConfig.name = Utils.sanitizeAlphaNumLowerCase(this.bluemix.name);
-		if (this.bluemix.server) {
-			this.name = this.bluemix.server.name;
-			this.manifestConfig = Object.assign(this.manifestConfig, this.bluemix.server);
+		this.manifestConfig.name = Utils.sanitizeAlphaNumLowerCase(this.opts.application.name);
+		if (this.opts.deploy_options.cloud_foundry) {
+			this.name = this.opts.application.name;
+			this.manifestConfig = Object.assign(this.manifestConfig, this.opts.deploy_options.cloud_foundry);
 			// use service instance names in manifest
 			this.manifestConfig.services = {};
-			_.forEach(this.bluemix.server.service_bindings, (service) => {
-				this.manifestConfig.services[service] = service["name"];
+			_.forEach(this.opts.deploy_options.cloud_foundry.service_bindings, (service, serviceKey) => {
+				this.manifestConfig.services[serviceKey] = service["name"];
 			});
-			this.deployment = Object.assign(this.deployment, this.bluemix.server.cloudDeploymentOptions);
+			this.deployment = Object.assign(this.deployment, this.opts.deploy_options.cloud_foundry.cloudDeploymentOptions);
 			this.manifestConfig.instances = this.manifestConfig.instances || '1';
-			this.deployment.type = this.bluemix.server.cloudDeploymentType || 'CF';
+			this.deployment.type = 'CF'
 			this.deployment.hasMongo = this.opts.createType === 'mern' || this.opts.createType === 'mean';
 		} else {
-			this.name = this.bluemix.name;
-			this.deployment.type = this.bluemix.cloudDeploymentType || 'CF';
+			this.name = this.opts.application.name;
+			this.deployment.type = 'CF';
 		}
 
-		switch (this.bluemix.backendPlatform) {
+		switch (this.opts.application.language) {
 			case 'NODE':
 				this._configureNode();
 				break;
@@ -98,7 +98,7 @@ module.exports = class extends Generator {
 				this._configureGo();
 				break;
 			default:
-				throw new Error(`Language ${this.bluemix.backendPlatform} was not one of the valid languages: NODE, SWIFT, JAVA, SPRING, DJANGO, PYTHON, or GO`);
+				throw new Error(`Language ${this.opts.application.language} was not one of the valid languages: NODE, SWIFT, JAVA, SPRING, DJANGO, PYTHON, or GO`);
 		}
 		if (this.manifestConfig && this.manifestConfig.ignorePaths) {
 			this.cfIgnoreContent = this.cfIgnoreContent.concat(this.manifestConfig.ignorePaths);
@@ -109,7 +109,7 @@ module.exports = class extends Generator {
 	/***
 	 * Get the highest memory size available
 	 *
-	 * @params manifestMemoryConfig {string} the memory allocaated h
+	 * @params manifestMemoryConfig {string} the memory allocated h
 	 */
 	_getHighestMemorySize(manifestMemoryConfig, userDefinedMinMemory) {
 		if (!userDefinedMinMemory) {
@@ -177,7 +177,7 @@ module.exports = class extends Generator {
 		this.manifestConfig.buildpack = 'swift_buildpack';
 
 		// if there is a `command` in manifest.yml already, keep it. Otherwise, this is the default command string:
-		let manifestCommand = this.bluemix.name ? ("\'" + `${this.bluemix.name}` + "\'") : undefined;
+		let manifestCommand = this.opts.application.name ? ("\'" + `${this.opts.application.name}` + "\'") : undefined;
 		try {
 			let manifestyml = jsyaml.safeLoad(fs.readFileSync('manifest.yml', 'utf8'));
 			manifestCommand = manifestyml.applications[0].command ? manifestyml.applications[0].command : manifestCommand;
@@ -272,7 +272,7 @@ module.exports = class extends Generator {
 		this.manifestConfig.buildpack = 'python_buildpack';
 
 		// if there is a `command` in manifest.yml already, keep it. Otherwise, this is the default command string:
-		let manifestCommand = `gunicorn --env DJANGO_SETTINGS_MODULE=${this.bluemix.name}.settings.production ${this.bluemix.name}.wsgi -b 0.0.0.0:$PORT`;
+		let manifestCommand = `gunicorn --env DJANGO_SETTINGS_MODULE=${this.opts.application.name}.settings.production ${this.opts.application.name}.wsgi -b 0.0.0.0:$PORT`;
 		try {
 			let manifestyml = jsyaml.safeLoad(fs.readFileSync('manifest.yml', 'utf8'));
 			manifestCommand = manifestyml.applications[0].command ? manifestyml.applications[0].command : manifestCommand;
