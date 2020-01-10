@@ -1,20 +1,29 @@
 #!/usr/bin/env bash
 source .env
+set -x
 
 OPTS_FILE=$1
 GIT_REPO_URL=$2
 DEBUG=$3
 
 APP_DIR=$OPTS_FILE.dir
+#APP_DIR=test.dir
+
+if [[ $GIT_REPO_URL=="meta" ]]; then
+    GIT_REPO_URL=$( cat $OPTS_FILE | jq '.metadata.git_url' )
+fi
+
+if [[ -z $GIT_URL ]]; then
+    GIT_REPO_URL=https://github.com/IBM/nodejs-express-app
+fi
+
 if [[ -n $DEBUG ]]; then
     DEBUG_OPTS=--inspect-brk;
-else
-    DEBUG_OPTS=""
 fi
 
 echo "Removing existing app dir"
 rm -rf ./$APP_DIR
-git clone $GIT_REPO_URL $APP_DIR
+git clone --single-branch -b master $GIT_REPO_URL $APP_DIR
 
 DEPLOY_OPTS=$( cat $OPTS_FILE | jq '.deploy_options' | tr -d ' \t\n\r\f' )
 APP_OPTS=$( cat $OPTS_FILE | jq '.application' | tr -d ' \t\n\r\f' )

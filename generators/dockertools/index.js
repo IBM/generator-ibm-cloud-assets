@@ -469,49 +469,6 @@ module.exports = class extends Generator {
 		};
 		const derrayify = serviceEnvs[0];
 
-		if (this.opts.services.length > 0) {
-			const dockerComposeConfig = {
-				containerName: `${applicationName.toLowerCase()}-flask-run`,
-				image: `${applicationName.toLowerCase()}-flask-run`,
-				ports: [port, debugPort].concat(servicePorts),
-				appPort: port,
-				envs: derrayify,
-				images: serviceImageNames
-			};
-			this._writeHandlebarsFile('python/docker-compose.yml', FILENAME_DOCKERCOMPOSE, dockerComposeConfig);
-			dockerComposeConfig.containerName = `${applicationName.toLowerCase()}-flask-tools`;
-			dockerComposeConfig.image = `${applicationName.toLowerCase()}-flask-tools`;
-			this._writeHandlebarsFile('python/docker-compose-tools.yml', FILENAME_DOCKERCOMPOSE_TOOLS, dockerComposeConfig);
-		}
-
-		if (this.fs.exists(this.destinationPath(FILENAME_CLI_CONFIG))) {
-			this.log(FILENAME_CLI_CONFIG, "already exists, skipping.");
-		} else {
-			this._writeHandlebarsFile('cli-config-common.yml', FILENAME_CLI_CONFIG, { cliConfig });
-		}
-
-		if (this.fs.exists(this.destinationPath(FILENAME_DOCKERFILE))) {
-			this.log(FILENAME_DOCKERFILE, "already exists, skipping.");
-		} else {
-			this._writeHandlebarsFile('python/Dockerfile', FILENAME_DOCKERFILE, {
-				port: port,
-				enable: this.opts.enable,
-				language: this.bluemix.backendPlatform,
-				name: this.bluemix.name,
-				servicesPackages: servicesPackages
-			});
-		}
-
-		if (this.fs.exists(this.destinationPath(FILENAME_DOCKERFILE_TOOLS))) {
-			this.log(FILENAME_DOCKERFILE_TOOLS, "already exists, skipping.");
-		} else {
-			this._writeHandlebarsFile('python/Dockerfile-tools', FILENAME_DOCKERFILE_TOOLS, {
-				servicesPackages: servicesPackages,
-				language: this.bluemix.backendPlatform,
-				name: this.bluemix.name
-			});
-		}
-
 		if (this.fs.exists(this.destinationPath(FILENAME_DEV))) {
 			this.log(FILENAME_DEV, "already exists, skipping.");
 		} else {

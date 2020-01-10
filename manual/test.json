@@ -1,28 +1,68 @@
 {
-    "deploy_options": {
-        "kube": {
-        "type": "HELM"
-        }
-    },
     "application": {
-        "app_id": "a447f5bf-40bb-422e-9a54-85ab24392830",
-        "cache_id": "31140467-afaa-3254-988c-0b17f2aaa895",
-        "name": "ondeck-nodejs-web",
-        "language": "SPRING",
-        "service_credentials": {
-            "cloudant": {
-                "apikey": "REPLACEME.UNKNOWN_SERVICE_NAME.apikey",
-                "host": "REPLACEME.UNKNOWN_SERVICE_NAME.host",
-                "iam_apikey_description": "REPLACEME.UNKNOWN_SERVICE_NAME.iam_apikey_description",
-                "iam_apikey_name": "REPLACEME.UNKNOWN_SERVICE_NAME.iam_apikey_name",
-                "iam_role_crn": "crn:v1:bluemix:public:iam::::serviceRole:Manager",
-                "iam_serviceid_crn": "REPLACEME.UNKNOWN_SERVICE_NAME.iam_serviceid_crn",
-                "password": "REPLACEME.UNKNOWN_SERVICE_NAME.password",
-                "port": 443,
-                "url": "REPLACEME.UNKNOWN_SERVICE_NAME.url",
-                "username": "REPLACEME.UNKNOWN_SERVICE_NAME.username"
+      "app_id": "7620c9c4-86ad-433d-9a7f-15aa7f3c118e",
+      "cache_id": "d8154f73-1aff-379d-a2c0-071edbeafae0",
+      "name": "Java Spring App ZGDFF",
+      "language": "SPRING",
+      "service_credentials": {
+        "databasesForPostgresql": {
+          "connection": {
+            "cli": {
+              "arguments": [
+                [
+                  "host=479e999d-a7fc-40cc-80d6-090451e2b9dc.bkvfu0nd0m8k95k94ujg.databases.appdomain.cloud port=32587 dbname=ibmclouddb user=ibm_cloud_46d82ae3_33f0_4395_bd57_eb26fa717c28 sslmode=verify-full"
+                ]
+              ],
+              "bin": "REPLACEME.Databases for PostgreSQL-nt.connection.cli.bin",
+              "certificate": {
+                "certificate_base64": "REPLACEME.Databases for PostgreSQL-nt.connection.cli.certificate.certificate_base64",
+                "name": "REPLACEME.Databases for PostgreSQL-nt.connection.cli.certificate.name"
+              },
+              "composed": [
+                "PGPASSWORD=3a9f2daec26620f4f78f6cf438d5e0df59c22ef96f3f76f8b8d2d2883f4f6322 PGSSLROOTCERT=b179a2b4-b76a-11e9-b9ae-c61492e0d24a psql 'host=479e999d-a7fc-40cc-80d6-090451e2b9dc.bkvfu0nd0m8k95k94ujg.databases.appdomain.cloud port=32587 dbname=ibmclouddb user=ibm_cloud_46d82ae3_33f0_4395_bd57_eb26fa717c28 sslmode=verify-full'"
+              ],
+              "environment": {
+                "PGPASSWORD": "REPLACEME.Databases for PostgreSQL-nt.connection.cli.environment.PGPASSWORD",
+                "PGSSLROOTCERT": "REPLACEME.Databases for PostgreSQL-nt.connection.cli.environment.PGSSLROOTCERT"
+              },
+              "type": "REPLACEME.Databases for PostgreSQL-nt.connection.cli.type"
+            },
+            "postgres": {
+              "authentication": {
+                "method": "REPLACEME.Databases for PostgreSQL-nt.connection.postgres.authentication.method",
+                "password": "REPLACEME.Databases for PostgreSQL-nt.connection.postgres.authentication.password",
+                "username": "REPLACEME.Databases for PostgreSQL-nt.connection.postgres.authentication.username"
+              },
+              "certificate": {
+                "certificate_base64": "REPLACEME.Databases for PostgreSQL-nt.connection.postgres.certificate.certificate_base64",
+                "name": "REPLACEME.Databases for PostgreSQL-nt.connection.postgres.certificate.name"
+              },
+              "composed": [
+                "postgres://ibm_cloud_46d82ae3_33f0_4395_bd57_eb26fa717c28:3a9f2daec26620f4f78f6cf438d5e0df59c22ef96f3f76f8b8d2d2883f4f6322@479e999d-a7fc-40cc-80d6-090451e2b9dc.bkvfu0nd0m8k95k94ujg.databases.appdomain.cloud:32587/ibmclouddb?sslmode=verify-full"
+              ],
+              "database": "REPLACEME.Databases for PostgreSQL-nt.connection.postgres.database",
+              "hosts": [
+                {
+                  "hostname": "479e999d-a7fc-40cc-80d6-090451e2b9dc.bkvfu0nd0m8k95k94ujg.databases.appdomain.cloud",
+                  "port": 32587
+                }
+              ],
+              "path": "REPLACEME.Databases for PostgreSQL-nt.connection.postgres.path",
+              "query_options": {
+                "sslmode": "REPLACEME.Databases for PostgreSQL-nt.connection.postgres.query_options.sslmode"
+              },
+              "scheme": "REPLACEME.Databases for PostgreSQL-nt.connection.postgres.scheme",
+              "type": "REPLACEME.Databases for PostgreSQL-nt.connection.postgres.type"
             }
+          },
+          "instance_administration_api": {
+            "deployment_id": "REPLACEME.Databases for PostgreSQL-nt.instance_administration_api.deployment_id",
+            "instance_id": "REPLACEME.Databases for PostgreSQL-nt.instance_administration_api.instance_id",
+            "root": "REPLACEME.Databases for PostgreSQL-nt.instance_administration_api.root"
+          }
         }
+      }
     }
-}
+  }
+  
   
