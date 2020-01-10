@@ -42,7 +42,7 @@
   },
   "devDependencies": {
     "coveralls": "^3.0.9",
-    "eslint": "^3.1.1",
+    "eslint": "^3.19.0",
     "eslint-plugin-ejs": "0.0.2",
     "mocha": "^5.2.0",
     "mocha-multi-reporters": "^1.1.7",

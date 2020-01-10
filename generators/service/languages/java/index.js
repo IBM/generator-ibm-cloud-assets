@@ -87,22 +87,6 @@ module.exports = class extends Generator {
 				}
 			})
 		}
-
-		this.context.metainf.forEach((metainf) => {
-			let location = this.templatePath(this.context.language + '/' + PATH_METAINF + metainf.filepath);
-			let contents = filesys.readFileSync(location, 'utf8');
-			let compiledTemplate = handlebars.compile(contents);
-			let output = compiledTemplate({ data: metainf.data });
-			if (metainf.filepath.endsWith(TEMPLATE_EXT)) {
-				metainf.filepath = metainf.filepath.slice(0, metainf.filepath.length - (TEMPLATE_EXT).length);
-			}
-			let destPath = this.destinationPath(PATH_METAINF + metainf.filepath);
-			if (this.fs.exists(destPath)) {
-				this.fs.append(destPath, output);
-			} else {
-				this.fs.write(destPath, output);
-			}
-		});
 		
 		// add missing pom.xml dependencies when running service enablement standalone
 		if (typeof this.context.parentContext === "undefined") {

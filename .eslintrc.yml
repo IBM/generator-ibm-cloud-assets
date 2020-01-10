@@ -5,9 +5,11 @@ env:
 
 rules:
   strict: 0
-  no-var: 2
+  no-var: 1
+  no-unused-vars: 1
   no-console: 0
-  indent: ["error", "tab", { "SwitchCase": 1}]
+  no-mixed-spaces-and-tabs: 1
+  indent: ["warn", "tab", { "SwitchCase": 1}]
 
 extends: eslint:recommended
 
