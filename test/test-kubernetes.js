@@ -168,8 +168,8 @@ describe('cloud-assets:kubernetes', function () {
 				console.log(JSON.stringify(serviceyml))
 
 				if (language === 'JAVA') {
-					assertYmlContent(serviceyml.spec.ports[0].name, 'http', 'serviceyml.spec.ports[0].name');
-					assertYmlContent(serviceyml.spec.ports[1].name, 'https', 'serviceyml.spec.ports[1].name');
+					assertYmlContent(serviceyml.spec.ports[0].name, 'https', 'serviceyml.spec.ports[0].name');
+					assertYmlContent(serviceyml.spec.ports[1].name, 'http', 'serviceyml.spec.ports[1].name');
 				}
 				if (language === 'SPRING') {
 					assertYmlContent(serviceyml.spec.ports[0].name, 'http', 'serviceyml.spec.ports[0].name');

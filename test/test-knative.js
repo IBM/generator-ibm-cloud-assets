@@ -86,7 +86,8 @@ describe('cloud-assets:knative', function () {
 		  }
 
 		let generatedYamlContents = yml.safeLoad(fs.readFileSync(serviceYamlFilePath, 'utf8'));
-		assert(_.isEqual(generatedYamlContents, targetServiceYaml));
+		assert.textEqual(JSON.stringify(generatedYamlContents), JSON.stringify(targetServiceYaml));
+		// assert(_.isEqual(generatedYamlContents, targetServiceYaml));
 	});
 
 	it('does not have helm charts', function () {
