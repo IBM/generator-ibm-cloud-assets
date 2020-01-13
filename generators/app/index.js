@@ -197,7 +197,7 @@ module.exports = class extends Generator {
 	writing() {
 		// runs subgenerators
 
-		this.composeWith(require.resolve('../dockertools'), this.opts);
+		this.composeWith(require.resolve('../cli_tools'), this.opts);
 
 		if (this.opts.deploy_options) {
 			if ( this.bluemix.cloudDeploymentType == "kube" ) {

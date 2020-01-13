@@ -15,7 +15,7 @@
   "scripts": {
     "test": "npm run lint && npm run mocha",
     "testcf": "npm run mocha test/test-cloudfoundry.js",
-    "testdocker": "npm run mocha test/test-dockertools.js",
+    "testcli": "npm run mocha test/test-clitools.js",
     "testkube": "npm run mocha test/test-kubernetes.js",
     "testknative": "npm run mocha test/test-knative.js",
     "testservice": "npm run mocha test/test-service.js",

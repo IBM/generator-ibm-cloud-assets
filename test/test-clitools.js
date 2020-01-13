@@ -20,10 +20,10 @@ const assert = require('yeoman-assert');
 const path = require('path');
 const utils = require('./test-utils')
 
-describe('cloud-enablement:dockertools', function () {
+describe('cloud-enablement:clitools', function () {
 	this.timeout(5000);
 
-	describe('cloud-enablement:dockertools with Swift project', function () {
+	describe('cloud-enablement:clitools with Swift project', function () {
 		beforeEach(function () {
 			return helpers.run(path.join(__dirname, '../generators/app'))
 				.inDir(path.join(__dirname, './tmp'))
@@ -57,7 +57,7 @@ describe('cloud-enablement:dockertools', function () {
 		});
 	});
 
-	describe('cloud-enablement:dockertools with NodeJS project', function () {
+	describe('cloud-enablement:clitools with NodeJS project', function () {
 		beforeEach(function () {
 			return helpers.run(path.join(__dirname, '../generators/app'))
 				.inDir(path.join(__dirname, './tmp'))
@@ -96,7 +96,7 @@ describe('cloud-enablement:dockertools', function () {
 	/* Common Java Project characteristics: Spring or Liberty, maven or gradle */
 	let javaFrameworks = ['JAVA', 'SPRING'];
 	javaFrameworks.forEach(language => {
-		describe('cloud-enablement:dockertools for ['+ language +'] project', function () {
+		describe('cloud-enablement:clitools for ['+ language +'] project', function () {
 			let artifactId = 'testArtifact-id';
 			let javaVersion = '1.0-SNAPSHOT';
 			let applicationName = `testgenv2apphelm${language}`;
@@ -109,7 +109,7 @@ describe('cloud-enablement:dockertools', function () {
 
 			it('create cli-config for CLI tool', function () {
 				assert.file('cli-config.yml');
-				assert.noFileContent('cli-config.yml', 'ibm-cloud-app-id : ')
+				assert.fileContent('cli-config.yml', 'ibm-cloud-app-id : ')
 			});
 			it('create cli-config chart path includes application name', function () {
 				assert.fileContent('cli-config.yml', `chart-path : "chart/${applicationName.toLowerCase()}"`);
@@ -121,7 +121,7 @@ describe('cloud-enablement:dockertools', function () {
 		});
 	});
 
-	describe('cloud-enablement:dockertools with Python project', function () {
+	describe('cloud-enablement:clitools with Python project', function () {
 		beforeEach(function () {
 			return helpers.run(path.join(__dirname, '../generators/app'))
 				.inDir(path.join(__dirname, './tmp'))
@@ -143,7 +143,7 @@ describe('cloud-enablement:dockertools', function () {
 	});
 
 	/*
-	describe('cloud-enablement:dockertools with Python project -- ibmcloud dev enable', function () {
+	describe('cloud-enablement:clitools with Python project -- ibmcloud dev enable', function () {
 		beforeEach(function () {
 			return helpers.run(path.join(__dirname, '../generators/app'))
 				.inDir(path.join(__dirname, './tmp'))
@@ -186,7 +186,7 @@ describe('cloud-enablement:dockertools', function () {
 	});
 	*/
 
-	describe('cloud-enablement:dockertools with Python project with no services', function () {
+	describe('cloud-enablement:clitools with Python project with no services', function () {
 		beforeEach(function () {
 			return helpers.run(path.join(__dirname, '../generators/app'))
 				.inDir(path.join(__dirname, './tmp'))
@@ -202,7 +202,7 @@ describe('cloud-enablement:dockertools', function () {
 
 	});
 
-	describe('cloud-enablement:dockertools with Django project', function () {
+	describe('cloud-enablement:clitools with Django project', function () {
 		beforeEach(function () {
 			return helpers.run(path.join(__dirname, '../generators/app'))
 				.inDir(path.join(__dirname, './tmp'))
@@ -220,7 +220,7 @@ describe('cloud-enablement:dockertools', function () {
 
 	});
 
-	// describe('cloud-enablement:dockertools with Django project -- ibmcloud dev enable', function () {
+	// describe('cloud-enablement:clitools with Django project -- ibmcloud dev enable', function () {
 	// 	beforeEach(function () {
 	// 		return helpers.run(path.join(__dirname, '../generators/app'))
 	// 			.inDir(path.join(__dirname, './tmp'))
@@ -260,7 +260,7 @@ describe('cloud-enablement:dockertools', function () {
 	// 	});
 	// });
 
-	describe('cloud-enablement:dockertools with Go project', function () {
+	describe('cloud-enablement:clitools with Go project', function () {
 		beforeEach(function () {
 			return helpers.run(path.join(__dirname, '../generators/app'))
 				.inDir(path.join(__dirname, './tmp'))
