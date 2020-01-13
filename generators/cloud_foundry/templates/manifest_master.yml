@@ -25,8 +25,8 @@ applications:
   {{#if this.domain }}
   domain: {{{this.domain}}}
   {{/if ~}}
-  {{#if this.host }}
-  host: {{{this.host}}}
+  {{#if this.hostname }}
+  host: {{{this.hostname}}}
   {{else}}
   random-route: true
   {{/if ~}}
