@@ -14,5 +14,8 @@
     "language": "SWIFT",
     "service_credentials": {
     }
+  },
+  "metadata": {
+    "git_url": "https://github.com/IBM/java-spring-app"
   }
 }

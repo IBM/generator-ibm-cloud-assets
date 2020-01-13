@@ -14,5 +14,8 @@
     "language": "GO",
     "service_credentials": {
     }
+  },
+  "metadata": {
+    "git_url": "https://github.com/IBM/go-gin-app"
   }
 }
