@@ -1,7 +1,7 @@
 # The IBM version of this configuration
 version : 0.0.3
-{{#exists applicationId}}
-ibm-cloud-app-id : "{{applicationId}}"
+{{#exists app_id}}
+ibm-cloud-app-id : "{{app_id}}"
 {{/exists}}
 
 # The container name used for the run container
