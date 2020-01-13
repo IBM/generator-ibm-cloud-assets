@@ -159,7 +159,7 @@ describe('cloud-assets:kubernetes', function () {
 				} else {
 					envTemplate = [{"name":"service_cloudant","valueFrom":{"secretKeyRef":{"name":{"[object Object]":null},"key":"binding","optional":true}}},{"name":"PORT","value":"{{ .Values.service.servicePort }}"},{"name":"APPLICATION_NAME","value":"{{ .Release.Name }}"}]
 				}
-				assert( _.isEqual(deploymentyml.spec.template.spec.containers[0].env, envTemplate) )
+				assert.textEqual(JSON.stringify(deploymentyml.spec.template.spec.containers[0].env, null, 3), JSON.stringify(envTemplate, null, 3));
 			});
 
 			it('has service.yaml with correct content', function () {
@@ -168,8 +168,8 @@ describe('cloud-assets:kubernetes', function () {
 				console.log(JSON.stringify(serviceyml))
 
 				if (language === 'JAVA') {
-					assertYmlContent(serviceyml.spec.ports[0].name, 'http', 'serviceyml.spec.ports[0].name');
-					assertYmlContent(serviceyml.spec.ports[1].name, 'https', 'serviceyml.spec.ports[1].name');
+					assertYmlContent(serviceyml.spec.ports[0].name, 'https', 'serviceyml.spec.ports[0].name');
+					assertYmlContent(serviceyml.spec.ports[1].name, 'http', 'serviceyml.spec.ports[1].name');
 				}
 				if (language === 'SPRING') {
 					assertYmlContent(serviceyml.spec.ports[0].name, 'http', 'serviceyml.spec.ports[0].name');
@@ -185,13 +185,16 @@ describe('cloud-assets:kubernetes', function () {
 				let templateValuesYml;
 				if (language === 'JAVA') {
 					templateValuesYml = {"replicaCount":1,"revisionHistoryLimit":1,"image":{"repository":"testgenv2apphelmjava","tag":"v1.0.0","pullPolicy":"IfNotPresent","resources":{"requests":{"cpu":"200m","memory":"300Mi"}}},"service":{"name":"Node","type":"NodePort","servicePort":9080,"servicePortHttps":9443},"hpa":{"enabled":false,"minReplicas":1,"maxReplicas":2,"metrics":{"cpu":{"targetAverageUtilization":70},"memory":{"targetAverageUtilization":70}}},"base":{"enabled":false,"replicaCount":1,"image":{"tag":"v0.9.9"},"weight":100},"istio":{"enabled":false,"weight":100},"services":{"cloudant":{"secretKeyRef":"my-service-cloudant"}}}
-					assert( _.isEqual(templateValuesYml, valuesyml) )
+					// assert( _.isEqual(templateValuesYml, valuesyml) )
+					assert.textEqual(JSON.stringify(valuesyml, null, 3), JSON.stringify(templateValuesYml, null, 3));
 				} else if (language === 'SPRING') {
 					templateValuesYml = {"replicaCount":1,"revisionHistoryLimit":1,"image":{"repository":"testgenv2apphelmspring","tag":"v1.0.0","pullPolicy":"IfNotPresent","resources":{"requests":{"cpu":"200m","memory":"300Mi"}}},"service":{"name":"Node","type":"NodePort","servicePort":8080},"hpa":{"enabled":false,"minReplicas":1,"maxReplicas":2,"metrics":{"cpu":{"targetAverageUtilization":70},"memory":{"targetAverageUtilization":70}}},"base":{"enabled":false,"replicaCount":1,"image":{"tag":"v0.9.9"},"weight":100},"istio":{"enabled":false,"weight":100},"services":{"cloudant":{"secretKeyRef":"my-service-cloudant"}}}
-					assert( _.isEqual(templateValuesYml, valuesyml) )
+					// assert( _.isEqual(templateValuesYml, valuesyml) )
+					assert.textEqual(JSON.stringify(valuesyml, null, 3), JSON.stringify(templateValuesYml, null, 3));
 				} else if (language === 'NODE') {
 					templateValuesYml = {"replicaCount":1,"revisionHistoryLimit":1,"image":{"tag":"v1.0.0","pullPolicy":"Always","resources":{"requests":{"cpu":"200m","memory":"300Mi"}}},"livenessProbe":{"initialDelaySeconds":30,"periodSeconds":10},"service":{"name":"node","type":"NodePort","servicePort":3000},"hpa":{"enabled":false,"minReplicas":1,"maxReplicas":2,"metrics":{"cpu":{"targetAverageUtilization":70},"memory":{"targetAverageUtilization":70}}},"base":{"enabled":false,"replicaCount":1,"image":{"tag":"v0.9.9"},"weight":100},"istio":{"enabled":false,"weight":100},"services":{"appid":{"secretKeyRef":"my-service-appid"},"cloudant":{"secretKeyRef":"my-service-cloudant"}}}
-					assert( _.isEqual(templateValuesYml, valuesyml) )
+					// assert( _.isEqual(templateValuesYml, valuesyml) )
+					assert.textEqual(JSON.stringify(valuesyml, null, 3), JSON.stringify(templateValuesYml, null, 3));
 				}
 			});
 

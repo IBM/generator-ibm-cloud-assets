@@ -44,8 +44,7 @@ describe('cloud-assets:knative', function () {
 			"apiVersion": "serving.knative.dev/v1alpha1",
 			"kind": "Service",
 			"metadata": {
-			  "name": "IMAGE_NAME",
-			  "namespace": "CLUSTER_NAMESPACE"
+			  "name": "testgenv2appknativenode"
 			},
 			"spec": {
 			  "template": {
@@ -86,7 +85,7 @@ describe('cloud-assets:knative', function () {
 		  }
 
 		let generatedYamlContents = yml.safeLoad(fs.readFileSync(serviceYamlFilePath, 'utf8'));
-		assert(_.isEqual(generatedYamlContents, targetServiceYaml));
+		assert.textEqual(JSON.stringify(generatedYamlContents, null, 3), JSON.stringify(targetServiceYaml, null, 3));
 	});
 
 	it('does not have helm charts', function () {
