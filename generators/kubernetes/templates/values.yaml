@@ -15,7 +15,7 @@ livenessProbe:
 service:
   name: {{#toLowerCase application.language}}{{/toLowerCase}}
   type: NodePort
-  servicePort: {{deploy_options.servicePorts.http}}
+  servicePort: {{ deploy_options.servicePorts.http }}
 hpa:
   enabled: false
   minReplicas: 1
@@ -25,13 +25,6 @@ hpa:
       targetAverageUtilization: 70
     memory:
       targetAverageUtilization: 70
-{{#has services 'mongodb'}}
-services:
-  mongo:
-     url: mongo
-     name: comments
-     env: production
-{{/has}}
 base:
   enabled: false
   replicaCount: 1

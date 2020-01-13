@@ -50,7 +50,7 @@ module.exports = class extends Generator {
 	}
 
 	configuring() {
-		this.opts.chartName = this.options.application.sanitizedName
+		this.opts.chartName = this.options.application.chartName
 		
 		// not services like cloudant, services like mongo
 		this.opts.services = typeof(this.opts.services) === 'string' ? JSON.parse(this.opts.services || '[]') : this.opts.services;
