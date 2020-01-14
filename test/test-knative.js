@@ -44,8 +44,7 @@ describe('cloud-assets:knative', function () {
 			"apiVersion": "serving.knative.dev/v1alpha1",
 			"kind": "Service",
 			"metadata": {
-			  "name": "IMAGE_NAME",
-			  "namespace": "CLUSTER_NAMESPACE"
+			  "name": knativeOptions.application.chartName
 			},
 			"spec": {
 			  "template": {

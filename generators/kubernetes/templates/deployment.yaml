@@ -40,15 +40,3 @@ spec:
             value : "{{tag ' .Values.service.servicePort '}}"
           - name: APPLICATION_NAME
             value: "{{tag ' .Release.Name '}}"
-          {{#has services 'mongodb'}}
-          - name: MONGO_URL
-            value: {{tag ' .Values.services.mongo.url '}}
-          - name: MONGO_DB_NAME
-            value: {{tag ' .Values.services.mongo.name '}}
-          - name: MONGO_USER
-            value: {{tag ' .Values.services.mongo.username '}}
-          - name: MONGO_PASS
-            value: {{tag ' .Values.services.mongo.password '}}
-          - name: MONGO_CA
-            value: {{tag ' .Values.services.mongo.ca '}}
-          {{/has}}

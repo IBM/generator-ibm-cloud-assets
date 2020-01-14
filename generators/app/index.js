@@ -166,13 +166,16 @@ module.exports = class extends Generator {
 		if (this.opts.deploy_options && this.bluemix.cloudDeploymentType == "kube") {
 			// work out app name and language
 			this.opts.bluemix.language = _.toLower(this.bluemix.backendPlatform);
+			
 			if(this.opts.bluemix.language === 'java' || this.opts.bluemix.language === 'spring') {
 				this.opts.bluemix.applicationName = this.opts.bluemix.appName || Utils.sanitizeAlphaNum(this.bluemix.name);
 			} else {
 				this.opts.bluemix.applicationName = Utils.sanitizeAlphaNum(this.bluemix.name);
 			}
+			this.opts.application.sanitizedName = Utils.sanitizeAlphaNum(this.opts.application.name); //java did something strange but should only be from generators
 
 			this.opts.bluemix.chartName = Utils.sanitizeAlphaNumLowerCase(this.opts.bluemix.applicationName);
+			this.opts.application.chartName = Utils.sanitizeAlphaNumLowerCase( this.opts.application.sanitizedName )
 
 			this.opts.bluemix.services = typeof(this.opts.bluemix.services) === 'string' ? JSON.parse(this.opts.bluemix.services || '[]') : this.opts.bluemix.services;
 
@@ -187,6 +190,12 @@ module.exports = class extends Generator {
 				}
 			}
 
+			this.opts.deploy_options.servicePorts = {"http": portDefault[this.opts.application.language.toLowerCase()].http}
+			if ( portDefault[this.opts.application.language.toLowerCase()].https ) {
+				this.opts.deploy_options.servicePorts.https = portDefault[this.opts.application.language.toLowerCase()].https;
+			}
+
+
 			if (this.bluemix.server && this.bluemix.server.cloudDeploymentOptions && this.bluemix.server.cloudDeploymentOptions.kubeDeploymentType) {
 					this.opts.bluemix.kubeDeploymentType = this.bluemix.server.cloudDeploymentOptions.kubeDeploymentType;
 			}
@@ -200,9 +209,9 @@ module.exports = class extends Generator {
 		this.composeWith(require.resolve('../cli_tools'), this.opts);
 
 		if (this.opts.deploy_options) {
-			if ( this.bluemix.cloudDeploymentType == "kube" ) {
+			if ( this.opts.deploy_options.kube ) {
 
-				if ( this.bluemix.server.cloudDeploymentOptions.kubeDeploymentType == "KNATIVE" ) {
+				if ( this.opts.deploy_options.kube.type == "KNATIVE" ) {
 					this.log("write knative")
 					this.composeWith(require.resolve('../knative'), this.opts);
 				} else {
@@ -210,7 +219,7 @@ module.exports = class extends Generator {
 					this.composeWith(require.resolve('../kubernetes'), this.opts);
 				}
 
-			} else if (this.bluemix.cloudDeploymentType == "cloud_foundry") {
+			} else if (this.opts.deployOptions.cloud_foundry) {
 				this.log("write CF")
 				this.composeWith(require.resolve('../cloud_foundry'), this.opts);
 			}
