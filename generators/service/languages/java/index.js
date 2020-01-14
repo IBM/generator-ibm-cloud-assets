@@ -55,16 +55,14 @@ module.exports = class extends Generator {
 		this._addJavaDependencies = Utils.addJavaDependencies.bind(this);
 
 		let serviceCredentials,
-			scaffolderKey,
 			serviceKey;
 		//initializing ourselves by composing with the service enabler
 		let root = path.dirname(require.resolve('../../enabler'));
 		Object.keys(svcInfo).forEach(svc => {
 			serviceKey = svc;
-			scaffolderKey = scaffolderMapping[serviceKey];
-			serviceCredentials = this.context.bluemix[scaffolderKey];
+			serviceCredentials = this.context.bluemix[serviceKey];
 			if (serviceCredentials) {
-				this.context.scaffolderKey = scaffolderKey;
+				this.context.scaffolderKey = serviceKey;
 				logger.debug("Composing with service : " + svc);
 				try {
 					this.context.cloudLabel = serviceCredentials && serviceCredentials.serviceInfo && serviceCredentials.serviceInfo.cloudLabel;
