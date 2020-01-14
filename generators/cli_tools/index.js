@@ -323,8 +323,8 @@ module.exports = class extends Generator {
 			hostPathRun: '.',
 			hostPathTools: '.',
 			// The colon adds a buffer command
-			containerPathRun: `/go/src/${applicationName}; :`,
-			containerPathTools: `/go/src/${applicationName}; :`,
+			containerPathRun: `/go/src/goginapp; :`,
+			containerPathTools: `/go/src/goginapp; :`,
 			containerPortMap: `${port}:${port}`,
 			containerPortMapDebug: `${debugPort}:${debugPort}`,
 			dockerFileRun,
