@@ -67,9 +67,7 @@ module.exports = class extends Generator {
 			this.options.libertyBeta = true
 		}
 
-		this.opts.bluemix = this._makeBluemix(this.opts.deploy_options, this.opts.application);
-
-		this.shouldPrompt = this.opts.bluemix ? false : true;
+		this.shouldPrompt = this.opts.application ? false : true;
 
 		/*
 		Yeoman copies the opts when doing compose with to create own object reference
@@ -135,14 +133,19 @@ module.exports = class extends Generator {
 				'SWIFT',
 				'DJANGO',
 				'GO'
-			]
+			],
+			default: "NODE"
 		});
 
 		prompts.push({
-			type: 'input',
+			type: 'list',
 			name: 'deploymentType',
 			message: 'Deployment Type (kube, cloud_foundry)',
-			default: path.basename(process.cwd())
+			choices: [
+				'kube',
+				'cloud_foundry'
+			],
+			default: "kube"
 		});
 
 		prompts.push({
@@ -152,20 +155,38 @@ module.exports = class extends Generator {
 			choices: [
 				'HELM',
 				'KNATIVE'
-			]
+			],
+			default: "KNATIVE"
 		});
+
+		prompts.push({
+			type: 'input',
+			name: 'cluster_name',
+			message: 'Cluster name if KUBE',
+			default: "mycluster"
+		});
+
+		prompts.push({
+			type: 'input',
+			name: 'region',
+			message: 'Cluster region if KUBE',
+			default: "ibm:ys1:us-south"
+		});
+
 		return this.prompt(prompts).then(this._processAnswers.bind(this));
 
 	}
 
 	configuring() {
 
+		this.opts.bluemix = this._makeBluemix(this.opts.deploy_options, this.opts.application);
+
 		this.opts.application.sanitizedName = Utils.sanitizeAlphaNumLowerCase(this.opts.application.name);
 
 		// process object for kube deployments
-		if (this.opts.deploy_options && this.bluemix.cloudDeploymentType == "kube") {
+		if (this.opts.deploy_options && this.opts.deploy_options.kube ) {
 			// work out app name and language
-			this.opts.bluemix.language = _.toLower(this.bluemix.backendPlatform);
+			this.opts.bluemix.language = _.toLower(this.opts.bluemix.backendPlatform);
 			
 			if(this.opts.bluemix.language === 'java' || this.opts.bluemix.language === 'spring') {
 				this.opts.bluemix.applicationName = this.opts.bluemix.appName || Utils.sanitizeAlphaNum(this.bluemix.name);
@@ -194,7 +215,6 @@ module.exports = class extends Generator {
 			if ( portDefault[this.opts.application.language.toLowerCase()].https ) {
 				this.opts.deploy_options.servicePorts.https = portDefault[this.opts.application.language.toLowerCase()].https;
 			}
-
 
 			if (this.bluemix.server && this.bluemix.server.cloudDeploymentOptions && this.bluemix.server.cloudDeploymentOptions.kubeDeploymentType) {
 					this.opts.bluemix.kubeDeploymentType = this.bluemix.server.cloudDeploymentOptions.kubeDeploymentType;
@@ -233,18 +253,38 @@ module.exports = class extends Generator {
 
 	_processAnswers(answers) {
 		// processes answers from the prompts, not part of production flow
-		_.extend(this.bluemix,
-			{
-				server: {
-					cloudDeploymentType: answers.deploymentType,
-					cloudDeploymentOptions:  { kubeDeploymentType: answers.kubeDeploymentType }
-				},
-				cloudDeploymentType: answers.deploymentType,
-				sanitizedName: Utils.sanitizeAlphaNumDash(answers.name),
-				name: answers.name,
-				backendPlatform: answers.language
+
+		if ( answers.deploymentType == "cloud_foundry" ) {
+			//CF
+			this.opts.deploy_options = {
+				"cloud_foundry": {
+					"disk_quota": "1G",
+					"domain": "mydomain.com",
+					"hostname": "my-app-hostname",
+					"instances": 3,
+					"memory": "512MB",
+					"service_bindings": {}
+			    }
 			}
-		);
+		} else {
+			//KUBE
+			this.opts.deploy_options = {
+				"kube": {
+					"cluster_name": answers.cluster_name,
+					"region": answers.region,
+					"type": answers.kubeDeploymentType,
+					"service_bindings": {}
+				}
+			}
+		} 
+
+		this.opts.application = {
+			"app_id": "4b395cc4-5149-48e2-b711-b3dd80cf3f11",
+			"name": answers.name,
+			"language": answers.language,
+			"service_credentials": {}
+		}
+
 	}
 
 	_sanitizeOption(options, name) {
