@@ -44,6 +44,7 @@ module.exports = class extends Generator {
 		this.logger.level = this.context.loggerLevel;
 		this.languageTemplatePath = this.templatePath() + "/" + this.context.language;
 		this.applicationType = (this.context.starter && this.context.starter.applicationType) ? this.context.starter.applicationType : "BLANK";
+		this.logger.debug(`Constructing: scaffolderName=${this.scaffolderName}, serviceKey=${this.serviceKey}, customCredKeys=${this.customCredKeys}`);
 	}
 
 
@@ -66,13 +67,12 @@ module.exports = class extends Generator {
 
 	configuring() {
 		this.hasBluemixProperty = this.context.bluemix.hasOwnProperty(this.scaffolderName);
-		this.hasTemplate = fs.existsSync(this.languageTemplatePath);
-		if (this.hasBluemixProperty && !this.hasTemplate) {
+		// this.logger.debug(`configuring - bluemix: ${JSON.stringify(this.context.bluemix, null, 2)}`);
+		if (this.hasBluemixProperty) {
 			this.logger.info(`No available sdk available for ${this.scaffolderName} in ${this.context.language}; configuring credentials only`);
 			this._addMappings(this.config);
 			this._addLocalDevConfig();
-			return;
-		} else if (!this.hasBluemixProperty || !this.hasTemplate) {
+		} else {
 			this.logger.info(`Nothing to process for ${this.scaffolderName} in ${this.context.language}`);
 			return;
 		}
@@ -82,32 +82,9 @@ module.exports = class extends Generator {
 			this._addMappings(this.config);
 			this._addLocalDevConfig();
 		}
-
-		if (serviceInfo && this.scaffolderName === "appid" && this.context.language === "node") {
-			this._handleAppidForNode();
-		}
-		else {
-			this._addDependencies();
-			//this._addReadMe();
-			//this._addInstrumentation();
-		}
-
 		
 		if (serviceInfo !== undefined) {
 			this._createObjectForKubeYamls(serviceInfo);
-			//this._addServicesToPipeline(serviceInfo);
-		}
-		
-	}
-
-	_handleAppidForNode() {
-		// AppID instrumentation / readme / dependencies / html are only
-		// intended for web apps, they do not apply to MS or blank projects
-		if (this.applicationType.toLowerCase() === "web") {
-			this._addDependencies();
-			//this._addReadMe();
-			this._addHtml();
-			this._addInstrumentation();
 		}
 	}
 
@@ -141,6 +118,7 @@ module.exports = class extends Generator {
 		let serviceInfo = {};
 		if (this.context.bluemix[this.scaffolderName]) {
 			let service = this.context.bluemix[this.scaffolderName];
+			// this.logger.debug(`included service: ${service}`);
 			if (service.hasOwnProperty('serviceInfo')) {
 				serviceInfo = service.serviceInfo;
 			} else if (Array.isArray(service)) {
@@ -179,22 +157,6 @@ module.exports = class extends Generator {
 		}
 
 		this.context.deploymentServicesEnv.push(serviceEnv);
-	}
-
-	_addDependencies() {
-		this.logger.info(`Adding dependencies for ${this.scaffolderName}`);
-		if (Array.isArray(this.context.dependenciesFile)) {
-			for (let i = 0; i < this.context.dependenciesFile.length; i++) {
-				this.context.addDependencies(this.fs.read(this.languageTemplatePath + "/" + this.context.dependenciesFile[i]));
-			}
-		} else {
-			let dependenciesString = this.fs.read(this.languageTemplatePath + "/" + this.context.dependenciesFile);
-			if (this.context.dependenciesFile.endsWith('.template')) {			//pass through handlebars if this is a .template file
-				let template = Handlebars.compile(dependenciesString);
-				dependenciesString = template(this.context);
-			}
-			this.context.addDependencies(dependenciesString);
-		}
 	}
 
 	_mapCredentialKeysToScaffolderKeys(credentialKeys, scaffolderKeys) {
