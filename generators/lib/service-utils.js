@@ -25,7 +25,7 @@ function addServicesEnvToHelmChartAsync(args) {
 			return resolve();
 		}
 
-		// the helm chart should've been generated in the generator-ibm-cloud-enablement generator
+		// the helm chart should've been generated in the kubernetes generator
 		// for deploy to Kubernetes using Helm chart
 		let chartFolderPath = `${destinationPath}/chart`;
 		if (!fs.existsSync(chartFolderPath)) {
@@ -148,7 +148,6 @@ function addServicesToServiceKnativeYamlAsync(args) {
 
 }
 
-
 // add services section with secretKeyRefs in values.yaml
 function addServicesEnvToValuesAsync(args) {
 	return new Promise((resolve, reject) => {
@@ -268,6 +267,7 @@ function generateSecretKeyRefsDeployment(services, prefix) {
 			`${prefix}      name: ${serviceEntry.valueFrom.secretKeyRef.name}\n` +
 			`${prefix}      key: ${serviceEntry.valueFrom.secretKeyRef.key}\n` +
 			`${prefix}      optional: true\n`;
+		// logger.debug(`generateSecretKeyRefsDeployment - adding servicesEnvString=${servicesEnvString}`);
 	});
 	return servicesEnvString;
 }
@@ -278,6 +278,7 @@ function generateSecretRefsValues(services) {
 		servicesEnvString +=
 			`  ${serviceEntry.scaffolderName}:\n` +
 			`    secretKeyRef: ${serviceEntry.keyName}\n`;
+		// logger.debug(`generateSecretRefsValues - adding servicesEnvString=${servicesEnvString}`);
 	});
 	return servicesEnvString;
 }

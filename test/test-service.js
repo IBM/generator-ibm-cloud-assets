@@ -46,6 +46,10 @@ function validateHelmChart(lang, deploy_type, service, applicationName) {
     assert.file(chartLocation + '/templates/service.yaml');
     assert.file(chartLocation + '/templates/hpa.yaml');
     assert.file(chartLocation + '/templates/basedeployment.yaml');
+    
+    assert.fileContent(chartLocation + '/templates/deployment.yaml', `service_${SvcInfo[service]["customServiceKey"].replace(/-/g, '_')}`);
+    assert.fileContent(chartLocation + '/templates/deployment.yaml', `.Values.services.${service}.secretKeyRef`);
+    assert.fileContent(valuesFile, `my-service-${service}`);
 }
 
 function validateKnativeService(lang, deploy_type, service) {
