@@ -239,7 +239,7 @@ module.exports = class extends Generator {
 					this.composeWith(require.resolve('../kubernetes'), this.opts);
 				}
 
-			} else if (this.opts.deployOptions.cloud_foundry) {
+			} else if (this.opts.deploy_options.cloud_foundry) {
 				this.log("write CF")
 				this.composeWith(require.resolve('../cloud_foundry'), this.opts);
 			}
