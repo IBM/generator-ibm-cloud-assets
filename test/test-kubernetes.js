@@ -152,14 +152,8 @@ describe('cloud-assets:kubernetes', function () {
 
 			it('has deployment.yaml with correct env settings', () => {
 				let generatedEnv = getSafeYaml(chartLocation + '/templates/deployment.yaml').spec.template.spec.containers[0].env;
-				let envTemplate;
-				if (language === 'NODE' || language === 'PYTHON' || language === 'SWIFT') {
-					// these languages support app_id, other languages do not
-					envTemplate = [{"name":"service_appid","valueFrom":{"secretKeyRef":{"name":{"[object Object]":null},"key":"binding","optional":true}}},{"name":"service_cloudant","valueFrom":{"secretKeyRef":{"name":{"[object Object]":null},"key":"binding","optional":true}}},{"name":"PORT","value":"{{ .Values.service.servicePort }}"},{"name":"APPLICATION_NAME","value":"{{ .Release.Name }}"}]
-				} else {
-					envTemplate = [{"name":"service_cloudant","valueFrom":{"secretKeyRef":{"name":{"[object Object]":null},"key":"binding","optional":true}}},{"name":"PORT","value":"{{ .Values.service.servicePort }}"},{"name":"APPLICATION_NAME","value":"{{ .Release.Name }}"}]
-				}
-				assert( _.isEqual(generatedEnv, envTemplate), "\n" + JSON.stringify(generatedEnv) + "\n" + JSON.stringify(envTemplate) );
+				let envTemplate = [{"name":"service_appid","valueFrom":{"secretKeyRef":{"name":{"[object Object]":null},"key":"binding","optional":true}}},{"name":"service_cloudant","valueFrom":{"secretKeyRef":{"name":{"[object Object]":null},"key":"binding","optional":true}}},{"name":"PORT","value":"{{ .Values.service.servicePort }}"},{"name":"APPLICATION_NAME","value":"{{ .Release.Name }}"}]
+				assert( _.isEqual(generatedEnv, envTemplate), "\n \n GENERATED: \n" + JSON.stringify(generatedEnv) + "\n \n EXPECTED: \n" + JSON.stringify(envTemplate) );
 			});
 
 			it('has service.yaml with correct content', function () {
@@ -181,18 +175,23 @@ describe('cloud-assets:kubernetes', function () {
 			});
 
 			it('has values.yaml with correct content', function () {
-				let valuesyml = getSafeYaml(chartLocation + '/values.yaml');
+				let generatedValuesyml = getSafeYaml(chartLocation + '/values.yaml');
 				let templateValuesYml;
 				if (language === 'JAVA') {
-					templateValuesYml = {"replicaCount":1,"revisionHistoryLimit":1,"image":{"repository":"testgenv2apphelmjava","tag":"v1.0.0","pullPolicy":"IfNotPresent","resources":{"requests":{"cpu":"200m","memory":"300Mi"}}},"service":{"name":"Node","type":"NodePort","servicePort":9080,"servicePortHttps":9443},"hpa":{"enabled":false,"minReplicas":1,"maxReplicas":2,"metrics":{"cpu":{"targetAverageUtilization":70},"memory":{"targetAverageUtilization":70}}},"base":{"enabled":false,"replicaCount":1,"image":{"tag":"v0.9.9"},"weight":100},"istio":{"enabled":false,"weight":100},"services":{"cloudant":{"secretKeyRef":"my-service-cloudant"}}}
+					templateValuesYml = {"replicaCount":1,"revisionHistoryLimit":1,"image":{"repository":"testgenv2apphelmjava","tag":"v1.0.0","pullPolicy":"IfNotPresent","resources":{"requests":{"cpu":"200m","memory":"300Mi"}}},"service":{"name":"Node","type":"NodePort","servicePort":9080,"servicePortHttps":9443},"hpa":{"enabled":false,"minReplicas":1,"maxReplicas":2,"metrics":{"cpu":{"targetAverageUtilization":70},"memory":{"targetAverageUtilization":70}}},"base":{"enabled":false,"replicaCount":1,"image":{"tag":"v0.9.9"},"weight":100},"istio":{"enabled":false,"weight":100},"services":{"appid":{"secretKeyRef":"my-service-appid"},"cloudant":{"secretKeyRef":"my-service-cloudant"}}}
 				} else if (language === 'SPRING') {
-					templateValuesYml = {"replicaCount":1,"revisionHistoryLimit":1,"image":{"repository":"testgenv2apphelmspring","tag":"v1.0.0","pullPolicy":"IfNotPresent","resources":{"requests":{"cpu":"200m","memory":"300Mi"}}},"service":{"name":"Node","type":"NodePort","servicePort":8080},"hpa":{"enabled":false,"minReplicas":1,"maxReplicas":2,"metrics":{"cpu":{"targetAverageUtilization":70},"memory":{"targetAverageUtilization":70}}},"base":{"enabled":false,"replicaCount":1,"image":{"tag":"v0.9.9"},"weight":100},"istio":{"enabled":false,"weight":100},"services":{"cloudant":{"secretKeyRef":"my-service-cloudant"}}}
+					templateValuesYml = {"replicaCount":1,"revisionHistoryLimit":1,"image":{"repository":"testgenv2apphelmspring","tag":"v1.0.0","pullPolicy":"IfNotPresent","resources":{"requests":{"cpu":"200m","memory":"300Mi"}}},"service":{"name":"Node","type":"NodePort","servicePort":8080},"hpa":{"enabled":false,"minReplicas":1,"maxReplicas":2,"metrics":{"cpu":{"targetAverageUtilization":70},"memory":{"targetAverageUtilization":70}}},"base":{"enabled":false,"replicaCount":1,"image":{"tag":"v0.9.9"},"weight":100},"istio":{"enabled":false,"weight":100},"services":{"appid":{"secretKeyRef":"my-service-appid"},"cloudant":{"secretKeyRef":"my-service-cloudant"}}}
 				} else if (language === 'NODE') {
 					templateValuesYml = {"replicaCount":1,"revisionHistoryLimit":1,"image":{"tag":"v1.0.0","pullPolicy":"Always","resources":{"requests":{"cpu":"200m","memory":"300Mi"}}},"livenessProbe":{"initialDelaySeconds":30,"periodSeconds":10},"service":{"name":"node","type":"NodePort","servicePort":3000},"hpa":{"enabled":false,"minReplicas":1,"maxReplicas":2,"metrics":{"cpu":{"targetAverageUtilization":70},"memory":{"targetAverageUtilization":70}}},"base":{"enabled":false,"replicaCount":1,"image":{"tag":"v0.9.9"},"weight":100},"istio":{"enabled":false,"weight":100},"services":{"appid":{"secretKeyRef":"my-service-appid"},"cloudant":{"secretKeyRef":"my-service-cloudant"}}}
+				} else if (language === 'GO') {
+					templateValuesYml = {"replicaCount":1,"revisionHistoryLimit":1,"image":{"tag":"v1.0.0","pullPolicy":"Always","resources":{"requests":{"cpu":"200m","memory":"300Mi"}}},"livenessProbe":{"initialDelaySeconds":30,"periodSeconds":10},"service":{"name":"go","type":"NodePort","servicePort":8080},"hpa":{"enabled":false,"minReplicas":1,"maxReplicas":2,"metrics":{"cpu":{"targetAverageUtilization":70},"memory":{"targetAverageUtilization":70}}},"base":{"enabled":false,"replicaCount":1,"image":{"tag":"v0.9.9"},"weight":100},"istio":{"enabled":false,"weight":100},"services":{"appid":{"secretKeyRef":"my-service-appid"},"cloudant":{"secretKeyRef":"my-service-cloudant"}}}
+				} else if (language === 'SWIFT') {
+					templateValuesYml = {"replicaCount":1,"revisionHistoryLimit":1,"image":{"tag":"v1.0.0","pullPolicy":"Always","resources":{"requests":{"cpu":"200m","memory":"300Mi"}}},"livenessProbe":{"initialDelaySeconds":30,"periodSeconds":10},"service":{"name":"swift","type":"NodePort","servicePort":8080},"hpa":{"enabled":false,"minReplicas":1,"maxReplicas":2,"metrics":{"cpu":{"targetAverageUtilization":70},"memory":{"targetAverageUtilization":70}}},"base":{"enabled":false,"replicaCount":1,"image":{"tag":"v0.9.9"},"weight":100},"istio":{"enabled":false,"weight":100},"services":{"appid":{"secretKeyRef":"my-service-appid"},"cloudant":{"secretKeyRef":"my-service-cloudant"}}}
+				} else if ( language === 'PYTHON' || language === 'DJANGO' ) {
+					templateValuesYml = {"replicaCount":1,"revisionHistoryLimit":1,"image":{"tag":"v1.0.0","pullPolicy":"Always","resources":{"requests":{"cpu":"200m","memory":"300Mi"}}},"livenessProbe":{"initialDelaySeconds":30,"periodSeconds":10},"service":{"name":"python","type":"NodePort","servicePort":3000},"hpa":{"enabled":false,"minReplicas":1,"maxReplicas":2,"metrics":{"cpu":{"targetAverageUtilization":70},"memory":{"targetAverageUtilization":70}}},"base":{"enabled":false,"replicaCount":1,"image":{"tag":"v0.9.9"},"weight":100},"istio":{"enabled":false,"weight":100},"services":{"appid":{"secretKeyRef":"my-service-appid"},"cloudant":{"secretKeyRef":"my-service-cloudant"}}}
 				}
-				if (['JAVA', 'SPRING', 'NODE'].includes(language)) {
-					assert( _.isEqual(templateValuesYml, valuesyml), "\n" + JSON.stringify(templateValuesYml) + "\n" + JSON.stringify(valuesyml)  );
-				}
+
+				assert( _.isEqual(templateValuesYml, generatedValuesyml), "\n \n GENERATED: \n" + JSON.stringify(generatedValuesyml) + "\n \n EXPECTED: \n" + JSON.stringify(templateValuesYml)  );
 			});
 
 			it('has basedeployment.yaml with correct content', function () {
