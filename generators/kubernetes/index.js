@@ -50,22 +50,18 @@ module.exports = class extends Generator {
 	}
 
 	configuring() {
-		// work out app name and language
-		this.opts.chartName = Utils.sanitizeAlphaNumLowerCase(this.opts.bluemix.name);
+		this.opts.chartName = this.options.application.chartName
+		
+		// not services like cloudant, services like mongo
 		this.opts.services = typeof(this.opts.services) === 'string' ? JSON.parse(this.opts.services || '[]') : this.opts.services;
-
 	}
 
 	writing() {
-		//skip writing files if platforms is specified via options and it doesn't include kube
-		if(this.opts.platforms && !this.opts.platforms.includes('kube')) {
-			return;
-		}
 		// setup output directory name for helm chart
 		// chart/<applicationName>/...
 		let chartDir = 'chart/' + this.opts.chartName;
 
-		if (this.opts.bluemix.backendPlatform.toLowerCase() === 'java' || this.opts.bluemix.backendPlatform.toLowerCase() === 'spring') {
+		if (this.opts.application.language.toLowerCase() === 'java' || this.opts.application.language.toLowerCase() === 'spring') {
 			this.fileLocations.deployment.source = 'java/deployment.yaml';
 			this.fileLocations.basedeployment.source = 'java/basedeployment.yaml';
 			this.fileLocations.service.source = 'java/service.yaml';
@@ -82,7 +78,7 @@ module.exports = class extends Generator {
 				target = chartDir + target.slice('chartDir'.length);
 			}
 			if(this.fileLocations[file].process) {
-				this._writeHandlebarsFile(source, target, this.opts.bluemix);
+				this._writeHandlebarsFile(source, target, this.opts);
 			} else {
 				this.fs.copy(
 					this.templatePath(source),

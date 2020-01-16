@@ -173,7 +173,7 @@ describe('cloud-assets:kubernetes', function () {
 				}
 				if (language === 'SPRING') {
 					assertYmlContent(serviceyml.spec.ports[0].name, 'http', 'serviceyml.spec.ports[0].name');
-					assertYmlContent(serviceyml.spec.ports[1], undefined, 'serviceyml.spec.ports[1]');
+					assertYmlContent(serviceyml.spec.ports[], undefined, 'serviceyml.spec.ports[1]');
 				}
 				if (language === 'NODE' || language === 'GO') {
 					assertYmlContent(serviceyml.spec.ports[0].name, 'http', 'serviceyml.spec.ports[0].name');

@@ -44,7 +44,7 @@ describe('cloud-assets:knative', function () {
 			"apiVersion": "serving.knative.dev/v1alpha1",
 			"kind": "Service",
 			"metadata": {
-			  "name": "testgenv2appknativenode"
+			  "name": knativeOptions.application.chartName
 			},
 			"spec": {
 			  "template": {
