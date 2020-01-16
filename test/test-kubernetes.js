@@ -151,7 +151,7 @@ describe('cloud-assets:kubernetes', function () {
 			});
 
 			it('has deployment.yaml with correct env settings', () => {
-				let deploymentyml = getSafeYaml(chartLocation + '/templates/deployment.yaml');
+				let generatedEnv = getSafeYaml(chartLocation + '/templates/deployment.yaml').spec.template.spec.containers[0].env;
 				let envTemplate;
 				if (language === 'NODE' || language === 'PYTHON' || language === 'SWIFT') {
 					// these languages support app_id, other languages do not
@@ -159,7 +159,7 @@ describe('cloud-assets:kubernetes', function () {
 				} else {
 					envTemplate = [{"name":"service_cloudant","valueFrom":{"secretKeyRef":{"name":{"[object Object]":null},"key":"binding","optional":true}}},{"name":"PORT","value":"{{ .Values.service.servicePort }}"},{"name":"APPLICATION_NAME","value":"{{ .Release.Name }}"}]
 				}
-				assert.textEqual(JSON.stringify(deploymentyml.spec.template.spec.containers[0].env, null, 3), JSON.stringify(envTemplate, null, 3));
+				assert( _.isEqual(generatedEnv, envTemplate), "\n" + JSON.stringify(generatedEnv) + "\n" + JSON.stringify(envTemplate) );
 			});
 
 			it('has service.yaml with correct content', function () {
@@ -173,7 +173,7 @@ describe('cloud-assets:kubernetes', function () {
 				}
 				if (language === 'SPRING') {
 					assertYmlContent(serviceyml.spec.ports[0].name, 'http', 'serviceyml.spec.ports[0].name');
-					assertYmlContent(serviceyml.spec.ports[], undefined, 'serviceyml.spec.ports[1]');
+					assertYmlContent(serviceyml.spec.ports[1], undefined, 'serviceyml.spec.ports[1]');
 				}
 				if (language === 'NODE' || language === 'GO') {
 					assertYmlContent(serviceyml.spec.ports[0].name, 'http', 'serviceyml.spec.ports[0].name');
@@ -185,16 +185,13 @@ describe('cloud-assets:kubernetes', function () {
 				let templateValuesYml;
 				if (language === 'JAVA') {
 					templateValuesYml = {"replicaCount":1,"revisionHistoryLimit":1,"image":{"repository":"testgenv2apphelmjava","tag":"v1.0.0","pullPolicy":"IfNotPresent","resources":{"requests":{"cpu":"200m","memory":"300Mi"}}},"service":{"name":"Node","type":"NodePort","servicePort":9080,"servicePortHttps":9443},"hpa":{"enabled":false,"minReplicas":1,"maxReplicas":2,"metrics":{"cpu":{"targetAverageUtilization":70},"memory":{"targetAverageUtilization":70}}},"base":{"enabled":false,"replicaCount":1,"image":{"tag":"v0.9.9"},"weight":100},"istio":{"enabled":false,"weight":100},"services":{"cloudant":{"secretKeyRef":"my-service-cloudant"}}}
-					// assert( _.isEqual(templateValuesYml, valuesyml) )
-					assert.textEqual(JSON.stringify(valuesyml, null, 3), JSON.stringify(templateValuesYml, null, 3));
 				} else if (language === 'SPRING') {
 					templateValuesYml = {"replicaCount":1,"revisionHistoryLimit":1,"image":{"repository":"testgenv2apphelmspring","tag":"v1.0.0","pullPolicy":"IfNotPresent","resources":{"requests":{"cpu":"200m","memory":"300Mi"}}},"service":{"name":"Node","type":"NodePort","servicePort":8080},"hpa":{"enabled":false,"minReplicas":1,"maxReplicas":2,"metrics":{"cpu":{"targetAverageUtilization":70},"memory":{"targetAverageUtilization":70}}},"base":{"enabled":false,"replicaCount":1,"image":{"tag":"v0.9.9"},"weight":100},"istio":{"enabled":false,"weight":100},"services":{"cloudant":{"secretKeyRef":"my-service-cloudant"}}}
-					// assert( _.isEqual(templateValuesYml, valuesyml) )
-					assert.textEqual(JSON.stringify(valuesyml, null, 3), JSON.stringify(templateValuesYml, null, 3));
 				} else if (language === 'NODE') {
 					templateValuesYml = {"replicaCount":1,"revisionHistoryLimit":1,"image":{"tag":"v1.0.0","pullPolicy":"Always","resources":{"requests":{"cpu":"200m","memory":"300Mi"}}},"livenessProbe":{"initialDelaySeconds":30,"periodSeconds":10},"service":{"name":"node","type":"NodePort","servicePort":3000},"hpa":{"enabled":false,"minReplicas":1,"maxReplicas":2,"metrics":{"cpu":{"targetAverageUtilization":70},"memory":{"targetAverageUtilization":70}}},"base":{"enabled":false,"replicaCount":1,"image":{"tag":"v0.9.9"},"weight":100},"istio":{"enabled":false,"weight":100},"services":{"appid":{"secretKeyRef":"my-service-appid"},"cloudant":{"secretKeyRef":"my-service-cloudant"}}}
-					// assert( _.isEqual(templateValuesYml, valuesyml) )
-					assert.textEqual(JSON.stringify(valuesyml, null, 3), JSON.stringify(templateValuesYml, null, 3));
+				}
+				if (['JAVA', 'SPRING', 'NODE'].includes(language)) {
+					assert( _.isEqual(templateValuesYml, valuesyml), "\n" + JSON.stringify(templateValuesYml) + "\n" + JSON.stringify(valuesyml)  );
 				}
 			});
 
