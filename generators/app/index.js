@@ -221,6 +221,7 @@ module.exports = class extends Generator {
 			}
 
 		}
+		logger.debug(`configuring - app options: ${JSON.stringify(this.opts.application, null, 3)}`);
 	}
 
 	writing() {

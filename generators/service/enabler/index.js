@@ -42,7 +42,7 @@ module.exports = class extends Generator {
 		this.cloudFoundryName = this.context.cloudLabel || CfSvcMap[opts.context.scaffolderKey];
 		this.serviceName = SvcInfo[opts.context.scaffolderKey]["customServiceKey"] ? `service-${SvcInfo[opts.context.scaffolderKey]["customServiceKey"]}` : `service-${this.scaffolderName}`;
 		this.logger.level = this.context.loggerLevel;
-		this.languageTemplatePath = this.templatePath() + "/" + this.context.language;
+		this.languageTemplatePath = this.templatePath() + "/" + this.context.application.language;
 		this.applicationType = (this.context.starter && this.context.starter.applicationType) ? this.context.starter.applicationType : "BLANK";
 		this.logger.debug(`Constructing: scaffolderName=${this.scaffolderName}, serviceKey=${this.serviceKey}, customCredKeys=${this.customCredKeys}`);
 	}
@@ -66,17 +66,18 @@ module.exports = class extends Generator {
 	 */
 
 	configuring() {
-		this.hasBluemixProperty = this.context.bluemix.hasOwnProperty(this.scaffolderName);
+		this.hasSvcProperty = this.context.application.service_credentials.hasOwnProperty(this.scaffolderName);
 		// this.logger.debug(`configuring - bluemix: ${JSON.stringify(this.context.bluemix, null, 2)}`);
-		if (this.hasBluemixProperty) {
-			this.logger.info(`No available sdk available for ${this.scaffolderName} in ${this.context.language}; configuring credentials only`);
+		if (this.hasSvcProperty) {
+			this.logger.info(`No available sdk available for ${this.scaffolderName} in ${this.context.application.language}; configuring credentials only`);
 			this._addMappings(this.config);
 			this._addLocalDevConfig();
 		} else {
-			this.logger.info(`Nothing to process for ${this.scaffolderName} in ${this.context.language}`);
+			this.logger.info(`Nothing to process for ${this.scaffolderName} in ${this.context.application.language}`);
 			return;
 		}
 		let serviceInfo = this._getServiceInfo();
+		this.logger.debug(`configuring - serviceInfo=${JSON.stringify(serviceInfo, null, 3)}`);
 
 		if (serviceInfo && this.scaffolderName !== "autoscaling") {
 			this._addMappings(this.config);
@@ -90,7 +91,7 @@ module.exports = class extends Generator {
 
 	writing() {
 		// add missing pom.xml dependencies when running service enablement standalone
-		if ((typeof this.context.parentContext === "undefined") && this.hasBluemixProperty && this.hasTemplate) {
+		if ((typeof this.context.parentContext === "undefined") && this.hasSvcProperty) {
 			this._addJavaDependencies();
 		}
 	}
@@ -116,8 +117,8 @@ module.exports = class extends Generator {
 
 	_getServiceInfo() {
 		let serviceInfo = {};
-		if (this.context.bluemix[this.scaffolderName]) {
-			let service = this.context.bluemix[this.scaffolderName];
+		if (this.context.application.service_credentials[this.scaffolderName]) {
+			let service = this.context.application.service_credentials[this.scaffolderName];
 			// this.logger.debug(`included service: ${service}`);
 			if (service.hasOwnProperty('serviceInfo')) {
 				serviceInfo = service.serviceInfo;
@@ -138,7 +139,7 @@ module.exports = class extends Generator {
 	}
 
 	_createObjectForKubeYamls(serviceInfo) {
-		this.logger.info(`adding Deployment service env info for ${this.scaffolderName}`);
+		this.logger.info(`adding Deployment service env info for ${this.scaffolderName} and service ${this.serviceName}`);
 
 		let serviceEnv = {
 			name: this._sanitizeServiceName(this.serviceName),
@@ -177,15 +178,29 @@ module.exports = class extends Generator {
 		return map;
 	}
 
+	_getDeployOptions() {
+		if (this.context.deploy_options.hasOwnProperty('kube')) {
+			return this.this.context.deploy_options.kube;
+		} else if (this.context.deploy_options.hasOwnProperty('cloud_foundry')) {
+			return this.context.deploy_options.cloud_foundry;
+		}
+	}
+
 	_addMappings(config) {
-		if (this.context.language === "swift") return;
+		if (this.context.application.language === "swift") return;
 		this.logger.info(`Adding mappings for ${this.scaffolderName}`);
 
-		let serviceCredentials = Array.isArray(this.context.bluemix[this.scaffolderName])
-			? this.context.bluemix[this.scaffolderName][0] : this.context.bluemix[this.scaffolderName];
-		if (this.context.bluemix[this.scaffolderName].hasOwnProperty('serviceInfo')) {
-			serviceCredentials['serviceInfo'] = this.context.bluemix[this.scaffolderName]['serviceInfo'];
+		let serviceCredentials = Array.isArray(this.context.application.service_credentials[this.scaffolderName])
+			? this.context.application.service_credentials[this.scaffolderName][0] : this.context.application.service_credentials[this.scaffolderName];
+		if (this.context.application.service_credentials[this.scaffolderName].hasOwnProperty('serviceInfo')) {
+			serviceCredentials['serviceInfo'] = this.context.application.service_credentials[this.scaffolderName]['serviceInfo'];
+		} 
+		else {
+			let deployOpts = this._getDeployOptions();
+			serviceCredentials['serviceInfo'] = deployOpts.service_bindings[this.scaffolderName];
 		}
+		this.logger.debug(`_addMappings - serviceCredentials=${JSON.stringify(serviceCredentials, null, 3)}`);
+		this.logger.debug(`_addMappings - deploy_options=${JSON.stringify(this.context.deploy_options, null, 3)}`);
 		let scaffolderKeys = this._setCredentialMapping({}, serviceCredentials, this.serviceKey);
 		scaffolderKeys = Object.keys(scaffolderKeys).map(key => {
 			let scaffolderKey = key.split(`${this.serviceKey.replace(/-/g, '_')}_`);
@@ -216,7 +231,7 @@ module.exports = class extends Generator {
 		let serviceKeySeparator = '_' 
 		let localCredentialKeys = [];
 		let springMapping = null
-		if (this.context.language === "java-spring") {
+		if (this.context.application.language === "SPRING") {
 			springMapping = ServiceUtils.getSpringServiceInfo(this.serviceKey)
 			if (springMapping) {
 				if (ServiceUtils.SPRING_BOOT_SERVICE_NAME in springMapping) {
@@ -270,14 +285,15 @@ module.exports = class extends Generator {
 	_addLocalDevConfig() {
 		this.logger.info(`Adding local dev config for ${this.scaffolderName}`);
 		let templateContent;
-		let serviceCredentials = Array.isArray(this.context.bluemix[this.scaffolderName])
-			? this.context.bluemix[this.scaffolderName][0] : this.context.bluemix[this.scaffolderName];
+		let serviceCredentials = Array.isArray(this.context.application.service_credentials[this.scaffolderName])
+			? this.context.application.service_credentials[this.scaffolderName][0] : this.context.application.service_credentials[this.scaffolderName];
 		templateContent = this._setCredentialMapping({}, serviceCredentials, this.serviceKey);
 
 
 		this.context.addLocalDevConfig(templateContent);
 	}
 
+	// TODO: cleanup
 	_addInstrumentation() {
 		const instPath = this.languageTemplatePath + "/instrumentation" + this.context.languageFileExt;
 		if (this.fs.exists(instPath) && this.context.addInstrumentation) {

@@ -67,7 +67,7 @@ module.exports = class extends Generator {
 		let root = path.dirname(require.resolve('../../enabler'));
 		Object.keys(svcInfo).forEach(svc => {
 			serviceKey = svc;
-			serviceCredentials = this.context.bluemix[serviceKey];
+			serviceCredentials = this.context.application.service_credentials[serviceKey];
 			if (serviceCredentials) {
 				this.context.scaffolderKey = serviceKey;
 				logger.debug("Composing with service : " + svc);

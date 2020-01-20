@@ -57,24 +57,31 @@ module.exports = class extends Generator {
 		}
 		this.parentContext = opts.parentContext;
 
-		this.log("Service opts.bluemix:");
-		this.log(opts.bluemix);
-		this.log(Object.keys(opts.bluemix));
+		// this.log("Service opts.bluemix:");
+		// this.log(opts.bluemix);
+		// this.log(Object.keys(opts.bluemix));
 		let context = this.parentContext || {};
 		//add bluemix options from this.options to existing bluemix options on parent context
-		context.bluemix = {};
-		context.bluemix = Object.assign(context.bluemix, opts.bluemix);
+		// context.bluemix = {};
+		// context.bluemix = Object.assign(context.bluemix, opts.bluemix);
+		context.deploy_options = {};
+		context.deploy_options = Object.assign(context.deploy_options, opts.deploy_options);
+		logger.debug(`Constructing - context.deploy_options: ${JSON.stringify(context.deploy_options, null, 3)}`);
+		context.application = {};
+		context.application = Object.assign(context.application, opts.application);
+		logger.debug(`Constructing - context.application: ${JSON.stringify(context.application, null, 3)}`);
+
 		context.starter = opts.starter || {}; //Object.assign(context.starter || {}, this.opts.starter || {});
 		context.loggerLevel = logger.level;
-		this.log('Service context.bluemix: %bmx', {bmx: context.bluemix});
-		this.log(Object.keys(context.bluemix));
-		this.log(Object.prototype.toString.call(context.bluemix));
-		context.language = context.bluemix.backendPlatform.toLowerCase();
+		// this.log('Service context.bluemix: %bmx', {bmx: context.bluemix});
+		// this.log(Object.keys(context.bluemix));
+		// this.log(Object.prototype.toString.call(context.bluemix));
+		// context.language = context.bluemix.backendPlatform.toLowerCase();
 
-		if (context.language === 'django'){
-			context.language = 'python';
-		}
-		context.sanitizedAppName = this._sanitizeAppName(context.bluemix.name);
+		// if (context.language === 'django'){
+		// 	context.language = 'python';
+		// }
+		context.sanitizedAppName = this._sanitizeAppName(context.application.name);
 
 		if (this.parentContext) {	// set a parent context to let the language generator know if there is a parent
 			context.parentContext = this.parentContext;
@@ -85,7 +92,7 @@ module.exports = class extends Generator {
 	intializing() {
 		let context = this.context;
 		let languageGeneratorPath = "./languages";
-		switch (context.language){
+		switch (context.application.language.toLowerCase()) {
 			case "node":
 				languageGeneratorPath += '/node-express';
 				break;
@@ -94,15 +101,15 @@ module.exports = class extends Generator {
 				break;
 			case "java":
 				languageGeneratorPath += '/java';
-				context.language = 'java-liberty';
+				// context.application.language = 'java-liberty';
 				break;
 			case "spring":
 				languageGeneratorPath += '/java';
-				context.language = 'java-spring';
+				// context.application.language = 'java-spring';
 				break;
 			case "swift":
 				languageGeneratorPath += '/swift-kitura';
-				context.language = 'swift';
+				// context.application.language = 'swift';
 				break;
 			case "go":
 				languageGeneratorPath += '/go'

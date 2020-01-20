@@ -41,7 +41,7 @@ module.exports = class extends Generator {
 		let root = path.dirname(require.resolve('../../enabler'));
 		Object.keys(svcInfo).forEach(svc => {
 			serviceKey = svc;
-			serviceCredentials = this.context.bluemix[serviceKey];
+			serviceCredentials = this.context.application.service_credentials[serviceKey];
 			if (serviceCredentials) {
 				this.context.scaffolderKey = serviceKey;
 				logger.debug("Composing with service : " + svc);
@@ -56,6 +56,7 @@ module.exports = class extends Generator {
 		});
 	}
 
+	// TODO: cleanup
 	_addDependencies(serviceDependenciesString) {
 		if (this.context.injectDependency) {
 			// NOTE: Dependencies should be one-per-line
@@ -82,7 +83,8 @@ module.exports = class extends Generator {
 
 	_getServiceInstanceName(bluemixKey) {
 		// Lookup metadata object using bluemix/scaffolder key
-		const serviceMetaData = this.context.bluemix[bluemixKey];
+		const serviceMetaData = this.context.application.service_credentials[bluemixKey];
+		logger.debug(`_getServiceInstanceName - serviceMetaData=${JSON.stringify(serviceMetaData, null, 3)}`);
 
 		if (!serviceMetaData) {
 			return null;
