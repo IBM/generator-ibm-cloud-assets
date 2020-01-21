@@ -13,6 +13,8 @@
 
 'use strict';
 
+const Log4js = require('log4js');
+const logger = Log4js.getLogger('generator-ibm-cloud-assets:cf');
 const Handlebars = require('../lib/handlebars.js');
 const Generator = require('yeoman-generator');
 const _ = require('lodash');
@@ -24,21 +26,7 @@ const fs = require('fs');
 module.exports = class extends Generator {
 	constructor(args, opts) {
 		super(args, opts);
-
-		//TODO: what is cloudContext do we still need this or was it from the lang gens
-		if (opts.cloudContext) {
-			this.opts = opts.cloudContext
-			this.opts.libertyVersion = opts.libertyVersion
-		} else {
-			this.opts = opts
-		}
-		//TODO: trash bluemiox completely
-		if (typeof(opts.bluemix) === 'string') {
-			this.bluemix = JSON.parse(opts.bluemix || '{}');
-		} else if (typeof(opts.bluemix) === 'object') {
-			this.bluemix = opts.bluemix;
-		}
-
+		this.opts = opts;
 	}
 
 	configuring() {
@@ -51,30 +39,17 @@ module.exports = class extends Generator {
 			},
 			triggersType: 'commit'
 		};
-		this.deployment = {
-			type: 'CF',
-			name: this.opts.application.name,
-			language: this.opts.application.language
-		};
 
-		this.name = undefined;
 		this.manifestConfig.name = this.opts.application.sanitizedName
-		if (this.opts.deploy_options.cloud_foundry) {
-			this.name = this.opts.application.name;
-			this.manifestConfig = Object.assign(this.manifestConfig, this.opts.deploy_options.cloud_foundry);
-			// use service instance names in manifest
-			this.manifestConfig.services = {};
-			_.forEach(this.opts.deploy_options.cloud_foundry.service_bindings, (service, serviceKey) => {
-				this.manifestConfig.services[serviceKey] = service["name"];
-			});
-			this.deployment = Object.assign(this.deployment, this.opts.deploy_options.cloud_foundry.cloudDeploymentOptions);
-			this.manifestConfig.instances = this.manifestConfig.instances || '1';
-			this.deployment.type = 'CF'
-			this.deployment.hasMongo = this.opts.createType === 'mern' || this.opts.createType === 'mean';
-		} else {
-			this.name = this.opts.application.name;
-			this.deployment.type = 'CF';
-		}
+		this.name = this.opts.application.name;
+		//TODO: check on memory syntax in this.manifestConfig
+		this.manifestConfig = Object.assign(this.manifestConfig, this.opts.deploy_options.cloud_foundry);
+		// use service instance names in manifest
+		this.manifestConfig.services = {};
+		_.forEach(this.opts.deploy_options.cloud_foundry.service_bindings, (service, serviceKey) => {
+			this.manifestConfig.services[serviceKey] = service["name"];
+		});
+		this.manifestConfig.instances = this.manifestConfig.instances || '1';
 
 		switch (this.opts.application.language) {
 			case 'NODE':
@@ -114,31 +89,29 @@ module.exports = class extends Generator {
 	 *
 	 * @params manifestMemoryConfig {string} the memory allocated h
 	 */
-	_getHighestMemorySize(manifestMemoryConfig, userDefinedMinMemory) {
-		if (!userDefinedMinMemory) {
+	_getHighestMemorySize(manifestMemoryConfig, minNecessaryMemory) {
+		if (!minNecessaryMemory) {
 			return manifestMemoryConfig;
-		} else if (!manifestMemoryConfig && userDefinedMinMemory) {
-			return userDefinedMinMemory;
+		} else if (!manifestMemoryConfig && minNecessaryMemory) {
+			return minNecessaryMemory;
 		}
 
-		const memMap = {
-			k: 1,
-			m: 2,
-			g: 3
+		const bytesMap = {
+			k: 1024,
+			m: 1048576,
+			g: 1073741824
 		};
-		const manifestSize = manifestMemoryConfig.replace(/[^MmGgKk]/g, '');
-		const userDefinedMinSize = userDefinedMinMemory.replace(/[^MmGgKk]/g, '');
+		const manifestValue = parseInt(manifestMemoryConfig.replace(/[M,m,G,g,K,k]/g, ''));
+		const definedValue = parseInt(minNecessaryMemory.replace(/[M,m,G,g,K,k]/g, ''));
+
+		const manifestSize = bytesMap[manifestMemoryConfig.replace(/[^MmGgKk]/g, '')];
+		const userDefinedMinSize = bytesMap[minNecessaryMemory.replace(/[^MmGgKk]/g, '')];
+
 		let highestAvailableSize;
-
-		if (memMap[manifestSize.toLowerCase()] > memMap[userDefinedMinSize.toLowerCase()]) {
+		if ((manifestValue*manifestSize) > (definedValue*userDefinedMinSize)) {
 			highestAvailableSize = manifestMemoryConfig;
-		} else if (memMap[manifestSize.toLowerCase()] < memMap[userDefinedMinSize.toLowerCase()]) {
-			highestAvailableSize = userDefinedMinMemory;
 		} else {
-			const manifestValue = parseInt(manifestSize.replace(/[M,m,G,g,K,k]/g, ''));
-			const definedValue = parseInt(userDefinedMinSize.replace(/[M,m,G,g,K,k]/g, ''));
-
-			highestAvailableSize = manifestValue > definedValue ? manifestMemoryConfig : userDefinedMinMemory;
+			highestAvailableSize = minNecessaryMemory;
 		}
 
 		return highestAvailableSize;
@@ -194,10 +167,6 @@ module.exports = class extends Generator {
 	}
 
 	_configureJavaCommon() {
-		if (this.opts.appName) {
-			this.manifestConfig.name = this.opts.appName;
-			this.name = this.opts.appName;
-		}
 		if (!this.opts.artifactId) {
 			try {
 				const data = this.fs.read(this.destinationPath("pom.xml"));
@@ -211,12 +180,6 @@ module.exports = class extends Generator {
 				// file not found
 				this.opts.artifactId = "<replace-me-with-artifactId-from-pom.xml>";
 			}
-		}
-		if (this.opts.createType === 'bff/liberty') {
-			this.manifestConfig.env.OPENAPI_SPEC = `/${this.name}/swagger/api`;
-		}
-		if (this.opts.createType === 'bff/spring') {
-			this.manifestConfig.env.OPENAPI_SPEC = '/swagger/api';
 		}
 	}
 
