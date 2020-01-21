@@ -149,7 +149,7 @@ module.exports = class extends Generator {
 					key: 'binding'
 				}
 			},
-			keyName: `${serviceInfo.name}`,
+			keyName: typeof(serviceInfo) === 'string' ? `${serviceInfo}` : `${serviceInfo.name}`,
 			scaffolderName: `${this.scaffolderName}`
 		};
 
@@ -178,14 +178,6 @@ module.exports = class extends Generator {
 		return map;
 	}
 
-	_getDeployOptions() {
-		if (this.context.deploy_options.hasOwnProperty('kube')) {
-			return this.this.context.deploy_options.kube;
-		} else if (this.context.deploy_options.hasOwnProperty('cloud_foundry')) {
-			return this.context.deploy_options.cloud_foundry;
-		}
-	}
-
 	_addMappings(config) {
 		if (this.context.application.language === "swift") return;
 		this.logger.info(`Adding mappings for ${this.scaffolderName}`);
@@ -196,7 +188,12 @@ module.exports = class extends Generator {
 			serviceCredentials['serviceInfo'] = this.context.application.service_credentials[this.scaffolderName]['serviceInfo'];
 		} 
 		else {
-			let deployOpts = this._getDeployOptions();
+			let deployOpts;
+			if (this.context.deploy_options.hasOwnProperty('kube')) {
+				deployOpts = this.context.deploy_options.kube;
+			} else {
+				deployOpts = this.context.deploy_options.cloud_foundry;
+			}
 			serviceCredentials['serviceInfo'] = deployOpts.service_bindings[this.scaffolderName];
 		}
 		this.logger.debug(`_addMappings - serviceCredentials=${JSON.stringify(serviceCredentials, null, 3)}`);

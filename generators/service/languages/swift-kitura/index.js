@@ -90,7 +90,7 @@ module.exports = class extends Generator {
 			return null;
 		}
 		const instanceName = serviceMetaData.hasOwnProperty('serviceInfo') ?
-			serviceMetaData.serviceInfo.name : serviceMetaData[0].serviceInfo.name;
+			serviceMetaData.serviceInfo : serviceMetaData[0].serviceInfo;
 		return instanceName;
 	}
 
