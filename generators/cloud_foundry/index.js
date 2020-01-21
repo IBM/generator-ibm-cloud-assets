@@ -192,10 +192,7 @@ module.exports = class extends Generator {
 		let zipPath = `${buildDir}/${this.opts.artifactId}` + `-` + version + `.zip`;
 		this.manifestConfig.path = `./${zipPath}`;
 		let excludes = [];
-		if (this.opts.libertyVersion === 'beta') {
-			this.manifestConfig.env.IBM_LIBERTY_BETA = 'true'
-			this.manifestConfig.env.JBP_CONFIG_LIBERTY = '\"version: +\"'
-		}
+
 		if (this.opts.application.service_credentials.cloudant) {
 			excludes.push('cloudantNoSQLDB=config');
 		}
@@ -236,13 +233,14 @@ module.exports = class extends Generator {
 		this.manifestConfig.buildpack = 'python_buildpack';
 
 		// if there is a `command` in manifest.yml already, keep it. Otherwise, this is the default command string:
-		let manifestCommand = `gunicorn --env DJANGO_SETTINGS_MODULE=${this.opts.application.name}.settings.production ${this.opts.application.name}.wsgi -b 0.0.0.0:$PORT`;
+		let manifestCommand = `gunicorn --env DJANGO_SETTINGS_MODULE=pythondjangoapp.settings.production pythondjangoapp.wsgi -b 0.0.0.0:$PORT`;
 		try {
 			let manifestyml = jsyaml.safeLoad(fs.readFileSync('manifest.yml', 'utf8'));
 			manifestCommand = manifestyml.applications[0].command ? manifestyml.applications[0].command : manifestCommand;
 		} catch (err) {
 			// cannot read file or find a command, return to default behavior
 		}
+		//TODO: generalize manifestCommand for bx dev enable commands passed
 		this.manifestConfig.command = this.opts.enable ? 'echo No run command specified in manifest.yml' : manifestCommand;
 		this.manifestConfig.memory = this.manifestConfig.memory || '128M';
 		this.cfIgnoreContent = ['.pyc', '.egg-info'];
@@ -258,11 +256,6 @@ module.exports = class extends Generator {
 	}
 
 	writing() {
-		//skip writing files if platforms is specified via options and it doesn't include bluemix
-		//TODO: this.opts.platforms?
-		if (this.opts.platforms && !this.opts.platforms.includes('bluemix')) {
-			return;
-		}
 		// write manifest.yml file
 		this.manifestConfig.hasServices = false;
 		if (this.manifestConfig.services && !_.isEmpty(this.manifestConfig.services) ) {

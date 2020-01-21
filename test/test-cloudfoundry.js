@@ -195,19 +195,6 @@ describe('cloud-enablement:cloudfoundry', function () {
 		});
 	});
 
-	describe('cloud-enablement:cloudfoundry with java-liberty with NO platforms', function () {
-		beforeEach(function () {
-			return helpers.run(path.join(__dirname, '../generators/app'))
-				.inDir(path.join(__dirname, './tmp'))
-				.withOptions(_.extend(optionsJava, {platforms: []}));
-		});
-
-		it('no cloud foundry files should be created', function () {
-			assert.noFile('manifest.yml');
-			assert.noFile('.cfignore');
-		});
-	});
-
 	describe('cloud-enablement:cloudfoundry with java-liberty with platforms array specified', function () {
 		beforeEach(function () {
 			return helpers.run(path.join(__dirname, '../generators/app'))
