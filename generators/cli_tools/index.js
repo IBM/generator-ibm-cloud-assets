@@ -1,5 +1,5 @@
 /*
- © Copyright IBM Corp. 2017, 2018
+ © Copyright IBM Corp. 2019, 2020
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
@@ -13,6 +13,8 @@
 
 'use strict';
 
+const Log4js = require('log4js');
+const logger = Log4js.getLogger('generator-ibm-cloud-assets:cli');
 const Generator = require('yeoman-generator');
 const Handlebars = require('../lib/handlebars.js');
 const Utils = require('../lib/utils');
@@ -26,24 +28,10 @@ module.exports = class extends Generator {
 	constructor(args, opts) {
 		super(args, opts);
 
-		if (typeof (opts.bluemix) === 'string') {
-			this.bluemix = JSON.parse(opts.bluemix || '{}');
-		} else {
-			this.bluemix = opts.bluemix;
-		}
-
 		if (typeof (opts) === 'string') {
 			this.opts = JSON.parse(opts || '{}');
 		} else {
 			this.opts = opts.cloudContext || opts;
-		}
-
-		this.opts.libertyBeta = opts.libertyBeta;
-
-		if (typeof (this.opts.services) === 'string') {
-			this.opts.services = JSON.parse(opts.services || '[]');
-		} else {
-			this.opts.services = opts.services || [];
 		}
 	}
 
@@ -79,11 +67,8 @@ module.exports = class extends Generator {
 	}
 
 	_generateSwift() {
-
 		const applicationName = this.opts.application.sanitizedName;
 		const executableName = this.opts.application.name;
-		const dockerFileRun = 'Dockerfile';
-		const dockerFileTools = 'Dockerfile-tools';
 
 		const cliConfig = {
 			containerNameRun: `${applicationName.toLowerCase()}-swift-run`,
@@ -94,8 +79,8 @@ module.exports = class extends Generator {
 			containerPathTools: '/swift-project',
 			containerPortMap: '8080:8080',
 			containerPortMapDebug: '2048:1024,2049:1025',
-			dockerFileRun,
-			dockerFileTools,
+			dockerFileRun: 'Dockerfile',
+			dockerFileTools: 'Dockerfile-tools',
 			imageNameRun: `${applicationName.toLowerCase()}-swift-run`,
 			imageNameTools: `${applicationName.toLowerCase()}-swift-tools`,
 			buildCmdRun: '/swift-utils/tools-utils.sh build release',
@@ -109,15 +94,11 @@ module.exports = class extends Generator {
 		};
 
 		this._writeHandlebarsFile('../templates/cli-config-common.yml', FILENAME_CLI_CONFIG, { cliConfig });
-
 	}
 
 	_generateNodeJS() {
 		const applicationName = this.opts.application.sanitizedName;
-		const port = this.opts.port ? this.opts.port : '3000';
-		const debugPort = '9229';
-		const dockerFileRun = 'Dockerfile';
-		const dockerFileTools = 'Dockerfile-tools';
+		const port = this.opts.deploy_options.servicePorts.http;
 
 		const cliConfig = {
 			containerNameRun: `${applicationName.toLowerCase()}-express-run`,
@@ -127,11 +108,11 @@ module.exports = class extends Generator {
 			containerPathRun: '/app',
 			containerPathTools: '/app',
 			containerPortMap: `${port}:${port}`,
-			containerPortMapDebug: `${debugPort}:${debugPort}`,
+			containerPortMapDebug: `9229:9229`,
 			containerMountsRun: '"./node_modules_linux": "/app/node_modules"',
 			containerMountsTools: '"./node_modules_linux": "/app/node_modules"',
-			dockerFileRun,
-			dockerFileTools,
+			dockerFileRun: 'Dockerfile',
+			dockerFileTools: 'Dockerfile-tools',
 			imageNameRun: `${applicationName.toLowerCase()}-express-run`,
 			imageNameTools: `${applicationName.toLowerCase()}-express-tools`,
 			buildCmdRun: 'npm install',
@@ -149,11 +130,9 @@ module.exports = class extends Generator {
 		this._copyTemplateIfNotExists(FILENAME_DEBUG, 'node/run-debug', {});
 
 		this._copyTemplateIfNotExists(FILENAME_DEV, 'node/run-dev', {});
-
 	}
 
 	_generateJava() {
-
 		if (!this.opts.artifactId) {
 			try {
 				const data = this.fs.read(this.destinationPath("pom.xml"));
@@ -171,44 +150,24 @@ module.exports = class extends Generator {
 		}
 
 		this.opts.appNameRefreshed = this.opts.application.sanitizedName.toLowerCase();
-		this.opts.buildType = this.opts.buildType ? this.opts.buildType : 'maven';
 		this.opts.version = this.opts.version ? this.opts.version : "1.0-SNAPSHOT";
 
-		if (!this.opts.platforms || this.opts.platforms.includes('cli')) {
-			/* Common cli-config template */
-			this.opts.applicationId = `${this.opts.application.app_id}`;
+		this.opts.applicationId = `${this.opts.application.app_id}`;
 
-			if (this.fs.exists(this.destinationPath(FILENAME_CLI_CONFIG))) {
-				this.log(FILENAME_CLI_CONFIG, "already exists, skipping.");
-			} else {
-				this._writeHandlebarsFile(
-					'java/cli-config.yml.template',
-					FILENAME_CLI_CONFIG,
-					this.opts
-				);
-			}
-		}
-	}
-
-	_writeHandlebarsFile(templateFile, destinationFile, data) {
-
-		if (this.fs.exists(this.destinationPath(destinationFile))) {
-			this.log(destinationFile, "already exists, skipping.");
-		}
-		else {
-			let template = this.fs.read(this.templatePath(templateFile));
-			let compiledTemplate = Handlebars.compile(template);
-			let output = compiledTemplate(data);
-			this.fs.write(this.destinationPath(destinationFile), output);
+		if (this.fs.exists(this.destinationPath(FILENAME_CLI_CONFIG))) {
+			this.log(FILENAME_CLI_CONFIG, "already exists, skipping.");
+		} else {
+			this._writeHandlebarsFile(
+				'java/cli-config.yml.template',
+				FILENAME_CLI_CONFIG,
+				this.opts
+			);
 		}
 	}
 
 	_generatePython() {
 		const applicationName = this.opts.application.sanitizedName;
-		const port = this.opts.port ? this.opts.port : '3000';
-		const debugPort = '5858';
-		const dockerFileRun = 'Dockerfile';
-		const dockerFileTools = 'Dockerfile-tools';
+		const port = this.opts.deploy_options.servicePorts.http;
 
 		const cliConfig = {
 			containerNameRun: `${applicationName.toLowerCase()}-flask-run`,
@@ -218,9 +177,9 @@ module.exports = class extends Generator {
 			containerPathRun: '/app',
 			containerPathTools: '/app',
 			containerPortMap: `${port}:${port}`,
-			containerPortMapDebug: `${debugPort}:${debugPort}`,
-			dockerFileRun,
-			dockerFileTools,
+			containerPortMapDebug: '5858:5858',
+			dockerFileRun: 'Dockerfile',
+			dockerFileTools: 'Dockerfile-tools',
 			imageNameRun: `${applicationName.toLowerCase()}-flask-run`,
 			imageNameTools: `${applicationName.toLowerCase()}-flask-tools`,
 			buildCmdRun: 'python manage.py build',
@@ -256,10 +215,7 @@ module.exports = class extends Generator {
 	}
 	_generateDjango() {
 		const applicationName = this.opts.application.sanitizedName;
-		const port = this.opts.port ? this.opts.port : '3000';
-		const debugPort = '5858';
-		const dockerFileRun = 'Dockerfile';
-		const dockerFileTools = 'Dockerfile-tools';
+		const port = this.opts.deploy_options.servicePorts.http;
 
 		const cliConfig = {
 			containerNameRun: `${applicationName.toLowerCase()}-django-run`,
@@ -269,9 +225,9 @@ module.exports = class extends Generator {
 			containerPathRun: '/app',
 			containerPathTools: '/app',
 			containerPortMap: `${port}:${port}`,
-			containerPortMapDebug: `${debugPort}:${debugPort}`,
-			dockerFileRun,
-			dockerFileTools,
+			containerPortMapDebug: `5858:5858`,
+			dockerFileRun: 'Dockerfile',
+			dockerFileTools: 'Dockerfile-tools',
 			imageNameRun: `${applicationName.toLowerCase()}-django-run`,
 			imageNameTools: `${applicationName.toLowerCase()}-django-tools`,
 			buildCmdRun: 'python -m compileall .',
@@ -312,10 +268,7 @@ module.exports = class extends Generator {
 	_generateGo() {
 		const applicationName = this.opts.application.sanitizedName;
 		const chartName = this.opts.application.sanitizedName;
-		const dockerFileRun = 'Dockerfile';
-		const dockerFileTools = 'Dockerfile-tools';
-		const port = this.opts.port ? this.opts.port : '8080';
-		const debugPort = '8181';
+		const port = this.opts.deploy_options.servicePorts.http;
 
 		const cliConfig = {
 			containerNameRun: `${applicationName.toLowerCase()}-go-run`,
@@ -326,9 +279,9 @@ module.exports = class extends Generator {
 			containerPathRun: `/go/src/goginapp; :`,
 			containerPathTools: `/go/src/goginapp; :`,
 			containerPortMap: `${port}:${port}`,
-			containerPortMapDebug: `${debugPort}:${debugPort}`,
-			dockerFileRun,
-			dockerFileTools,
+			containerPortMapDebug: '8181:8181',
+			dockerFileRun: 'Dockerfile',
+			dockerFileTools: 'Dockerfile-tools',
 			imageNameRun: `${applicationName.toLowerCase()}-go-run`,
 			imageNameTools: `${applicationName.toLowerCase()}-go-tools`,
 			buildCmdRun: 'go build',
@@ -345,9 +298,22 @@ module.exports = class extends Generator {
 
 	}
 
+	_writeHandlebarsFile(templateFile, destinationFile, data) {
+
+		if (this.fs.exists(this.destinationPath(destinationFile))) {
+			logger.debug(destinationFile, "already exists, skipping.");
+		}
+		else {
+			let template = this.fs.read(this.templatePath(templateFile));
+			let compiledTemplate = Handlebars.compile(template);
+			let output = compiledTemplate(data);
+			this.fs.write(this.destinationPath(destinationFile), output);
+		}
+	}
+
 	_copyTemplateIfNotExists(targetFileName, sourceTemplatePath, ctx) {
 		if (this.fs.exists(this.destinationPath(targetFileName))) {
-			this.log(targetFileName, "already exists, skipping.");
+			logger.debug(targetFileName, "already exists, skipping.");
 		} else {
 			this.fs.copyTpl(
 				this.templatePath(sourceTemplatePath),

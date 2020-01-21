@@ -22,7 +22,7 @@ dockerfile-tools : "Dockerfile-tools"
 
 # The name of image to create from dockerfile-run
 image-name-run : "{{#toLowerCase appName}}{{/toLowerCase}}"
-{{#has buildType 'maven'}}
+
 # The name of image to create from dockerfile-tools
 image-name-tools : "bx-dev-java-maven-tools"
 
@@ -37,23 +37,6 @@ test-cmd : "mvn install -Dmaven.repo.local=/project/.m2/repository -Pbx-dev-buil
 
 # The command to build the code and docker image for DEBUG
 build-cmd-debug : "mvn install -Dmaven.repo.local=/project/.m2/repository -Pbx-dev-build"
-{{/has}}
-{{#has buildType 'gradle'}}
-# The name of image to create from dockerfile-tools
-image-name-tools : "bx-dev-java-gradle-tools"
-
-# The project root on the host for the run container to mount to container-path-run
-host-path-run : "build"
-
-# The command to build the code and docker image for RUN
-build-cmd-run : "gradle -g . build"
-
-# The command to execute tests for the code in the tools container
-test-cmd : "gradle -g . build"
-
-# The command to build the code and docker image for DEBUG
-build-cmd-debug : "gradle -g . build"
-{{/has}}
 
 # The command to execute debug of the code in the tools container
 debug-cmd : "server debug"

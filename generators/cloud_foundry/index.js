@@ -225,7 +225,7 @@ module.exports = class extends Generator {
 		this.cfIgnoreContent = ['/.classpath', '/.project', '/.settings', '/src/main/liberty/config/server.env', 'target/', 'build/'];
 		this.manifestConfig.buildpack = 'liberty-for-java';
 		this.manifestConfig.memory = this.manifestConfig.memory || '512M';
-		let buildDir = (this.opts.buildType && this.opts.buildType === 'gradle') ? 'build' : 'target';
+		let buildDir = 'target';
 		let zipPath = `${buildDir}/${this.opts.artifactId}` + `-` + version + `.zip`;
 		this.manifestConfig.path = `./${zipPath}`;
 		let excludes = [];
@@ -252,7 +252,7 @@ module.exports = class extends Generator {
 		this.cfIgnoreContent = ['/.classpath', '/.project', '/.settings', '/src/main/resources/application-local.properties', 'target/', 'build/'];
 		this.manifestConfig.buildpack = 'java_buildpack';
 		this.manifestConfig.memory = this._getHighestMemorySize(this.manifestConfig.memory, '1024M');
-		let buildDir = (this.opts.buildType && this.opts.buildType === 'gradle') ? 'build/libs' : 'target';
+		let buildDir = 'target';
 		let jarPath = `${buildDir}/${this.opts.artifactId}` + `-` + version + `.jar`;
 		this.manifestConfig.path = `./${jarPath}`;
 		this.pipelineConfig.pushCommand = 'cf push "${CF_APP}" -p ' + jarPath + ' --hostname "${CF_HOSTNAME}" -d "${CF_DOMAIN}"';

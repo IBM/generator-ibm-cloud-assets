@@ -12,7 +12,6 @@ container-name-tools : "bx-dev-{{appNameRefreshed}}-tools"
 
 # The name of image to create from dockerfile-run
 image-name-run : "{{appNameRefreshed}}"
-{{#has buildType 'maven'}}
 # The name of image to create from dockerfile-tools
 image-name-tools : "bx-dev-java-maven-tools"
 
@@ -27,23 +26,6 @@ test-cmd : "mvn install -Dmaven.repo.local=/project/.m2/repository"
 
 # The command to build the code and docker image for DEBUG
 build-cmd-debug : "mvn install -Dmaven.repo.local=/project/.m2/repository"
-{{/has}}
-{{#has buildType 'gradle'}}
-# The name of image to create from dockerfile-tools
-image-name-tools : "bx-dev-java-gradle-tools"
-
-# The project root on the host for the run container to mount to container-path-run
-host-path-run : "build"
-
-# The command to build the code and docker image for RUN
-build-cmd-run : "gradle -g . build"
-
-# The command to execute tests for the code in the tools container
-test-cmd : "gradle -g . build"
-
-# The command to build the code and docker image for DEBUG
-build-cmd-debug : "gradle -g . build"
-{{/has}}
 
 # The project root in the run container to mount to host-path-run
 container-path-run : "/project"
@@ -56,7 +38,7 @@ container-port-map : "8080:8080,8443:8443"
 container-port-map-debug : "8000:8000"
 
 # The command to execute debug of the code in the tools container
-debug-cmd : "java -Dspring.profiles.active=local -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=y -jar {{#has buildType 'maven'}}./target/{{/has}}{{#has buildType 'gradle'}}./build/libs/{{/has}}{{#firstAvailable artifactId appNameRefreshed}}{{/firstAvailable}}-{{version}}.jar"
+debug-cmd : "java -Dspring.profiles.active=local -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=y -jar ./target/{{#firstAvailable artifactId appNameRefreshed}}{{/firstAvailable}}-{{version}}.jar"
 
 # The name for the dockerfile for the run container
 dockerfile-run : "Dockerfile"
