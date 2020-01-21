@@ -97,6 +97,7 @@ module.exports = class extends Generator {
 				languageGeneratorPath += '/node-express';
 				break;
 			case "python":
+			case "django":
 				languageGeneratorPath += '/python-flask';
 				break;
 			case "java":

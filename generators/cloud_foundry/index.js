@@ -233,10 +233,10 @@ module.exports = class extends Generator {
 			this.manifestConfig.env.IBM_LIBERTY_BETA = 'true'
 			this.manifestConfig.env.JBP_CONFIG_LIBERTY = '\"version: +\"'
 		}
-		if (this.bluemix.cloudant) {
+		if (this.opts.application.service_credentials.cloudant) {
 			excludes.push('cloudantNoSQLDB=config');
 		}
-		if (this.bluemix.objectStorage) {
+		if (this.opts.application.service_credentials.objectStorage) {
 			excludes.push('Object-Storage=config');
 		}
 		if (excludes.length === 1) {
