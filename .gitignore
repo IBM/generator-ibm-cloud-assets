@@ -49,13 +49,18 @@ test/tmp
 .floo*
 
 # output from generator 
-# Dockerfile
-# Dockerfile-tools
-# cli-config.yml
-# manifest.yml
-# .cfignore
-# .bluemix
-helm
+service.yaml
+manifest.yml
+.cfignore
+cli-config.yml
+run-dev
+run-debug
+config.json
+mappings.json
+chart/
+
+dump.rdb
 
 manual/test.json
+manual/*.dir
 
