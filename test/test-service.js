@@ -112,7 +112,8 @@ function validateCreds(lang, services) {
             && services !== "discovery" && services !== "languageTranslator" && services !== "naturalLanguageClassifier"
             && services !== "naturalLanguageUnderstanding" && services !== "personalityInsights" && services !== "speechToText"
             && services !== "textToSpeech" && services != "toneAnalyzer" && services !== "visualRecognition") {
-            assert.fileContent(mappings_path, testUtils.PREFIX_SVC_BINDING_NAME + services);
+            // assert.fileContent(mappings_path, testUtils.PREFIX_SVC_BINDING_NAME + services);
+            assert.fileContent(mappings_path, `service_${SvcInfo[services]["customServiceKey"].replace(/-/g, '_')}`);
         }
         assert.file([localdev_path]);
     });
@@ -215,17 +216,6 @@ describe("cloud-assets:service", function() {
 
                 validateDeployAssets(javaLang, deploy_type, service);
                 validateCreds(javaLang, service);
-        
-                it('pom.xml with Cloud Env', function () {
-                    assert.file([
-                        'pom.xml'
-                    ]);
-                    assert.fileContent('pom.xml', '<artifactId>javax.json-api</artifactId>');
-                    assert.fileContent('pom.xml', '<artifactId>com.ibm.websphere.appserver.api.json</artifactId>');
-                    assert.fileContent('pom.xml', '<artifactId>cdi-api</artifactId>');
-                    assert.fileContent('pom.xml', '<artifactId>json-path</artifactId>');
-                    assert.fileContent('pom.xml', '<artifactId>microprofile-config-api</artifactId>');
-                });
             });
             
             const springLang = "SPRING";
@@ -242,16 +232,6 @@ describe("cloud-assets:service", function() {
 
                 validateDeployAssets(springLang, deploy_type, service);
                 validateCreds(springLang, service);
-        
-                it('pom.xml with Cloud Env', function () {
-                    assert.file([
-                        'pom.xml'
-                    ]);
-                    assert.fileContent('pom.xml', '<artifactId>javax.json-api</artifactId>');
-                    assert.fileContent('pom.xml', '<artifactId>json-path</artifactId>');
-                    assert.fileContent('pom.xml', '<artifactId>ibm-cloud-spring-boot-service-bind</artifactId>');
-                    assert.fileContent('pom.xml', '<artifactId>microprofile-config-api</artifactId>');
-                });
             });
 
             const swiftLang = "SWIFT";

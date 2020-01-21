@@ -60,7 +60,7 @@ module.exports = class extends Generator {
 		let root = path.dirname(require.resolve('../../enabler'));
 		Object.keys(svcInfo).forEach(svc => {
 			serviceKey = svc;
-			serviceCredentials = this.context.bluemix[serviceKey];
+			serviceCredentials = this.context.application.service_credentials[serviceKey];
 			if (serviceCredentials) {
 				this.context.scaffolderKey = serviceKey;
 				logger.debug("Composing with service : " + svc);
@@ -76,15 +76,6 @@ module.exports = class extends Generator {
 	}
 
 	writing() {
-		if (this.context.instrumentationAdded) {
-			this._writeFiles(this.context.language + '/**', this.conf);
-			this.context.srcFolders.forEach(folder => {
-				if (filesys.existsSync(folder)) {
-					this._writeFiles(folder + '/**', this.conf)
-				}
-			})
-		}
-		
 		// add missing pom.xml dependencies when running service enablement standalone
 		if (typeof this.context.parentContext === "undefined") {
 			this._addJavaDependencies();
@@ -105,7 +96,7 @@ module.exports = class extends Generator {
 
 	_addLocalDevConfig(devconf) {
 		logger.debug('Adding devconf', devconf);
-		if (this.context.bluemix) {
+		if (this.context.application.service_credentials) {
 			let localDevFilePath = this.destinationPath(PATH_LOCALDEV_FILE);
 			this.fs.extendJSON(localDevFilePath, devconf);
 		} else {
@@ -114,7 +105,7 @@ module.exports = class extends Generator {
 	}
 
 	_addCoreDependencies() {
-		let dependenciesString = this.fs.read(`${this.templatePath()}/${this.context.language}/${this.context.dependenciesFile}`);
+		let dependenciesString = this.fs.read(`${this.templatePath()}/${this.context.application.language}/${this.context.dependenciesFile}`);
 		let template = handlebars.compile(dependenciesString);
 		dependenciesString = template(this.context);
 		if (this.context._addDependencies) {
@@ -138,6 +129,7 @@ module.exports = class extends Generator {
 	}
 
 	_writeFiles(templatePath, data) {
+		// TODO cleanup
 		//do not write out any files that are marked as processing templates
 		try {
 			this.fs.copy([this.templatePath(templatePath), '!**/*.template'], this.destinationPath(), {

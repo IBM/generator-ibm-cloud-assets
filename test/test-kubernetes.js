@@ -114,7 +114,7 @@ function assertHpaYmlContent(chartLocation) {
 }
 
 describe('cloud-assets:kubernetes', function () {
-	this.timeout(5000);
+	this.timeout(1000*60*10);
 
 	let languages = [ 'JAVA', 'SPRING', 'NODE', 'GO', 'SWIFT', 'PYTHON' ];
 	
