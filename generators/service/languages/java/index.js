@@ -76,16 +76,6 @@ module.exports = class extends Generator {
 	}
 
 	writing() {
-		// TODO: cleanup
-		if (this.context.instrumentationAdded) {
-			this._writeFiles(this.context.application.language + '/**', this.conf);
-			this.context.srcFolders.forEach(folder => {
-				if (filesys.existsSync(folder)) {
-					this._writeFiles(folder + '/**', this.conf)
-				}
-			})
-		}
-		
 		// add missing pom.xml dependencies when running service enablement standalone
 		if (typeof this.context.parentContext === "undefined") {
 			this._addJavaDependencies();
