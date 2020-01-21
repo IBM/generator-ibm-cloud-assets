@@ -69,28 +69,6 @@ module.exports = class extends Generator {
 
 		this.shouldPrompt = this.opts.application ? false : true;
 
-		/*
-		Yeoman copies the opts when doing compose with to create own object reference
-		that can be updated in prompting
-		*/
-		if (this.opts.bluemix) {
-			this.bluemix = this.opts.bluemix;
-		} else {
-			this.bluemix = {};
-			this.opts.bluemix = this.bluemix;
-		}
-
-		if (this.opts.bluemix.name && !this.opts.bluemix.sanitizedName) {
-			this.opts.bluemix.sanitizedName = Utils.sanitizeAlphaNumDash(this.opts.bluemix.name);
-		}
-
-		// Find cloud deployment type to composeWith correct generators
-		if (this.bluemix.server) {
-			this.cloudDeploymentType = this.bluemix.server.cloudDeploymentType;
-		} else {
-			this.cloudDeploymentType = this.bluemix.cloudDeploymentType;
-		}
-
 	}
 
 	_setLoggerLevel(){
@@ -153,8 +131,8 @@ module.exports = class extends Generator {
 			name: 'kubeDeploymentType',
 			message: 'Kube Deployment Type',
 			choices: [
-				'HELM',
-				'KNATIVE'
+				'KNATIVE',
+				'HELM'
 			],
 			default: "KNATIVE"
 		});
@@ -178,50 +156,9 @@ module.exports = class extends Generator {
 	}
 
 	configuring() {
-
-		this.opts.bluemix = this._makeBluemix(this.opts.deploy_options, this.opts.application);
-
 		this.opts.application.sanitizedName = Utils.sanitizeAlphaNumLowerCase(this.opts.application.name);
-
-		// process object for kube deployments
-		if (this.opts.deploy_options && this.opts.deploy_options.kube ) {
-			// work out app name and language
-			this.opts.bluemix.language = _.toLower(this.opts.bluemix.backendPlatform);
-			
-			if(this.opts.bluemix.language === 'java' || this.opts.bluemix.language === 'spring') {
-				this.opts.bluemix.applicationName = this.opts.bluemix.appName || Utils.sanitizeAlphaNum(this.bluemix.name);
-			} else {
-				this.opts.bluemix.applicationName = Utils.sanitizeAlphaNum(this.bluemix.name);
-			}
-			this.opts.application.sanitizedName = Utils.sanitizeAlphaNum(this.opts.application.name); //java did something strange but should only be from generators
-
-			this.opts.bluemix.chartName = Utils.sanitizeAlphaNumLowerCase(this.opts.bluemix.applicationName);
-			this.opts.application.chartName = Utils.sanitizeAlphaNumLowerCase( this.opts.application.sanitizedName )
-
-			this.opts.bluemix.services = typeof(this.opts.bluemix.services) === 'string' ? JSON.parse(this.opts.bluemix.services || '[]') : this.opts.bluemix.services;
-
-			this.opts.bluemix.servicePorts = {};
-			//use port if passed in
-			if(this.opts.bluemix.port) {
-				this.opts.bluemix.servicePorts.http = this.opts.bluemix.port;
-			} else {
-				this.opts.bluemix.servicePorts.http = portDefault[this.opts.bluemix.language].http;
-				if(portDefault[this.opts.bluemix.language].https) {
-					this.opts.bluemix.servicePorts.https = portDefault[this.opts.bluemix.language].https;
-				}
-			}
-
-			this.opts.deploy_options.servicePorts = {"http": portDefault[this.opts.application.language.toLowerCase()].http}
-			if ( portDefault[this.opts.application.language.toLowerCase()].https ) {
-				this.opts.deploy_options.servicePorts.https = portDefault[this.opts.application.language.toLowerCase()].https;
-			}
-
-			if (this.bluemix.server && this.bluemix.server.cloudDeploymentOptions && this.bluemix.server.cloudDeploymentOptions.kubeDeploymentType) {
-					this.opts.bluemix.kubeDeploymentType = this.bluemix.server.cloudDeploymentOptions.kubeDeploymentType;
-			}
-
-		}
-		logger.debug(`configuring - app options: ${JSON.stringify(this.opts.application, null, 3)}`);
+		this.opts.application.chartName = Utils.sanitizeAlphaNumLowerCase( this.opts.application.name );
+		this.opts.deploy_options.servicePorts = portDefault[this.opts.application.language.toLowerCase()]
 	}
 
 	writing() {
@@ -240,12 +177,12 @@ module.exports = class extends Generator {
 					this.composeWith(require.resolve('../kubernetes'), this.opts);
 				}
 
-			} else if (this.opts.deployOptions.cloud_foundry) {
+			} else if (this.opts.deploy_options.cloud_foundry) {
 				this.log("write CF")
 				this.composeWith(require.resolve('../cloud_foundry'), this.opts);
 			}
 		}
-
+		this.log("write services")
 		this.composeWith(require.resolve('../service'), this.opts);
 
 		this.log("end writing")
@@ -307,53 +244,5 @@ module.exports = class extends Generator {
 		} catch (e) {
 			throw Error(`${name} parameter is expected to be a valid stringified JSON object: ${e}`);
 		}
-	}
-
-	_makeBluemix(deployOpts, application){
-
-		const hasServiceCreds = application.hasOwnProperty("service_credentials");
-		let bluemix = {
-			name: application.name,
-			applicationName: application.name,
-			cloudDeploymentType: (deployOpts) ? Object.keys(deployOpts)[0] : false,
-			backendPlatform: application.language,
-			server: {
-				services: hasServiceCreds ? Object.keys(application.service_credentials) : {},
-				cloudDeploymentType: (deployOpts) ? Object.keys(deployOpts)[0] : false,
-				"cloudDeploymentOptions": {
-					"kubeDeploymentType": (deployOpts && deployOpts.kube) ? deployOpts.kube.type : false
-				}
-			}
-		};
-
-		if ( deployOpts && deployOpts.cloud_foundry ) {
-			_.extend(bluemix.server, deployOpts.cloud_foundry);
-			bluemix.server.host = bluemix.server.hostname;
-			bluemix.cloudDeploymentType = "cloud_foundry";
-		}
-		
-		if (hasServiceCreds) {
-			let bindings = (deployOpts) ? deployOpts[bluemix.cloudDeploymentType]["service_bindings"] : {};
-			for (let service of Object.keys(application.service_credentials)) {
-				let obj = {}
-				obj[service] = [application.service_credentials[service]];
-				let binding = ( bindings ) ? bindings[service] : "REPLACEME-binding-" + service;
-				if (bluemix.cloudDeploymentType === "cloud_foundry") {
-					obj[service]["serviceInfo"] = {
-						"name": binding.name,
-						"cloudLabel": binding.label,
-					}
-				} else {
-					obj[service]["serviceInfo"] = {
-						"name": binding,
-						"cloudLabel": service,
-					}
-				}
-				_.extend(bluemix, obj);
-			}
-
-		}
-
-		return bluemix;
 	}
 }

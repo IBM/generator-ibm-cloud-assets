@@ -52,7 +52,7 @@ const baseDeployObjects = {
                 "domain": "mydomain.com",
                 "hostname": "my-app-hostname",
                 "instances": "3",
-                "memory": "256MB",
+                "memory": "256M",
                 "service_bindings": {}
             }
         },
