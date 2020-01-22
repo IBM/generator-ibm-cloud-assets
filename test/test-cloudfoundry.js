@@ -112,73 +112,71 @@ describe('cloud-enablement:cloudfoundry', function () {
 	});
 
 	let javaFrameworks = ['JAVA', 'SPRING'];
-	let javaBuildTypes = ['maven'];
+	let buildType = 'maven';
 	let createTypes = ['enable/', 'microservice'];
 
 	let assertYmlContent = function(actual, expected, label) {
 		assert.strictEqual(actual, expected, 'Expected ' + label + ' to be ' + expected + ', found ' + actual);
 	}
 	javaFrameworks.forEach(language => {
-		javaBuildTypes.forEach(buildType => {
-			createTypes.forEach(createType => {
+		createTypes.forEach(createType => {
 
-				describe('cloud-enablement:cloudfoundry with ' + language + ' with buildType ' + buildType + ' and createType ' + createType, function () {
-					let baseOptions = language === 'SPRING' ? optionsSpring : optionsJava;
-					baseOptions.deploy_options.cloud_foundry.memory = '512M'
-					let artifactId = '${CF_APP}';
-					let javaVersion = '1.0-SNAPSHOT';
+			describe('cloud-enablement:cloudfoundry with ' + language + ' with buildType ' + buildType + ' and createType ' + createType, function () {
+				let baseOptions = language === 'SPRING' ? optionsSpring : optionsJava;
+				baseOptions.deploy_options.cloud_foundry.memory = '512M'
+				let artifactId = '${CF_APP}';
+				let javaVersion = '1.0-SNAPSHOT';
 
-					let options = _.extend(baseOptions, {buildType : buildType, createType: createType, artifactId: artifactId, version: javaVersion});
-					if (language === 'libertyBeta') {
-						options.libertyVersion = 'beta'
+				let options = _.extend(baseOptions, {buildType : buildType, createType: createType, artifactId: artifactId, version: javaVersion});
+				if (language === 'libertyBeta') {
+					options.libertyVersion = 'beta'
+				}
+
+				beforeEach(function () {
+					return helpers.run(path.join(__dirname, '../generators/app'))
+						.inDir(path.join(__dirname, './tmp'))
+						.withOptions(options)
+				});
+
+				it('manifest.yml is generated with correct content', function () {
+					assert.file('manifest.yml');
+					let manifestyml = yml.safeLoad(fs.readFileSync('manifest.yml', 'utf8'));
+
+					if (language === 'JAVA' || language === 'libertyBeta') {
+						let targetDir = buildType === 'maven' ? 'target' : 'build'
+						assertYmlContent(manifestyml.applications[0].path, './' + targetDir + '/' + artifactId + '-' + javaVersion +'.zip', 'manifestyml.applications[0].path');
+						assertYmlContent(manifestyml.applications[0].memory, '512M', 'manifestyml.applications[0].memory')
+						assertYmlContent(manifestyml.applications[0].buildpack, 'liberty-for-java', 'manifestyml.applications[0].buildpack')
 					}
 
-					beforeEach(function () {
-						return helpers.run(path.join(__dirname, '../generators/app'))
-							.inDir(path.join(__dirname, './tmp'))
-							.withOptions(options)
-					});
+					if (language === 'JAVA') {
+						assertYmlContent(manifestyml.applications[0].env.IBM_LIBERTY_BETA, undefined, 'manifestyml.applications[0].env.IBM_LIBERTY_BETA')
+						assertYmlContent(manifestyml.applications[0].env.JBP_CONFIG_LIBERTY, undefined, 'manifestyml.applications[0].env.JBP_CONFIG_LIBERTY')
+					}
 
-					it('manifest.yml is generated with correct content', function () {
-						assert.file('manifest.yml');
-						let manifestyml = yml.safeLoad(fs.readFileSync('manifest.yml', 'utf8'));
+					if (language === 'libertyBeta') {
+						assertYmlContent(manifestyml.applications[0].env.IBM_LIBERTY_BETA, true, 'manifestyml.applications[0].env.IBM_LIBERTY_BETA')
+						assertYmlContent(manifestyml.applications[0].env.JBP_CONFIG_LIBERTY, 'version: +', 'manifestyml.applications[0].env.JBP_CONFIG_LIBERTY')
+					}
 
-						if (language === 'JAVA' || language === 'libertyBeta') {
-							let targetDir = buildType === 'maven' ? 'target' : 'build'
-							assertYmlContent(manifestyml.applications[0].path, './' + targetDir + '/' + artifactId + '-' + javaVersion +'.zip', 'manifestyml.applications[0].path');
-							assertYmlContent(manifestyml.applications[0].memory, '512M', 'manifestyml.applications[0].memory')
-							assertYmlContent(manifestyml.applications[0].buildpack, 'liberty-for-java', 'manifestyml.applications[0].buildpack')
-						}
-
-						if (language === 'JAVA') {
-							assertYmlContent(manifestyml.applications[0].env.IBM_LIBERTY_BETA, undefined, 'manifestyml.applications[0].env.IBM_LIBERTY_BETA')
-							assertYmlContent(manifestyml.applications[0].env.JBP_CONFIG_LIBERTY, undefined, 'manifestyml.applications[0].env.JBP_CONFIG_LIBERTY')
-						}
-
-						if (language === 'libertyBeta') {
-							assertYmlContent(manifestyml.applications[0].env.IBM_LIBERTY_BETA, true, 'manifestyml.applications[0].env.IBM_LIBERTY_BETA')
-							assertYmlContent(manifestyml.applications[0].env.JBP_CONFIG_LIBERTY, 'version: +', 'manifestyml.applications[0].env.JBP_CONFIG_LIBERTY')
-						}
-
-						if ( language === 'SPRING' ) {
-							let targetDir = buildType === 'maven' ? 'target' : 'build/libs'
-							assertYmlContent(manifestyml.applications[0].path, './'+targetDir+'/' + artifactId + '-'+javaVersion+'.jar', 'manifestyml.applications[0].path');
-							assertYmlContent(manifestyml.applications[0].memory, '1024M', 'manifestyml.applications[0].memory')
-							assertYmlContent(manifestyml.applications[0].buildpack, 'java_buildpack', 'manifestyml.applications[0].buildpack')
-						}
-					});
-
-					it('.cfignore file is generated', function () {
-						assert.file('.cfignore');
-						if(language === 'JAVA' || language === 'libertyBeta') {
-							assert.fileContent('.cfignore', '/src/main/liberty/config/server.env');
-						} else /* language === 'SPRING' */ {
-							assert.fileContent('.cfignore', '/src/main/resources/application-local.properties');
-						}
-					});
+					if ( language === 'SPRING' ) {
+						let targetDir = buildType === 'maven' ? 'target' : 'build/libs'
+						assertYmlContent(manifestyml.applications[0].path, './'+targetDir+'/' + artifactId + '-'+javaVersion+'.jar', 'manifestyml.applications[0].path');
+						assertYmlContent(manifestyml.applications[0].memory, '1024M', 'manifestyml.applications[0].memory')
+						assertYmlContent(manifestyml.applications[0].buildpack, 'java_buildpack', 'manifestyml.applications[0].buildpack')
+					}
 				});
-			})
-		});
+
+				it('.cfignore file is generated', function () {
+					assert.file('.cfignore');
+					if(language === 'JAVA' || language === 'libertyBeta') {
+						assert.fileContent('.cfignore', '/src/main/liberty/config/server.env');
+					} else /* language === 'SPRING' */ {
+						assert.fileContent('.cfignore', '/src/main/resources/application-local.properties');
+					}
+				});
+			});
+		})
 	});
 
 	describe('cloud-enablement:cloudfoundry with java-liberty with NO services', function () {
@@ -194,19 +192,6 @@ describe('cloud-enablement:cloudfoundry', function () {
 			if(manifestyml.applications[0].env) {
 				assertYmlContent(manifestyml.applications[0].env.services_autoconfig_excludes, undefined, 'manifestyml.applications[0].env.services_autoconfig_excludes');
 			}
-		});
-	});
-
-	describe('cloud-enablement:cloudfoundry with java-liberty with NO platforms', function () {
-		beforeEach(function () {
-			return helpers.run(path.join(__dirname, '../generators/app'))
-				.inDir(path.join(__dirname, './tmp'))
-				.withOptions(_.extend(optionsJava, {platforms: []}));
-		});
-
-		it('no cloud foundry files should be created', function () {
-			assert.noFile('manifest.yml');
-			assert.noFile('.cfignore');
 		});
 	});
 

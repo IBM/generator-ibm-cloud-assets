@@ -32,7 +32,7 @@ var fs = editor.create(store);
 const fse = require('fs-extra');
 
 const SERVICES = testUtils.SERVICES;
-const DEPLOY_OBJECTS = testUtils.baseDeployObjects;
+const DEPLOY_OBJECTS = testUtils.generateDeployOpts();
 
 const SvcInfo = require('../generators/service/templates/serviceInfo.json');
 

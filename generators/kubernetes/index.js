@@ -1,5 +1,5 @@
 /*
- © Copyright IBM Corp. 2017, 2018
+ © Copyright IBM Corp. 2019, 2020
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
@@ -14,28 +14,14 @@
 'use strict';
 
 const Generator = require('yeoman-generator');
-let _ = require('lodash');
 const Handlebars = require('../lib/handlebars.js');
-const Utils = require('../lib/utils');
 
 module.exports = class extends Generator {
 
 	constructor(args, opts) {
 		super(args, opts);
-
-		if (typeof (opts.bluemix) === 'string') {
-			this.bluemix = JSON.parse(opts.bluemix || '{}');
-		} else {
-			this.bluemix = opts.bluemix;
-		}
-
-		if(typeof (opts) === 'string'){
-			this.opts = JSON.parse(opts || '{}');
-		} else {
-			this.opts = opts.cloudContext || opts;
-		}
+		this.opts = opts;
 	}
-
 
 	initializing() {
 		this.fileLocations = {
@@ -49,17 +35,9 @@ module.exports = class extends Generator {
 		};
 	}
 
-	configuring() {
-		this.opts.chartName = this.options.application.chartName;
-		
-		// not services like cloudant, services like mongo
-		this.opts.services = typeof(this.opts.services) === 'string' ? JSON.parse(this.opts.services || '[]') : this.opts.services;
-	}
-
 	writing() {
-		// setup output directory name for helm chart
-		// chart/<applicationName>/...
-		let chartDir = 'chart/' + this.opts.chartName;
+		// setup output directory name for helm chart as chart/<applicationName>/...
+		let chartDir = 'chart/' + this.opts.application.chartName;
 
 		if (this.opts.application.language.toLowerCase() === 'java' || this.opts.application.language.toLowerCase() === 'spring') {
 			this.fileLocations.deployment.source = 'java/deployment.yaml';
@@ -69,7 +47,7 @@ module.exports = class extends Generator {
 			this.fileLocations.values.source = 'java/values.yaml';
 		}
 
-		// iterate over file names
+		// iterate over file names for processing
 		let files = Object.keys(this.fileLocations);
 		files.forEach(file => {
 			let source = this.fileLocations[file].source;

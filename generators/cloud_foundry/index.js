@@ -1,5 +1,5 @@
 /*
- © Copyright IBM Corp. 2017, 2018
+ © Copyright IBM Corp. 2019, 2020
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
@@ -13,6 +13,8 @@
 
 'use strict';
 
+const Log4js = require('log4js');
+const logger = Log4js.getLogger('generator-ibm-cloud-assets:cf');
 const Handlebars = require('../lib/handlebars.js');
 const Generator = require('yeoman-generator');
 const _ = require('lodash');
@@ -24,21 +26,7 @@ const fs = require('fs');
 module.exports = class extends Generator {
 	constructor(args, opts) {
 		super(args, opts);
-
-		//TODO: what is cloudContext do we still need this or was it from the lang gens
-		if (opts.cloudContext) {
-			this.opts = opts.cloudContext
-			this.opts.libertyVersion = opts.libertyVersion
-		} else {
-			this.opts = opts
-		}
-		//TODO: trash bluemiox completely
-		if (typeof(opts.bluemix) === 'string') {
-			this.bluemix = JSON.parse(opts.bluemix || '{}');
-		} else if (typeof(opts.bluemix) === 'object') {
-			this.bluemix = opts.bluemix;
-		}
-
+		this.opts = opts;
 	}
 
 	configuring() {
@@ -51,30 +39,17 @@ module.exports = class extends Generator {
 			},
 			triggersType: 'commit'
 		};
-		this.deployment = {
-			type: 'CF',
-			name: this.opts.application.name,
-			language: this.opts.application.language
-		};
 
-		this.name = undefined;
 		this.manifestConfig.name = this.opts.application.sanitizedName
-		if (this.opts.deploy_options.cloud_foundry) {
-			this.name = this.opts.application.name;
-			this.manifestConfig = Object.assign(this.manifestConfig, this.opts.deploy_options.cloud_foundry);
-			// use service instance names in manifest
-			this.manifestConfig.services = {};
-			_.forEach(this.opts.deploy_options.cloud_foundry.service_bindings, (service, serviceKey) => {
-				this.manifestConfig.services[serviceKey] = service["name"];
-			});
-			this.deployment = Object.assign(this.deployment, this.opts.deploy_options.cloud_foundry.cloudDeploymentOptions);
-			this.manifestConfig.instances = this.manifestConfig.instances || '1';
-			this.deployment.type = 'CF'
-			this.deployment.hasMongo = this.opts.createType === 'mern' || this.opts.createType === 'mean';
-		} else {
-			this.name = this.opts.application.name;
-			this.deployment.type = 'CF';
-		}
+		this.name = this.opts.application.name;
+		//TODO: check on memory syntax in this.manifestConfig
+		this.manifestConfig = Object.assign(this.manifestConfig, this.opts.deploy_options.cloud_foundry);
+		// use service instance names in manifest
+		this.manifestConfig.services = {};
+		_.forEach(this.opts.deploy_options.cloud_foundry.service_bindings, (service, serviceKey) => {
+			this.manifestConfig.services[serviceKey] = service["name"];
+		});
+		this.manifestConfig.instances = this.manifestConfig.instances || '1';
 
 		switch (this.opts.application.language) {
 			case 'NODE':
@@ -114,31 +89,29 @@ module.exports = class extends Generator {
 	 *
 	 * @params manifestMemoryConfig {string} the memory allocated h
 	 */
-	_getHighestMemorySize(manifestMemoryConfig, userDefinedMinMemory) {
-		if (!userDefinedMinMemory) {
+	_getHighestMemorySize(manifestMemoryConfig, minNecessaryMemory) {
+		if (!minNecessaryMemory) {
 			return manifestMemoryConfig;
-		} else if (!manifestMemoryConfig && userDefinedMinMemory) {
-			return userDefinedMinMemory;
+		} else if (!manifestMemoryConfig && minNecessaryMemory) {
+			return minNecessaryMemory;
 		}
 
-		const memMap = {
-			k: 1,
-			m: 2,
-			g: 3
+		const bytesMap = {
+			k: 1024,
+			m: 1048576,
+			g: 1073741824
 		};
-		const manifestSize = manifestMemoryConfig.replace(/[^MmGgKk]/g, '');
-		const userDefinedMinSize = userDefinedMinMemory.replace(/[^MmGgKk]/g, '');
+		const manifestValue = parseInt(manifestMemoryConfig.replace(/[M,m,G,g,K,k]/g, ''));
+		const definedValue = parseInt(minNecessaryMemory.replace(/[M,m,G,g,K,k]/g, ''));
+
+		const manifestSize = bytesMap[manifestMemoryConfig.replace(/[^MmGgKk]/g, '')];
+		const userDefinedMinSize = bytesMap[minNecessaryMemory.replace(/[^MmGgKk]/g, '')];
+
 		let highestAvailableSize;
-
-		if (memMap[manifestSize.toLowerCase()] > memMap[userDefinedMinSize.toLowerCase()]) {
+		if ((manifestValue*manifestSize) > (definedValue*userDefinedMinSize)) {
 			highestAvailableSize = manifestMemoryConfig;
-		} else if (memMap[manifestSize.toLowerCase()] < memMap[userDefinedMinSize.toLowerCase()]) {
-			highestAvailableSize = userDefinedMinMemory;
 		} else {
-			const manifestValue = parseInt(manifestSize.replace(/[M,m,G,g,K,k]/g, ''));
-			const definedValue = parseInt(userDefinedMinSize.replace(/[M,m,G,g,K,k]/g, ''));
-
-			highestAvailableSize = manifestValue > definedValue ? manifestMemoryConfig : userDefinedMinMemory;
+			highestAvailableSize = minNecessaryMemory;
 		}
 
 		return highestAvailableSize;
@@ -194,10 +167,6 @@ module.exports = class extends Generator {
 	}
 
 	_configureJavaCommon() {
-		if (this.opts.appName) {
-			this.manifestConfig.name = this.opts.appName;
-			this.name = this.opts.appName;
-		}
 		if (!this.opts.artifactId) {
 			try {
 				const data = this.fs.read(this.destinationPath("pom.xml"));
@@ -212,12 +181,6 @@ module.exports = class extends Generator {
 				this.opts.artifactId = "<replace-me-with-artifactId-from-pom.xml>";
 			}
 		}
-		if (this.opts.createType === 'bff/liberty') {
-			this.manifestConfig.env.OPENAPI_SPEC = `/${this.name}/swagger/api`;
-		}
-		if (this.opts.createType === 'bff/spring') {
-			this.manifestConfig.env.OPENAPI_SPEC = '/swagger/api';
-		}
 	}
 
 	_configureLiberty() {
@@ -225,14 +188,11 @@ module.exports = class extends Generator {
 		this.cfIgnoreContent = ['/.classpath', '/.project', '/.settings', '/src/main/liberty/config/server.env', 'target/', 'build/'];
 		this.manifestConfig.buildpack = 'liberty-for-java';
 		this.manifestConfig.memory = this.manifestConfig.memory || '512M';
-		let buildDir = (this.opts.buildType && this.opts.buildType === 'gradle') ? 'build' : 'target';
+		let buildDir = 'target';
 		let zipPath = `${buildDir}/${this.opts.artifactId}` + `-` + version + `.zip`;
 		this.manifestConfig.path = `./${zipPath}`;
 		let excludes = [];
-		if (this.opts.libertyVersion === 'beta') {
-			this.manifestConfig.env.IBM_LIBERTY_BETA = 'true'
-			this.manifestConfig.env.JBP_CONFIG_LIBERTY = '\"version: +\"'
-		}
+
 		if (this.opts.application.service_credentials.cloudant) {
 			excludes.push('cloudantNoSQLDB=config');
 		}
@@ -252,7 +212,7 @@ module.exports = class extends Generator {
 		this.cfIgnoreContent = ['/.classpath', '/.project', '/.settings', '/src/main/resources/application-local.properties', 'target/', 'build/'];
 		this.manifestConfig.buildpack = 'java_buildpack';
 		this.manifestConfig.memory = this._getHighestMemorySize(this.manifestConfig.memory, '1024M');
-		let buildDir = (this.opts.buildType && this.opts.buildType === 'gradle') ? 'build/libs' : 'target';
+		let buildDir = 'target';
 		let jarPath = `${buildDir}/${this.opts.artifactId}` + `-` + version + `.jar`;
 		this.manifestConfig.path = `./${jarPath}`;
 		this.pipelineConfig.pushCommand = 'cf push "${CF_APP}" -p ' + jarPath + ' --hostname "${CF_HOSTNAME}" -d "${CF_DOMAIN}"';
@@ -273,13 +233,14 @@ module.exports = class extends Generator {
 		this.manifestConfig.buildpack = 'python_buildpack';
 
 		// if there is a `command` in manifest.yml already, keep it. Otherwise, this is the default command string:
-		let manifestCommand = `gunicorn --env DJANGO_SETTINGS_MODULE=${this.opts.application.name}.settings.production ${this.opts.application.name}.wsgi -b 0.0.0.0:$PORT`;
+		let manifestCommand = `gunicorn --env DJANGO_SETTINGS_MODULE=pythondjangoapp.settings.production pythondjangoapp.wsgi -b 0.0.0.0:$PORT`;
 		try {
 			let manifestyml = jsyaml.safeLoad(fs.readFileSync('manifest.yml', 'utf8'));
 			manifestCommand = manifestyml.applications[0].command ? manifestyml.applications[0].command : manifestCommand;
 		} catch (err) {
 			// cannot read file or find a command, return to default behavior
 		}
+		//TODO: generalize manifestCommand for bx dev enable commands passed
 		this.manifestConfig.command = this.opts.enable ? 'echo No run command specified in manifest.yml' : manifestCommand;
 		this.manifestConfig.memory = this.manifestConfig.memory || '128M';
 		this.cfIgnoreContent = ['.pyc', '.egg-info'];
@@ -295,11 +256,6 @@ module.exports = class extends Generator {
 	}
 
 	writing() {
-		//skip writing files if platforms is specified via options and it doesn't include bluemix
-		//TODO: this.opts.platforms?
-		if (this.opts.platforms && !this.opts.platforms.includes('bluemix')) {
-			return;
-		}
 		// write manifest.yml file
 		this.manifestConfig.hasServices = false;
 		if (this.manifestConfig.services && !_.isEmpty(this.manifestConfig.services) ) {

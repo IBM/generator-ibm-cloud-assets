@@ -1,5 +1,5 @@
 /*
- © Copyright IBM Corp. 2017, 2018
+ © Copyright IBM Corp. 2019, 2020
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
@@ -60,15 +60,13 @@ module.exports = class extends Generator {
 		if (this.opts.deployOptions) { this.opts.deploy_options = this.opts.deployOptions }
 		this._sanitizeOption(this.options, DEPLOY_OPTIONS);
 		this._sanitizeOption(this.options, APPLICATION_OPTIONS);
-		this.log("THIS.OPTS: ");
-		this.log(this.opts);
+		logger.debug("THIS.OPTS: " + JSON.stringify(this.opts, null, 3));
 
 		if (this.options.libertyVersion === 'beta') {
 			this.options.libertyBeta = true
 		}
 
 		this.shouldPrompt = this.opts.application ? false : true;
-
 	}
 
 	_setLoggerLevel(){
@@ -86,6 +84,9 @@ module.exports = class extends Generator {
 	intializing() {
 	}
 
+	/**
+	 * Executed when user runs generator via yo CLI, not in production.
+	 */
 	prompting() {
 		if (!this.shouldPrompt) {
 			return;
@@ -152,7 +153,6 @@ module.exports = class extends Generator {
 		});
 
 		return this.prompt(prompts).then(this._processAnswers.bind(this));
-
 	}
 
 	configuring() {
@@ -163,30 +163,27 @@ module.exports = class extends Generator {
 
 	writing() {
 		// runs subgenerators
-
 		this.composeWith(require.resolve('../cli_tools'), this.opts);
 
 		if (this.opts.deploy_options) {
 			if ( this.opts.deploy_options.kube ) {
-
 				if ( this.opts.deploy_options.kube.type == "KNATIVE" ) {
-					this.log("write knative")
+					logger.debug("write knative")
 					this.composeWith(require.resolve('../knative'), this.opts);
 				} else {
-					this.log("write helm")
+					logger.debug("write helm")
 					this.composeWith(require.resolve('../kubernetes'), this.opts);
 				}
 
 			} else if (this.opts.deploy_options.cloud_foundry) {
-				this.log("write CF")
+				logger.debug("write CF")
 				this.composeWith(require.resolve('../cloud_foundry'), this.opts);
 			}
 		}
-		this.log("write services")
+		logger.debug("write services")
 		this.composeWith(require.resolve('../service'), this.opts);
 
-		this.log("end writing")
-
+		logger.debug("end writing")
 	}
 
 	_processAnswers(answers) {
@@ -226,15 +223,16 @@ module.exports = class extends Generator {
 	}
 
 	_sanitizeOption(options, name) {
-		// this.log(options);
+		// logger.debug(options);
 		const optionValue = options[name];
-		this.log(`optionValue=${optionValue}`);
+		logger.debug(`optionValue=${optionValue}`);
 		if (optionValue && _.isFunction(optionValue.indexOf) && optionValue.indexOf('file:') === 0) {
+			// reading options from file, not part of production execution
 			const fileName = optionValue.replace('file:', '');
 			const filePath = this.destinationPath(`./${fileName}`);
 			console.info(`Reading '${name}' parameter from local file ${filePath} with contents: ${this.fs.readJSON(filePath)}`);
 			this.options[name] = this.fs.readJSON(filePath);
-			this.log(`Saved this.options[${name}]=${this.options[name]}`);
+			logger.debug(`Saved this.options[${name}]=${this.options[name]}`);
 			return this.options[name];
 		}
 

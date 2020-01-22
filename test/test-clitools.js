@@ -21,7 +21,7 @@ const path = require('path');
 const utils = require('./test-utils')
 
 describe('cloud-enablement:clitools', function () {
-	this.timeout(5000);
+	this.timeout(1000*60*10);
 
 	describe('cloud-enablement:clitools with Swift project', function () {
 		beforeEach(function () {
