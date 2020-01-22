@@ -1,7 +1,0 @@
-{
-        "name":"AcmeProject","backendPlatform": "NODE",
-        "sanitizedName": "AcmeProject",
-        "language": "NODE",
-        "services": ["serviceName"]
-    }
-    
