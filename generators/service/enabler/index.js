@@ -1,5 +1,5 @@
 /*
- * © Copyright IBM Corp. 2017, 2018
+ * © Copyright IBM Corp. 2019, 2020
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,6 @@ module.exports = class extends Generator {
 		this.logger.debug(`Constructing: scaffolderName=${this.scaffolderName}, serviceKey=${this.serviceKey}, customCredKeys=${this.customCredKeys}`);
 	}
 
-
 	initializing() {
 		this._addJavaDependencies = Utils.addJavaDependencies.bind(this);
 	}
@@ -64,10 +63,8 @@ module.exports = class extends Generator {
 	 * @param config
 	 * @returns {undefined}
 	 */
-
 	configuring() {
 		this.hasSvcProperty = this.context.application.service_credentials.hasOwnProperty(this.scaffolderName);
-		// this.logger.debug(`configuring - bluemix: ${JSON.stringify(this.context.bluemix, null, 2)}`);
 		if (this.hasSvcProperty) {
 			this.logger.info(`No available sdk available for ${this.scaffolderName} in ${this.context.application.language}; configuring credentials only`);
 			this._addMappings(this.config);
@@ -103,7 +100,6 @@ module.exports = class extends Generator {
 	}
 
 	_sanitizeJSONString(dirtyJSONString) {
-
 		const lastIndexOfComma = dirtyJSONString.lastIndexOf(',');
 
 		const prunedJSONString = dirtyJSONString.split("").filter((value, idx) => {
@@ -119,7 +115,7 @@ module.exports = class extends Generator {
 		let serviceInfo = {};
 		if (this.context.application.service_credentials[this.scaffolderName]) {
 			let service = this.context.application.service_credentials[this.scaffolderName];
-			// this.logger.debug(`included service: ${service}`);
+			this.logger.debug(`included service: ${service}`);
 			if (service.hasOwnProperty('serviceInfo')) {
 				serviceInfo = service.serviceInfo;
 			} else if (Array.isArray(service)) {
@@ -129,13 +125,6 @@ module.exports = class extends Generator {
 			}
 		}
 		return serviceInfo;
-	}
-
-	_addServicesToPipeline(serviceInfo) {
-		if (!this.context.servicesInfo) {
-			this.context.servicesInfo = [];
-		}
-		this.context.servicesInfo.push(serviceInfo);
 	}
 
 	_createObjectForKubeYamls(serviceInfo) {
@@ -290,39 +279,6 @@ module.exports = class extends Generator {
 		this.context.addLocalDevConfig(templateContent);
 	}
 
-	// TODO: cleanup
-	_addInstrumentation() {
-		const instPath = this.languageTemplatePath + "/instrumentation" + this.context.languageFileExt;
-		if (this.fs.exists(instPath) && this.context.addInstrumentation) {
-			this.logger.info(`Adding instrumentation for ${this.scaffolderName}`);
-			this.context.addInstrumentation({
-				sourceFilePath: instPath,
-				targetFileName: `service-${this.serviceKey}` + this.context.languageFileExt,
-				servLabel: this.scaffolderName
-			});
-		}
-	}
-
-	_addHtml() {
-		this.logger.info(`Adding AppID login html snippet to landing page for ${this.scaffolderName}`);
-
-		this.fs.copy(
-			this.languageTemplatePath + "/appid.html",
-			this.destinationPath("./public/appid.html")
-		);
-	}
-
-	_addReadMe() {
-		let readmePath = this.languageTemplatePath + "/README.md";
-		if (this.fs.exists(readmePath) && this.context.addReadMe) {
-			this.logger.info(`Adding Readme for ${this.scaffolderName}`);
-			this.context.addReadMe({
-				sourceFilePath: readmePath,
-				targetFileName: `service-${this.serviceKey}` + ".md"
-			});
-		}
-	}
-
 	_setCredentialMapping(templateContent, serviceCredentials, currentKey) {
 		let key,
 			keys = Object.keys(serviceCredentials);
@@ -341,5 +297,4 @@ module.exports = class extends Generator {
 
 		return templateContent;
 	}
-
 };
