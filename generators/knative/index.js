@@ -1,5 +1,5 @@
 /*
- © Copyright IBM Corp. 2017, 2019
+ © Copyright IBM Corp. 2019, 2020
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
@@ -14,9 +14,7 @@
 'use strict';
 
 const Generator = require('yeoman-generator');
-let _ = require('lodash');
 const Handlebars = require('../lib/handlebars');
-const Utils = require('../lib/utils');
 
 module.exports = class extends Generator {
 
@@ -27,13 +25,9 @@ module.exports = class extends Generator {
 	initializing() {}
 
 	writing() {
-		this._writeHandlebarsFile('service.yaml', './service.yaml', this.options);
-	}
-
-	_writeHandlebarsFile(templateFile, destinationFile, data) {
-		let template = this.fs.read(this.templatePath(templateFile));
+		let template = this.fs.read(this.templatePath('service.yaml'));
 		let compiledTemplate = Handlebars.compile(template);
-		let output = compiledTemplate(data);
-		this.fs.write(this.destinationPath(destinationFile), output);
+		let output = compiledTemplate(this.options);
+		this.fs.write(this.destinationPath('./service.yaml'), output);
 	}
 };
