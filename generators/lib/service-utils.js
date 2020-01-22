@@ -79,6 +79,7 @@ function addServicesEnvToHelmChartAsync(args) {
 }
 
 function appendDeploymentYaml(deploymentFilePath, services, resolve, reject) {
+	//TODO: we should use jsyaml read writes instead of string injection
 	let readStream = fs.createReadStream(deploymentFilePath);
 	let promiseIsRejected = false;
 	readStream.on('error', (err) => {
@@ -205,6 +206,7 @@ function addServicesEnvToValuesAsync(args) {
 			return resolve();
 		}
 
+		//TODO: we should use jsyaml read writes instead of string injection
 		let readStream = fs.createReadStream(valuesFilePath);
 		let promiseIsRejected = false;
 		readStream.on('error', (err) => {
