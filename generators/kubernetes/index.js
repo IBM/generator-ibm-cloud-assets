@@ -12,7 +12,8 @@
  */
 
 'use strict';
-
+const Log4js = require('log4js');
+const logger = Log4js.getLogger('generator-ibm-cloud-assets:ks');
 const Generator = require('yeoman-generator');
 const Handlebars = require('../lib/handlebars.js');
 
@@ -56,6 +57,7 @@ module.exports = class extends Generator {
 				target = chartDir + target.slice('chartDir'.length);
 			}
 			if(this.fileLocations[file].process) {
+
 				this._writeHandlebarsFile(source, target, this.opts);
 			} else {
 				this.fs.copy(
@@ -70,6 +72,7 @@ module.exports = class extends Generator {
 		let template = this.fs.read(this.templatePath(templateFile));
 		let compiledTemplate = Handlebars.compile(template);
 		let output = compiledTemplate(data);
+		logger.trace(`Generating ${destinationFile} for ${this.opts.application.language}`);
 		this.fs.write(this.destinationPath(destinationFile), output);
 	}
 };

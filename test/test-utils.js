@@ -24,7 +24,7 @@ var editor = require("mem-fs-editor");
 var store = memFs.create();
 var fs = editor.create(store);
 
-const SVC_CRED_SAMPLES = require("./samples/service_creds.json");
+const SVC_CRED_SAMPLES = require("./templates/service_creds.json");
 const CF_SVC_MAPPINGS = require("./../generators/service/templates/cfServiceMapping.json");
 
 const PREFIX_SVC_BINDING_NAME = "my-service-";

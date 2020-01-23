@@ -1,0 +1,249 @@
+{
+    "appid": {
+        "apikey": "REPLACEME.UNKNOWN_SERVICE_NAME.apikey",
+        "iam_apikey_description": "REPLACEME.UNKNOWN_SERVICE_NAME.iam_apikey_description",
+        "iam_apikey_name": "REPLACEME.UNKNOWN_SERVICE_NAME.iam_apikey_name",
+        "iam_role_crn": "crn:v1:bluemix:public:iam::::serviceRole:Manager",
+        "iam_serviceid_crn": "REPLACEME.UNKNOWN_SERVICE_NAME.iam_serviceid_crn",
+        "appidServiceEndpoint": "https://us-south.appid.cloud.ibm.com",
+        "clientId": "1234-1234-1234-1234",
+        "discoveryEndpoint": "https://us-south.appid.cloud.ibm.com/oauth/v4/1234/.well-known/openid-configuration",
+        "managementUrl": "https://us-south.appid.cloud.ibm.com/management/v4/1234",
+        "oauthServerUrl": "https://us-south.appid.cloud.ibm.com/oauth/v4/1234",
+        "profilesUrl": "https://us-south.appid.cloud.ibm.com",
+        "secret": "1234567890",
+        "tenantId": "1234-5678",
+        "version": 4
+    },
+    "cloudant": {
+        "apikey": "REPLACEME.UNKNOWN_SERVICE_NAME.apikey",
+        "host": "REPLACEME.UNKNOWN_SERVICE_NAME.host",
+        "iam_apikey_description": "REPLACEME.UNKNOWN_SERVICE_NAME.iam_apikey_description",
+        "iam_apikey_name": "REPLACEME.UNKNOWN_SERVICE_NAME.iam_apikey_name",
+        "iam_role_crn": "crn:v1:bluemix:public:iam::::serviceRole:Manager",
+        "iam_serviceid_crn": "REPLACEME.UNKNOWN_SERVICE_NAME.iam_serviceid_crn",
+        "password": "REPLACEME.UNKNOWN_SERVICE_NAME.password",
+        "port": 443,
+        "url": "REPLACEME.UNKNOWN_SERVICE_NAME.url",
+        "username": "REPLACEME.UNKNOWN_SERVICE_NAME.username"
+    },
+    "cloudObjectStorage": {
+        "apikey": "REPLACEME.UNKNOWN_SERVICE_NAME.apikey",
+        "endpoints": "REPLACEME.UNKNOWN_SERVICE_NAME.cos",
+        "iam_apikey_description": "REPLACEME.UNKNOWN_SERVICE_NAME.iam_apikey_description",
+        "iam_apikey_name": "REPLACEME.UNKNOWN_SERVICE_NAME.iam_apikey_name",
+        "iam_role_crn": "crn:v1:bluemix:public:iam::::serviceRole:Manager",
+        "iam_serviceid_crn": "REPLACEME.UNKNOWN_SERVICE_NAME.iam_serviceid_crn",
+        "resource_instance_id": "REPLACEME"
+    },
+    "db2OnCloud": {
+        "db": "BLUDB",
+        "dsn": "DATABASE=BLUDB;HOSTNAME=my-dashdb-host.net;PORT=50000;PROTOCOL=TCPIP;UID=myuser;PWD=mypass;",
+        "host": "my-dashdb-host.net",
+        "hostname": "my-dashdb-host.net",
+        "https_url": "https://my-dashdb-host.net",
+        "jdbcurl": "jdbc:db2://my-dashdb-host.net:50000/BLUDB",
+        "parameters": {},
+        "password": "mypass",
+        "port": 50000,
+        "ssldsn": "DATABASE=BLUDB;HOSTNAME=my-dashdb-host.net;PORT=50001;PROTOCOL=TCPIP;UID=myuser;PWD=mypass;Security=SSL;",
+        "ssljdbcurl": "jdbc:db2://my-dashdb-host.net:50001/BLUDB:sslConnection=true;",
+        "uri": "db2://myuser:mypass@my-dashdb-host.net:50000/BLUDB",
+        "username": "myuser"
+    },
+    "mongodb": {
+        "authentication": {
+          "method": "direct",
+          "password": "mypass",
+          "username": "myuser"
+        },
+        "certificate": {
+          "certificate_base64": "base64_cert==",
+          "name": "cert_name_uuid"
+        },
+        "composed": [
+          "mongodb://myuser:mypass@my-mongodb.cloud:30997,cert_name_uuid-1.my-mongodb.cloud:30997/ibmclouddb?authSource=admin&replicaSet=replset"
+        ],
+        "database": "ibmclouddb",
+        "hosts": [
+          {
+            "hostname": "cert_name_uuid-0.my-mongodb.cloud",
+            "port": 30997
+          },
+          {
+            "hostname": "cert_name_uuid-1.my-mongodb.cloud",
+            "port": 30997
+          }
+        ],
+        "path": "/ibmclouddb",
+        "query_options": {
+          "authSource": "admin",
+          "replicaSet": "replset"
+        },
+        "replica_set": "replset",
+        "scheme": "mongodb",
+        "type": "uri"
+    },
+    "hypersecuredb": {
+        "authentication": {
+          "method": "direct",
+          "password": "mypass",
+          "username": "myuser"
+        },
+        "certificate": {
+          "certificate_base64": "base64_cert==",
+          "name": "cert_name_uuid"
+        },
+        "composed": [
+          "mongodb://myuser:mypass@my-mongodb.cloud:30997,cert_name_uuid-1.my-mongodb.cloud:30997/ibmclouddb?authSource=admin&replicaSet=replset"
+        ],
+        "database": "ibmclouddb",
+        "hosts": [
+          {
+            "hostname": "cert_name_uuid-0.my-mongodb.cloud",
+            "port": 30997
+          },
+          {
+            "hostname": "cert_name_uuid-1.my-mongodb.cloud",
+            "port": 30997
+          }
+        ],
+        "path": "/ibmclouddb",
+        "query_options": {
+          "authSource": "admin",
+          "replicaSet": "replset"
+        },
+        "replica_set": "replset",
+        "scheme": "mongodb",
+        "type": "uri"
+    },
+    "postgresql": {
+        "db_type": "postgresql",
+        "uri_cli_1": "PGPASSWORD=MYPASS psql \"sslmode=require host=my-pg-host.58.dblayer.com port=27363 dbname=compose user=admin\"",
+        "maps": [],
+        "instance_administration_api": {
+          "instance_id": "instance_uuid",
+          "root": "https://composebroker-dashboard-public.mybluemix.net/api",
+          "deployment_id": "deployment_id"
+        },
+        "name": "bmix-dal-yp-instance_uuid",
+        "uri_cli": "PGPASSWORD=MYPASS psql \"sslmode=require host=my-pg-host.57.dblayer.com port=27363 dbname=compose user=admin\"",
+        "uri_direct_1": "postgres://admin:MYPASS@my-pg-host.58.dblayer.com:27363/compose",
+        "ca_certificate_base64": "base64_cert",
+        "deployment_id": "deployment_id",
+        "uri": "postgres://admin:MYPASS@my-pg-host.57.dblayer.com:27363/compose"
+    },
+    "push": {
+        "apikey": "my-apikey-push",
+        "appGuid": "app_guid_here",
+        "clientSecret": "client_secret_here",
+        "iam_apikey_description": "Auto-generated for key api_key_guid_here",
+        "iam_apikey_name": "api_key_name_guid_here",
+        "iam_role_crn": "crn:v1:bluemix:public:iam::::serviceRole:Writer",
+        "iam_serviceid_crn": "crn:v1:bluemix:public:iam-identity::a/crn_id_here::serviceid:ServiceId-svc_id_here",
+        "plan": "LITE",
+        "url": "https://imfpush.us-east.bluemix.net/imfpush/v1/apps/app_guid_here"
+    },
+    "redis": {
+        "name": "my-redis-1575911073589",
+        "credentials": {
+            "db_type": "redis",
+            "maps": [],
+            "instance_administration_api": {
+                "instance_id": "my_instance_uuid",
+                "root": "https://composebroker-dashboard-public.mybluemix.net/api",
+                "deployment_id": "my_deploy_id"
+            },
+            "name": "bmix-dal-yp-my_instance_uuid",
+            "uri_direct_1": "rediss://admin:MYPASS@my-redis-host.59.dblayer.com:27365",
+            "ca_certificate_base64": "base64_cert",
+            "deployment_id": "my_deploy_id",
+            "uri": "rediss://admin:MYPASS@my-redis-host.57.dblayer.com:27365",
+            "misc": {
+                "direct_readonly": [],
+                "cli_readonly": [],
+                "ssh_cli": []
+            }
+        }
+    },
+    "conversation": {
+        "apikey": "my-apikey-convo",
+        "iam_apikey_description": "Auto-generated for key uuid_here",
+        "iam_apikey_name": "Auto-generated service credentials",
+        "iam_role_crn": "crn:v1:bluemix:public:iam::::serviceRole:Manager",
+        "iam_serviceid_crn": "crn:v1:bluemix:public:iam-identity::a/uuid_here::serviceid:ServiceId-service_id_here",
+        "url": "https://gateway-wdc.watsonplatform.net/assistant/api"
+    },
+    "discovery": {
+        "apikey": "my-apikey-discovery",
+        "iam_apikey_description": "Auto-generated for key uuid_here",
+        "iam_apikey_name": "Auto-generated service credentials",
+        "iam_role_crn": "crn:v1:bluemix:public:iam::::serviceRole:Manager",
+        "iam_serviceid_crn": "crn:v1:bluemix:public:iam-identity::a/uuid_1::serviceid:ServiceId-uuid_2",
+        "url": "https://gateway.watsonplatform.net/discovery/api"
+    },
+    "languageTranslator": {
+        "apikey": "my-apikey-translator",
+        "iam_apikey_description": "Auto-generated for key uuid_here",
+        "iam_apikey_name": "Auto-generated service credentials",
+        "iam_role_crn": "crn:v1:bluemix:public:iam::::serviceRole:Manager",
+        "iam_serviceid_crn": "crn:v1:bluemix:public:iam-identity::a/crn_uuid::serviceid:ServiceId-uuid_2",
+        "url": "https://gateway.watsonplatform.net/language-translator/api"
+    },
+    "naturalLanguageClassifier": {
+        "apikey": "my-apikey-classifier",
+        "iam_apikey_description": "Auto-generated for key uuid_1",
+        "iam_apikey_name": "Auto-generated service credentials",
+        "iam_role_crn": "crn:v1:bluemix:public:iam::::serviceRole:Manager",
+        "iam_serviceid_crn": "crn:v1:bluemix:public:iam-identity::a/crn_uuid::serviceid:ServiceId-svc_uuid",
+        "url": "https://gateway.watsonplatform.net/natural-language-classifier/api"
+    },
+    "naturalLanguageUnderstanding": {
+        "apikey": "my-apikey-nlu",
+        "iam_apikey_description": "Auto-generated for key uuid_1",
+        "iam_apikey_name": "apikey-name.default",
+        "iam_role_crn": "crn:v1:bluemix:public:iam::::serviceRole:Manager",
+        "iam_serviceid_crn": "crn:v1:bluemix:public:iam-identity::a/crn_uuid::serviceid:ServiceId-svc_uuid",
+        "url": "https://gateway-wdc.watsonplatform.net/natural-language-understanding/api"
+    },
+    "personalityInsights": {
+        "apikey": "my-apikey-person-insights",
+        "iam_apikey_description": "Auto-generated for key uuid_1",
+        "iam_apikey_name": "Auto-generated service credentials",
+        "iam_role_crn": "crn:v1:bluemix:public:iam::::serviceRole:Manager",
+        "iam_serviceid_crn": "crn:v1:bluemix:public:iam-identity::a/crn_uuid::serviceid:ServiceId-svc_uuid",
+        "url": "https://gateway.watsonplatform.net/personality-insights/api"
+    },
+    "speechToText": {
+        "apikey": "my-apikey-speech2text",
+        "iam_apikey_description": "Auto-generated for key uuid_1",
+        "iam_apikey_name": "Auto-generated service credentials",
+        "iam_role_crn": "crn:v1:bluemix:public:iam::::serviceRole:Manager",
+        "iam_serviceid_crn": "crn:v1:bluemix:public:iam-identity::a/crn_uuid::serviceid:ServiceId-svc_uuid",
+        "url": "https://stream.watsonplatform.net/speech-to-text/api"
+    },
+    "textToSpeech": {
+        "apikey": "my-apikey-text2speech",
+        "iam_apikey_description": "Auto-generated for key uuid_1",
+        "iam_apikey_name": "kube-uuid_2.uuid_3.default",
+        "iam_role_crn": "crn:v1:bluemix:public:iam::::serviceRole:Manager",
+        "iam_serviceid_crn": "crn:v1:bluemix:public:iam-identity::a/crn_uuid::serviceid:ServiceId-svc_uuid",
+        "url": "https://stream.watsonplatform.net/text-to-speech/api"
+    },
+    "toneAnalyzer": {
+        "apikey": "my-apikey-tone",
+        "iam_apikey_description": "Auto-generated for key uuid_1",
+        "iam_apikey_name": "Auto-generated service credentials",
+        "iam_role_crn": "crn:v1:bluemix:public:iam::::serviceRole:Manager",
+        "iam_serviceid_crn": "crn:v1:bluemix:public:iam-identity::a/2de836702ef00a3435bab2a105c5452b::serviceid:ServiceId-20d87aa9-a078-4da9-96a4-4689edf37bcc",
+        "url": "https://gateway.watsonplatform.net/tone-analyzer/api"
+    },
+    "visualRecognition": {
+        "apikey": "my-apikey-visrec",
+        "iam_apikey_description": "Auto-generated for key uuid_1",
+        "iam_apikey_name": "Auto-generated service credentials",
+        "iam_role_crn": "crn:v1:bluemix:public:iam::::serviceRole:Manager",
+        "iam_serviceid_crn": "crn:v1:bluemix:public:iam-identity::a/crn_uuid::serviceid:ServiceId-svc_uuid",
+        "url": "https://gateway.watsonplatform.net/visual-recognition/api"
+    }
+}
