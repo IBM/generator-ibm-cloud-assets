@@ -1,5 +1,5 @@
 /*
- © Copyright IBM Corp. 2017, 2018
+ © Copyright IBM Corp. 2019, 2020
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
@@ -11,16 +11,9 @@
  limitations under the License.
  */
 
-
-// module for utils
-
 'use strict';
 
 const logger = require('log4js').getLogger("generator-ibm-cloud-assets:utils");
-const Handlebars = require('../lib/handlebars');
-const Glob = require('glob');
-const _ = require('lodash');
-const fs = require('fs');
 const jsdom = require('jsdom');
 const { JSDOM } = jsdom;
 const DOMParser = new JSDOM().window.DOMParser;
@@ -29,82 +22,40 @@ const prettifyxml = require('prettify-xml');
 
 const REGEX_LEADING_ALPHA = /^[^a-zA-Z]*/;
 const REGEX_ALPHA_NUM = /[^a-zA-Z0-9]/g;
-const REGEX_ALPHA_NUM_DASH = /[^a-zA-Z0-9-]/g;
 
 const PATH_KNATIVE_YAML = "./service.yaml";
 
-const sanitizeAlphaNumLowerCase = (name) => {
-	return sanitizeAlphaNum(name).toLowerCase();
-};
-
-const sanitizeAlphaNum = (name) => {
+const _sanitizeAlphaNumLowerCase = (name) => {
 	let cleanName = '';
 	if (name != undefined) {
-		cleanName = name.replace(REGEX_LEADING_ALPHA, '').replace(REGEX_ALPHA_NUM, '');
+		cleanName = name.replace(REGEX_LEADING_ALPHA, '').replace(REGEX_ALPHA_NUM, '').toLowerCase();
 	}
 	return (cleanName || 'APP');
 };
 
-function _writeHandlebarsFile(_this, templateFile, destinationFile, data) {
-	let template = _this.fs.read(_this.templatePath(templateFile));
-	let compiledTemplate = Handlebars.compile(template);
-	let output = compiledTemplate(data);
-	_this.fs.write(_this.destinationPath(destinationFile), output);
-}
-
-function _copyFiles(_this, srcPath, dstPath, templateContext) {
-
-	let files = Glob.sync(srcPath + "/**/*", {dot: true});
-
-	_.each(files, function (srcFilePath) {
-
-		// Do not process srcFilePath if it is pointing to a directory
-		if (fs.lstatSync(srcFilePath).isDirectory()) return;
-
-		// Do not process files that end in .partial, they're processed separately
-		if (srcFilePath.indexOf(".partial") > 0 || srcFilePath.indexOf(".replacement") > 0) return;
-
-		let functionName =srcFilePath.substring(srcFilePath.lastIndexOf("/")+1);
-		if( _.isUndefined(functionName) ) {
-			return;
-		}
-
-		// Lets write the Actions using HandleBars
-		_writeHandlebarsFile(_this,srcFilePath, dstPath+"/"+functionName,templateContext);
-
-	}.bind(this));
-}
-
-
-const sanitizeAlphaNumDash = (name) => {
-	name = name || 'appname';
-	return name
-    .toLowerCase()
-    .replace(REGEX_LEADING_ALPHA, '')
-    .replace(/ /g, '-')
-    .replace(REGEX_ALPHA_NUM_DASH, '');
-};
-
-function mergeFileObject(existingObject, objectToMerge){
-	let existingFiles = [];
-	let existingData = {};
-	existingObject.forEach((obj) => {
-		existingFiles.push(obj.filepath);
-		existingData[obj.filepath] = obj.data;
-	})
-	objectToMerge.forEach((obj) => {
-		if(existingFiles.includes(obj.filepath)) {
-			obj.data.forEach((data) => {
-				if(existingData[obj.filepath].includes(data)) {
-					return; //The data is already being written in this file
-				} else {
-					existingData[obj.filepath].push(data);
-				}
-			})
-		} else {
-			existingObject.push(obj);
-		}
-	})
+const _portDefault = {
+	java: {
+		http: '9080',
+		https: '9443'
+	},
+	spring: {
+		http: '8080'
+	},
+	node: {
+		http: '3000'
+	},
+	python: {
+		http: '3000'
+	},
+	swift: {
+		http: '8080'
+	},
+	django: {
+		http: '3000'
+	},
+	go: {
+		http: '8080'
+	}
 }
 
 function addJavaDependencies() {
@@ -164,12 +115,8 @@ function addJavaDependencies() {
 }
 
 module.exports = {
-	sanitizeAlphaNum: sanitizeAlphaNum,
-	sanitizeAlphaNumLowerCase: sanitizeAlphaNumLowerCase,
-	sanitizeAlphaNumDash: sanitizeAlphaNumDash,
-	writeHandlebarsFile: _writeHandlebarsFile,
-	copyFiles: _copyFiles,
+	sanitizeAlphaNumLowerCase: _sanitizeAlphaNumLowerCase,
 	PATH_KNATIVE_YAML: PATH_KNATIVE_YAML,
-	mergeFileObject: mergeFileObject,
-	addJavaDependencies: addJavaDependencies
+	addJavaDependencies: addJavaDependencies,
+	portDefault: _portDefault
 };

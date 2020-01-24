@@ -5,7 +5,7 @@
       "domain": "mydomain.com",
       "hostname": "my-app-hostname",
       "instances": 3,
-      "memory": "512MB",
+      "memory": "1024M",
       "service_bindings": {
         "appid": {
           "name": "nick-flaskknativewbi-appid-1568998962198",
@@ -38,6 +38,6 @@
     }
   },
   "metadata": {
-    "git_url": "https://github.com/IBM/flask-web-app"
+    "git_url": "https://github.com/IBM/python-flask-app"
   }
 }

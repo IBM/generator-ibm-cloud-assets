@@ -24,7 +24,7 @@ var editor = require("mem-fs-editor");
 var store = memFs.create();
 var fs = editor.create(store);
 
-const SVC_CRED_SAMPLES = require("./samples/service_creds.json");
+const SVC_CRED_SAMPLES = require("./templates/service_creds.json");
 const CF_SVC_MAPPINGS = require("./../generators/service/templates/cfServiceMapping.json");
 
 const PREFIX_SVC_BINDING_NAME = "my-service-";
@@ -45,14 +45,15 @@ function generateAppOpts(type, language) {
     };
 }
 
-const baseDeployObjects = {
+function generateDeployOpts() {
+    return {
         "cf": {
             "cloud_foundry": {
                 "disk_quota": "1G",
                 "domain": "mydomain.com",
                 "hostname": "my-app-hostname",
                 "instances": "3",
-                "memory": "256MB",
+                "memory": "256M",
                 "service_bindings": {}
             }
         },
@@ -68,11 +69,12 @@ const baseDeployObjects = {
                 "service_bindings": {}      
             }        
         }
-    };
+    }; 
+}
 
 function generateTestPayload(tc_type, language, service_keys) {
     let payload = {};
-    let deploy_opts = baseDeployObjects[tc_type];
+    let deploy_opts = generateDeployOpts()[tc_type];
     let app_opts = generateAppOpts(tc_type, language);
     _.forEach(service_keys, (key) => {
         if (tc_type === "cf") {
@@ -93,7 +95,7 @@ function generateTestPayload(tc_type, language, service_keys) {
 module.exports = {
     getServiceCreds: getServiceCreds,
     generateTestPayload: generateTestPayload,
-    baseDeployObjects: baseDeployObjects,
+    generateDeployOpts: generateDeployOpts,
     LANGS: LANGS,
     SERVICES: SERVICES,
     PREFIX_SVC_BINDING_NAME: PREFIX_SVC_BINDING_NAME

@@ -22,6 +22,7 @@ const path = require('path');
 const handlebars = require('handlebars');
 
 const scaffolderMapping = require('../../templates/scaffolderMapping.json');
+const svcInfo = require('../../templates/serviceInfo.json');
 const Utils = require('../../../lib/utils');
 
 const PATH_MAPPINGS_FILE = './src/main/resources/mappings.json';
@@ -40,9 +41,6 @@ module.exports = class extends Generator {
 
 	//setup all the values we need to pass in the context
 	initializing() {
-		let serviceCredentials,
-			scaffolderKey,
-			serviceKey;
 		this.context.dependenciesFile = 'config.json.template';
 		this.context.languageFileExt = '';
 		this.context.generatorLocation = GENERATOR_LOCATION;
@@ -56,54 +54,28 @@ module.exports = class extends Generator {
 		this.context.metainf = [];
 		this._addJavaDependencies = Utils.addJavaDependencies.bind(this);
 
-		//initializing ourselves by composing with the service generators
-		let root = path.dirname(require.resolve('../..'));
-		let folders = filesys.readdirSync(root);
-		folders.forEach(folder => {
-			if (folder.startsWith('service-')) {
-				serviceKey = folder.substring(folder.indexOf('-') + 1);
-				scaffolderKey = scaffolderMapping[serviceKey];
-				serviceCredentials = this.context.bluemix[scaffolderKey];
-				if (serviceCredentials) {
-					logger.debug('Composing with service : ' + folder);
-					try {
-						this.context.cloudLabel = serviceCredentials && serviceCredentials.serviceInfo && serviceCredentials.serviceInfo.cloudLabel;
-						this.composeWith(path.join(root, folder), { context: this.context });
-					} catch (err) {
-						/* istanbul ignore next */      //ignore for code coverage as this is just a warning - if the service fails to load the subsequent service test will fail
-						logger.warn('Unable to compose with service', folder, err);
-					}
+		let serviceCredentials,
+			serviceKey;
+		//initializing ourselves by composing with the service enabler
+		let root = path.dirname(require.resolve('../../enabler'));
+		Object.keys(svcInfo).forEach(svc => {
+			serviceKey = svc;
+			serviceCredentials = this.context.application.service_credentials[serviceKey];
+			if (serviceCredentials) {
+				this.context.scaffolderKey = serviceKey;
+				logger.debug("Composing with service : " + svc);
+				try {
+					this.context.cloudLabel = serviceCredentials && serviceCredentials.serviceInfo && serviceCredentials.serviceInfo.cloudLabel;
+					this.composeWith(root, {context: this.context});
+				} catch (err) {
+					/* istanbul ignore next */	//ignore for code coverage as this is just a warning - if the service fails to load the subsequent service test will fail
+					logger.warn('Unable to compose with service', svc, err);
 				}
 			}
 		});
 	}
 
 	writing() {
-		if (this.context.instrumentationAdded) {
-			this._writeFiles(this.context.language + '/**', this.conf);
-			this.context.srcFolders.forEach(folder => {
-				if (filesys.existsSync(folder)) {
-					this._writeFiles(folder + '/**', this.conf)
-				}
-			})
-		}
-
-		this.context.metainf.forEach((metainf) => {
-			let location = this.templatePath(this.context.language + '/' + PATH_METAINF + metainf.filepath);
-			let contents = filesys.readFileSync(location, 'utf8');
-			let compiledTemplate = handlebars.compile(contents);
-			let output = compiledTemplate({ data: metainf.data });
-			if (metainf.filepath.endsWith(TEMPLATE_EXT)) {
-				metainf.filepath = metainf.filepath.slice(0, metainf.filepath.length - (TEMPLATE_EXT).length);
-			}
-			let destPath = this.destinationPath(PATH_METAINF + metainf.filepath);
-			if (this.fs.exists(destPath)) {
-				this.fs.append(destPath, output);
-			} else {
-				this.fs.write(destPath, output);
-			}
-		});
-		
 		// add missing pom.xml dependencies when running service enablement standalone
 		if (typeof this.context.parentContext === "undefined") {
 			this._addJavaDependencies();
@@ -124,7 +96,7 @@ module.exports = class extends Generator {
 
 	_addLocalDevConfig(devconf) {
 		logger.debug('Adding devconf', devconf);
-		if (this.context.bluemix) {
+		if (this.context.application.service_credentials) {
 			let localDevFilePath = this.destinationPath(PATH_LOCALDEV_FILE);
 			this.fs.extendJSON(localDevFilePath, devconf);
 		} else {
@@ -133,7 +105,7 @@ module.exports = class extends Generator {
 	}
 
 	_addCoreDependencies() {
-		let dependenciesString = this.fs.read(`${this.templatePath()}/${this.context.language}/${this.context.dependenciesFile}`);
+		let dependenciesString = this.fs.read(`${this.templatePath()}/${this.context.application.language}/${this.context.dependenciesFile}`);
 		let template = handlebars.compile(dependenciesString);
 		dependenciesString = template(this.context);
 		if (this.context._addDependencies) {
@@ -157,6 +129,7 @@ module.exports = class extends Generator {
 	}
 
 	_writeFiles(templatePath, data) {
+		// TODO cleanup
 		//do not write out any files that are marked as processing templates
 		try {
 			this.fs.copy([this.templatePath(templatePath), '!**/*.template'], this.destinationPath(), {

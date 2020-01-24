@@ -16,6 +16,6 @@
     "service_credentials": {}
   },
   "metadata": {
-    "git_url": "https://github.com/IBM/flask-web-app"
+    "git_url": "https://github.com/IBM/python-flask-app"
   }
 }

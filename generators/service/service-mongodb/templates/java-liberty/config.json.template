@@ -1,8 +1,0 @@
-{
-  "dependencies" : [
-    {"groupId" : "org.mongodb", "artifactId" : "mongo-java-driver", "version" : "3.5.0"}
-  ],
-  "frameworkDependencies" : [
-    {"feature" : "mpConfig-1.1"}
-  ]
-}

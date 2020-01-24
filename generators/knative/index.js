@@ -1,5 +1,5 @@
 /*
- © Copyright IBM Corp. 2017, 2019
+ © Copyright IBM Corp. 2019, 2020
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
@@ -12,40 +12,26 @@
  */
 
 'use strict';
-
+const Log4js = require('log4js');
+const logger = Log4js.getLogger('generator-ibm-cloud-assets:kn');
 const Generator = require('yeoman-generator');
-let _ = require('lodash');
 const Handlebars = require('../lib/handlebars');
-const Utils = require('../lib/utils');
 
 module.exports = class extends Generator {
 
 	constructor(args, opts) {
 		super(args, opts);
-
-		if (typeof (opts.bluemix) === 'string') {
-			this.bluemix = JSON.parse(opts.bluemix || '{}');
-		} else {
-			this.bluemix = opts.bluemix;
-		}
-
-		if(typeof (opts) === 'string'){
-			this.opts = JSON.parse(opts || '{}');
-		} else {
-			this.opts = opts.cloudContext || opts;
-		}
+		this.opts = opts
 	}
 
 	initializing() {}
 
 	writing() {
-		this._writeHandlebarsFile('service.yaml', './service.yaml', this.opts.bluemix);
-	}
-
-	_writeHandlebarsFile(templateFile, destinationFile, data) {
-		let template = this.fs.read(this.templatePath(templateFile));
+		let template = this.fs.read(this.templatePath('service.yaml'));
 		let compiledTemplate = Handlebars.compile(template);
-		let output = compiledTemplate(data);
-		this.fs.write(this.destinationPath(destinationFile), output);
+		let output = compiledTemplate(this.options);
+
+		logger.trace( `Generating service.yaml for ${this.opts.application.sanitizedName.toLowerCase()} with port ${this.opts.deploy_options.servicePorts.http}` )
+		this.fs.write(this.destinationPath('./service.yaml'), output);
 	}
 };

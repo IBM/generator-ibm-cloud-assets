@@ -27,5 +27,8 @@
             "username": "REPLACEME.UNKNOWN_SERVICE_NAME.username"
         }
     }
+  },
+  "metadata": {
+    "git_url": "https://github.com/IBM/nodejs-express-app"
   }
 }

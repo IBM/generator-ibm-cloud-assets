@@ -23,11 +23,11 @@ spec:
         readinessProbe:
           httpGet:
           {{! healthEndpoint is configured in the index.js and is different for basicweb}}
-          {{#has language 'java'}}
+          {{#has application.language 'JAVA'}}
             path: /{{#if healthEndpoint}}{{healthEndpoint}}{{else}}health{{/if}}
             port: 9080
           {{/has}}
-          {{#has language 'spring'}}
+          {{#has application.language 'SPRING'}}
             path: /{{#if healthEndpoint}}{{healthEndpoint}}{{else}}health{{/if}}
             port: 8080
           {{/has}}
@@ -42,9 +42,3 @@ spec:
             value: "{{tag ' .Values.service.servicePort '}}"
           - name: APPLICATION_NAME
             value: "{{tag ' .Release.Name '}}"
-          {{#has services 'mongodb'}}
-          - name: MONGO_URL
-            value: {{tag ' .Values.services.mongo.url '}}
-          - name: MONGO_DB_NAME
-            value: {{tag ' .Values.services.mongo.name '}}
-          {{/has}}

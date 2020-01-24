@@ -1,9 +1,23 @@
+/*
+ © Copyright IBM Corp. 2019, 2020
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+ http://www.apache.org/licenses/LICENSE-2.0
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ */
+
 'use strict'
 const Log4js = require('log4js');
-const logger = Log4js.getLogger("generator-ibm-service-enablement:ServiceUtils");
+const logger = Log4js.getLogger("generator-ibm-cloud-assets:ServiceUtils");
 const readline = require('readline');
 const fs = require('fs');
 const yaml = require('js-yaml');
+const _ = require('lodash');
 
 const SPRING_BOOT_SERVICE_NAME = "spring_boot_service_name";
 const SPRING_BOOT_SERVICE_KEY_SEPARATOR = "spring_boot_service_key_separator";
@@ -25,7 +39,7 @@ function addServicesEnvToHelmChartAsync(args) {
 			return resolve();
 		}
 
-		// the helm chart should've been generated in the generator-ibm-cloud-enablement generator
+		// the helm chart should've been generated in the kubernetes generator
 		// for deploy to Kubernetes using Helm chart
 		let chartFolderPath = `${destinationPath}/chart`;
 		if (!fs.existsSync(chartFolderPath)) {
@@ -47,9 +61,8 @@ function addServicesEnvToHelmChartAsync(args) {
 
 				deploymentFilePath = `${chartFolderPath}/${chartFolders[i]}/templates/deployment.yaml`;
 				deploymentFileExists = fs.existsSync(deploymentFilePath);
-				logger.info(`deployment.yaml exists (${deploymentFileExists}) at ${deploymentFilePath}`);
-
 				if (deploymentFileExists) {
+					logger.info(`deployment.yaml exists at ${deploymentFilePath}`);
 					break;
 				}
 			}
@@ -66,6 +79,7 @@ function addServicesEnvToHelmChartAsync(args) {
 }
 
 function appendDeploymentYaml(deploymentFilePath, services, resolve, reject) {
+	//TODO: we should use jsyaml read writes instead of string injection
 	let readStream = fs.createReadStream(deploymentFilePath);
 	let promiseIsRejected = false;
 	readStream.on('error', (err) => {
@@ -77,18 +91,19 @@ function appendDeploymentYaml(deploymentFilePath, services, resolve, reject) {
 	let envSection = false;
 	let deploymentFileString = '';
 	let rl = readline.createInterface({ input: readStream });
-	rl.on('line', (line) => {
+	rl.on('line', (line) => {    				   // to append the secretKeyRef above the port inside env
 		envSection |= (line.indexOf('env:') > -1); // did we find env: yet?
-		if (envSection) { // we found env, look for -name: PORT, will insert above that
-			let match = line.match(REGEX_PORT); // regex, captures leading whitespace
+		if (envSection) { 						   // we found env, look for -name: PORT, will insert above that
+			let match = line.match(REGEX_PORT);    // regex, captures leading whitespace
 			if (match !== null) {
 				deploymentFileString += generateSecretKeyRefsDeployment(services, `${match[1]}`);
-				envSection = false;               // all done with env section.
+				envSection = false;                // all done with env section.
 			}
 		}
 
 		// NOW append the line to the string
 		deploymentFileString += `${line}\n`;
+		
 	}).on('close', () => {
 		if (promiseIsRejected) { return; }
 		fs.writeFile(deploymentFilePath, deploymentFileString, (err) => {
@@ -105,13 +120,13 @@ function appendDeploymentYaml(deploymentFilePath, services, resolve, reject) {
 
 function addServicesToServiceKnativeYamlAsync(args) {
 	return new Promise((resolve) => {
-		let serviceYamlFilePath = "./service.yaml"; //args.destinationPath
+		let serviceYamlFilePath = "./service.yaml";
 		let services = args.context.deploymentServicesEnv; //array of service objects
 
 		let hasServices = services && services.length > 0;
 		if (!fs.existsSync(serviceYamlFilePath) || !hasServices) {
 			logger.info("Not adding service env to service.yaml");
-			return resolve()
+			return resolve();
 		}
 
 		let serviceYamlContents = yaml.safeLoad(fs.readFileSync(serviceYamlFilePath, 'utf8'));
@@ -121,6 +136,7 @@ function addServicesToServiceKnativeYamlAsync(args) {
 				service.valueFrom.secretKeyRef && service.valueFrom.secretKeyRef.key
 		});
 
+		// actual secret key ref objects that go into the yaml
 		services = services.map((service) => {
 			return {
 				name: service.name,
@@ -131,30 +147,26 @@ function addServicesToServiceKnativeYamlAsync(args) {
 					}
 				}
 			}
-		})
+		});
 
 		if (serviceYamlContents.spec.template.spec.containers[0].env) {
-			logger.info("Env already exists in service.yaml, not overwriting with services");
-			return resolve()
+			serviceYamlContents.spec.template.spec.containers[0].env = _.union(services, serviceYamlContents.spec.template.spec.containers[0].env);
 		}
-		serviceYamlContents.spec.template.spec.containers[0].env = services
+		else {
+			serviceYamlContents.spec.template.spec.containers[0].env = services;
+		}
 
 		logger.info("Adding service env to service.yaml");
-
-		fs.writeFileSync(serviceYamlFilePath, yaml.safeDump(serviceYamlContents))
+		fs.writeFileSync(serviceYamlFilePath, yaml.safeDump(serviceYamlContents));
 
 		return resolve();
 	});
-
 }
-
 
 // add services section with secretKeyRefs in values.yaml
 function addServicesEnvToValuesAsync(args) {
 	return new Promise((resolve, reject) => {
 		let context = args.context;
-		let destinationPath = args.destinationPath;
-
 		logger.level = context.loggerLevel;
 
 		let hasServices = context.deploymentServicesEnv && context.deploymentServicesEnv.length > 0;
@@ -163,9 +175,9 @@ function addServicesEnvToValuesAsync(args) {
 			return resolve();
 		}
 
-		// values.yaml should've been generated in the generator-ibm-cloud-enablement generator
+		// values.yaml should've been generated in the kubernetes sub-generator
 		// for deploy to Kubernetes using Helm chart
-		let chartFolderPath = `${destinationPath}/chart`;
+		let chartFolderPath = `${args.destinationPath}/chart`;
 		if (!fs.existsSync(chartFolderPath)) {
 			logger.info('/chart folder does not exist');
 			return resolve();
@@ -194,6 +206,7 @@ function addServicesEnvToValuesAsync(args) {
 			return resolve();
 		}
 
+		//TODO: we should use jsyaml read writes instead of string injection
 		let readStream = fs.createReadStream(valuesFilePath);
 		let promiseIsRejected = false;
 		readStream.on('error', (err) => {
@@ -232,7 +245,6 @@ function addServicesEnvToValuesAsync(args) {
 		});
 
 		logger.info(`Adding ${context.deploymentServicesEnv.length} services in values.yaml`);
-
 	});
 }
 
@@ -268,6 +280,7 @@ function generateSecretKeyRefsDeployment(services, prefix) {
 			`${prefix}      name: ${serviceEntry.valueFrom.secretKeyRef.name}\n` +
 			`${prefix}      key: ${serviceEntry.valueFrom.secretKeyRef.key}\n` +
 			`${prefix}      optional: true\n`;
+		logger.trace(`generateSecretKeyRefsDeployment - adding servicesEnvString=${servicesEnvString}`);
 	});
 	return servicesEnvString;
 }
@@ -278,6 +291,7 @@ function generateSecretRefsValues(services) {
 		servicesEnvString +=
 			`  ${serviceEntry.scaffolderName}:\n` +
 			`    secretKeyRef: ${serviceEntry.keyName}\n`;
+		logger.trace(`generateSecretRefsValues - adding servicesEnvString=${servicesEnvString}`);
 	});
 	return servicesEnvString;
 }

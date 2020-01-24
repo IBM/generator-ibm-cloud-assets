@@ -1,9 +1,0 @@
-{
-    "application": {
-        "name": "gv-sample-app",
-        "language": "spring",
-        "services": {
-
-        }
-    }
-}

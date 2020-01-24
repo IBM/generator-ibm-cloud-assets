@@ -1,5 +1,0 @@
-{
-  "dependencies" : [
-    {"groupId" : "com.ibm.watson.developer_cloud", "artifactId" : "tone-analyzer", "version" : "6.14.0"}
-  ]
-}

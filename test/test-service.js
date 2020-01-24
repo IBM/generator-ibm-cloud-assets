@@ -14,6 +14,8 @@
 /* eslint-env mocha */
 'use strict';
 
+const Log4js = require('log4js');
+const logger = Log4js.getLogger('generator-ibm-cloud-assets:test-service');
 const helpers = require('yeoman-test');
 const assert = require('yeoman-assert');
 const _ = require('lodash');
@@ -30,7 +32,9 @@ var fs = editor.create(store);
 const fse = require('fs-extra');
 
 const SERVICES = testUtils.SERVICES;
-const DEPLOY_OBJECTS = testUtils.baseDeployObjects;
+const DEPLOY_OBJECTS = testUtils.generateDeployOpts();
+
+const SvcInfo = require('../generators/service/templates/serviceInfo.json');
 
 function validateHelmChart(lang, deploy_type, service, applicationName) {
     const chartLocation = 'chart/' + utils.sanitizeAlphaNumLowerCase(applicationName);
@@ -42,31 +46,38 @@ function validateHelmChart(lang, deploy_type, service, applicationName) {
     assert.file(chartLocation + '/templates/service.yaml');
     assert.file(chartLocation + '/templates/hpa.yaml');
     assert.file(chartLocation + '/templates/basedeployment.yaml');
+    
+    assert.fileContent(chartLocation + '/templates/deployment.yaml', `service_${SvcInfo[service]["customServiceKey"].replace(/-/g, '_')}`);
+    assert.fileContent(chartLocation + '/templates/deployment.yaml', `.Values.services.${service}.secretKeyRef`);
+    assert.fileContent(valuesFile, `my-service-${service}`);
 }
 
-function validateKnativeService(lang, deploy_type, services) {
+function validateKnativeService(lang, deploy_type, service) {
     assert.file([
         'service.yaml'
     ]);
+    
+    assert.fileContent('service.yaml', `service_${SvcInfo[service]["customServiceKey"].replace(/-/g, '_')}`);
+    assert.fileContent('service.yaml', `my-service-${service.toLowerCase()}`);
 }
 
-function validateCF(lang, deploy_type, services, applicationName) {
+function validateCF(lang, deploy_type, service, applicationName) {
     assert.file([
         'manifest.yml'
     ]);
-    assert.fileContent('manifest.yml', testUtils.PREFIX_SVC_BINDING_NAME + services);
+    assert.fileContent('manifest.yml', testUtils.PREFIX_SVC_BINDING_NAME + service);
     assert.fileContent('manifest.yml', 'name: ' + utils.sanitizeAlphaNumLowerCase(applicationName));
 }
 
-function validateDeployAssets(lang, deploy_type, services) {
+function validateDeployAssets(lang, deploy_type, service) {
     let applicationName = `test-genv2-app-${deploy_type}-${lang}`;
     it('validateDeployAssets', function () {
         if (deploy_type === "knative") {
-            validateKnativeService(lang, deploy_type, services);
+            validateKnativeService(lang, deploy_type, service);
         } else if (deploy_type === "helm") {
-            validateHelmChart(lang, deploy_type, services, applicationName);
+            validateHelmChart(lang, deploy_type, service, applicationName);
         } else {
-            validateCF(lang, deploy_type, services, applicationName);
+            validateCF(lang, deploy_type, service, applicationName);
         }
     });
 }
@@ -101,7 +112,8 @@ function validateCreds(lang, services) {
             && services !== "discovery" && services !== "languageTranslator" && services !== "naturalLanguageClassifier"
             && services !== "naturalLanguageUnderstanding" && services !== "personalityInsights" && services !== "speechToText"
             && services !== "textToSpeech" && services != "toneAnalyzer" && services !== "visualRecognition") {
-            assert.fileContent(mappings_path, testUtils.PREFIX_SVC_BINDING_NAME + services);
+            // assert.fileContent(mappings_path, testUtils.PREFIX_SVC_BINDING_NAME + services);
+            assert.fileContent(mappings_path, `service_${SvcInfo[services]["customServiceKey"].replace(/-/g, '_')}`);
         }
         assert.file([localdev_path]);
     });
@@ -204,17 +216,6 @@ describe("cloud-assets:service", function() {
 
                 validateDeployAssets(javaLang, deploy_type, service);
                 validateCreds(javaLang, service);
-        
-                it('pom.xml with Cloud Env', function () {
-                    assert.file([
-                        'pom.xml'
-                    ]);
-                    assert.fileContent('pom.xml', '<artifactId>javax.json-api</artifactId>');
-                    assert.fileContent('pom.xml', '<artifactId>com.ibm.websphere.appserver.api.json</artifactId>');
-                    assert.fileContent('pom.xml', '<artifactId>cdi-api</artifactId>');
-                    assert.fileContent('pom.xml', '<artifactId>json-path</artifactId>');
-                    assert.fileContent('pom.xml', '<artifactId>microprofile-config-api</artifactId>');
-                });
             });
             
             const springLang = "SPRING";
@@ -231,16 +232,6 @@ describe("cloud-assets:service", function() {
 
                 validateDeployAssets(springLang, deploy_type, service);
                 validateCreds(springLang, service);
-        
-                it('pom.xml with Cloud Env', function () {
-                    assert.file([
-                        'pom.xml'
-                    ]);
-                    assert.fileContent('pom.xml', '<artifactId>javax.json-api</artifactId>');
-                    assert.fileContent('pom.xml', '<artifactId>json-path</artifactId>');
-                    assert.fileContent('pom.xml', '<artifactId>ibm-cloud-spring-boot-service-bind</artifactId>');
-                    assert.fileContent('pom.xml', '<artifactId>microprofile-config-api</artifactId>');
-                });
             });
 
             const swiftLang = "SWIFT";

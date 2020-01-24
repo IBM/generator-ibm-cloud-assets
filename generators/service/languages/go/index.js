@@ -23,6 +23,7 @@ const fs = require('fs');
 const Utils = require('../../../lib/utils');
 const Handlebars = require('../../../lib/handlebars.js');
 const scaffolderMapping = require('../../templates/scaffolderMapping.json');
+const svcInfo = require('../../templates/serviceInfo.json');
 
 const GENERATOR_LOCATION = 'server';
 const PATH_MAPPINGS_FILE = "./server/config/mappings.json";
@@ -55,32 +56,28 @@ module.exports = class extends Generator {
 		this.context.addInstrumentation = this._addInstrumentation.bind(this);
 
 		let serviceCredentials,
-			scaffolderKey,
 			serviceKey;
-
-		//initializing ourselves by composing with the service generators
-		let root = path.dirname(require.resolve('../..'));
-		let folders = fs.readdirSync(root);
-		folders.forEach(folder => {
-			if (folder.startsWith('service-')) {
-				serviceKey = folder.substring(folder.indexOf('-') + 1);
-				scaffolderKey = scaffolderMapping[serviceKey];
-				serviceCredentials = this.context.bluemix[scaffolderKey];
-				if (serviceCredentials) {
-					logger.debug("Composing with service : " + folder);
-					try {
-						this.context.cloudLabel = serviceCredentials && serviceCredentials.serviceInfo && serviceCredentials.serviceInfo.cloudLabel;
-						this.composeWith(path.join(root, folder), {context: this.context});
-					} catch (err) {
-						/* istanbul ignore next */	//ignore for code coverage as this is just a warning - if the service fails to load the subsequent service test will fail
-						logger.warn('Unable to compose with service', folder, err);
-					}
+		//initializing ourselves by composing with the service enabler
+		let root = path.dirname(require.resolve('../../enabler'));
+		Object.keys(svcInfo).forEach(svc => {
+			serviceKey = svc;
+			serviceCredentials = this.context.application.service_credentials[serviceKey];
+			if (serviceCredentials) {
+				this.context.scaffolderKey = serviceKey;
+				logger.debug("Composing with service : " + svc);
+				try {
+					this.context.cloudLabel = serviceCredentials && serviceCredentials.serviceInfo && serviceCredentials.serviceInfo.cloudLabel;
+					this.composeWith(root, {context: this.context});
+				} catch (err) {
+					/* istanbul ignore next */	//ignore for code coverage as this is just a warning - if the service fails to load the subsequent service test will fail
+					logger.warn('Unable to compose with service', svc, err);
 				}
 			}
 		});
 	}
 
 	writing() {
+		// TODO: cleanup
 		// Generate services.go, which acts like a service manager
 		if (this.context.addServices) {
 			this._writeHandlebarsFile('services.go', "services/services.go", {

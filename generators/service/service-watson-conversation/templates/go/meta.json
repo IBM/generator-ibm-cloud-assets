@@ -1,5 +1,0 @@
-{
-  "import":"github.com/watson-developer-cloud/go-sdk/assistantv1",
-  "variableName":"WatsonAssistant",
-  "type":"assistantv1.AssistantV1"
-}

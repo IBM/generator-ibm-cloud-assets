@@ -3,7 +3,7 @@
 replicaCount: 1
 revisionHistoryLimit: 1
 image:
-  repository: {{#toLowerCase applicationName}}{{/toLowerCase}}
+  repository: {{#toLowerCase application.sanitizedName}}{{/toLowerCase}}
   tag: v1.0.0
   pullPolicy: IfNotPresent
   resources:
@@ -13,9 +13,9 @@ image:
 service:
   name: Node
   type: NodePort
-  servicePort: {{servicePorts.http}}
-{{#if servicePorts.https}}
-  servicePortHttps: {{servicePorts.https}}
+  servicePort: {{ deploy_options.servicePorts.http }}
+{{#if deploy_options.servicePorts.https}}
+  servicePortHttps: {{ deploy_options.servicePorts.https }}
 {{/if}}
 hpa:
   enabled: false
@@ -26,13 +26,6 @@ hpa:
       targetAverageUtilization: 70
     memory:
       targetAverageUtilization: 70
-{{#has services 'mongodb'}}
-services:
-  mongo:
-     url: mongo
-     name: comments
-     env: production
-{{/has}}
 base:
   enabled: false
   replicaCount: 1

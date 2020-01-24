@@ -1,7 +1,0 @@
-{
-  "[[source]]": "",
-  "[dev-packages]": "",
-  "[packages]": {
-    "redis": "~=2.10.0"
-  }
-}

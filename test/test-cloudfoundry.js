@@ -16,21 +16,20 @@
 
 const helpers = require('yeoman-test');
 const assert = require('yeoman-assert');
+const utils = require('./test-utils');
 const path = require('path');
 const yml = require('js-yaml');
 const fs = require('fs');
+const _ = require('lodash');
 
-const scaffolderSample = require('./samples/scaffolder-sample');
-const scaffolderSampleNode = scaffolderSample.getJson('NODE');
-const scaffolderSampleNodeNoServer = scaffolderSample.getJsonNoServer('NODE');
-const scaffolderSampleGoNoServer = scaffolderSample.getJsonNoServer('GO');
-const scaffolderSampleSwift = scaffolderSample.getJson('SWIFT')
-const scaffolderSampleJava = scaffolderSample.getJson('JAVA');
-const scaffolderSampleSpring = scaffolderSample.getJson('SPRING');
-const scaffolderSampleJavaNoServices = scaffolderSample.getJsonNoServices('JAVA');
-const scaffolderSamplePython = scaffolderSample.getJson('PYTHON');
-const scaffolderSampleDjango = scaffolderSample.getJson('DJANGO');
-const scaffolderSampleGo = scaffolderSample.getJson('GO');
+const optionsNode = utils.generateTestPayload("cf", "NODE", ['appid', 'cloudant']);
+const optionsSwift = utils.generateTestPayload("cf", "SWIFT", ['appid', 'cloudant']);
+const optionsJava = utils.generateTestPayload("cf", "JAVA", ['appid', 'cloudant']);
+const optionsSpring = utils.generateTestPayload("cf", "SPRING", ['appid', 'cloudant']);
+const optionsJavaNoServices = utils.generateTestPayload("cf", "JAVA", []);
+const optionsPython = utils.generateTestPayload("cf", "PYTHON", ['appid', 'cloudant']);
+const optionsDjango = utils.generateTestPayload("cf", "DJANGO", ['appid', 'cloudant']);
+const optionsGo = utils.generateTestPayload("cf", "GO", ['appid', 'cloudant']);
 
 describe('cloud-enablement:cloudfoundry', function () {
 	this.timeout(5000);
@@ -39,48 +38,40 @@ describe('cloud-enablement:cloudfoundry', function () {
 		beforeEach(function () {
 			return helpers.run(path.join(__dirname, '../generators/app'))
 				.inDir(path.join(__dirname, './tmp'))
-				.withOptions({bluemix: JSON.stringify(scaffolderSamplePython)});
+				.withOptions(optionsPython);
 		});
 
 		it('manifest.yml has memory', function () {
 			assert.file('manifest.yml');
-			assert.fileContent('manifest.yml', 'memory: 1024M');
+			assert.fileContent('manifest.yml', 'memory: 256M');
 		});
 
-		it('toolchain.yml repo type is clone', function () {
-			assert.file('.bluemix/toolchain.yml');
-			assert.fileContent('.bluemix/toolchain.yml', 'type: clone');
-		});
 	});
 
 	describe('cloud-enablement:cloudfoundry with Django', function () {
 		beforeEach(function () {
 			return helpers.run(path.join(__dirname, '../generators/app'))
 				.inDir(path.join(__dirname, './tmp'))
-				.withOptions({bluemix: JSON.stringify(scaffolderSampleDjango)});
+				.withOptions(optionsDjango);
 		});
 
 		it('manifest.yml has memory', function () {
 			assert.file('manifest.yml');
-			assert.fileContent('manifest.yml', 'memory: 1024M');
+			assert.fileContent('manifest.yml', 'memory: 256M');
 		});
 
-		it('toolchain.yml repo type is clone', function () {
-			assert.file('.bluemix/toolchain.yml');
-			assert.fileContent('.bluemix/toolchain.yml', 'type: clone');
-		});
 	});
 
 	describe('cloud-enablement:cloudfoundry with Swift', function () {
 		beforeEach(function () {
 			return helpers.run(path.join(__dirname, '../generators/app'))
 				.inDir(path.join(__dirname, './tmp'))
-				.withOptions({bluemix: JSON.stringify(scaffolderSampleSwift)});
+				.withOptions(optionsSwift);
 		});
 
 		it('manifest.yml has memory', function () {
 			assert.file('manifest.yml');
-			assert.fileContent('manifest.yml', 'memory: 1024M');
+			assert.fileContent('manifest.yml', 'memory: 256M');
 		});
 
 		it('manifest.yml has SWIFT_BUILD_DIR_CACHE set to false', function () {
@@ -88,36 +79,29 @@ describe('cloud-enablement:cloudfoundry', function () {
 			assert.fileContent('manifest.yml', 'SWIFT_BUILD_DIR_CACHE : false');
 		});
 
-		it('toolchain.yml repo type is clone', function () {
-			assert.file('.bluemix/toolchain.yml');
-			assert.fileContent('.bluemix/toolchain.yml', 'type: clone');
-		});
 	});
 
 	describe('cloud-enablement:cloudfoundry with Node', function () {
 		beforeEach(function () {
 			return helpers.run(path.join(__dirname, '../generators/app'))
 				.inDir(path.join(__dirname, './tmp'))
-				.withOptions({bluemix: JSON.stringify(scaffolderSampleNode)});
+				.withOptions(optionsNode);
 		});
 
 		it('manifest.yml has memory', function () {
 			assert.file('manifest.yml');
-			assert.fileContent('manifest.yml', 'memory: 1024M');
-		});
-
-		it('toolchain.yml repo type is clone', function () {
-			assert.file('.bluemix/toolchain.yml');
-			assert.fileContent('.bluemix/toolchain.yml', 'type: clone');
+			assert.fileContent('manifest.yml', 'memory: 256M');
 		});
 
 	});
 
 	describe('cloud-enablement:cloudfoundry with Go', function () {
+		let options = optionsGo;
+		options.deploy_options.cloud_foundry.memory = '1024M';
 		beforeEach(function () {
 			return helpers.run(path.join(__dirname, '../generators/app'))
 				.inDir(path.join(__dirname, './tmp'))
-				.withOptions({bluemix: JSON.stringify(scaffolderSampleGo)});
+				.withOptions(options);
 		});
 
 		it('manifest.yml has memory', function () {
@@ -125,132 +109,81 @@ describe('cloud-enablement:cloudfoundry', function () {
 			assert.fileContent('manifest.yml', 'memory: 1024M');
 		});
 
-		it('toolchain.yml repo type is clone', function () {
-			assert.file('.bluemix/toolchain.yml');
-			assert.fileContent('.bluemix/toolchain.yml', 'type: clone');
-		});
-
 	});
 
-	let javaFrameworks = ['JAVA', 'libertyBeta', 'SPRING'];
-	let javaBuildTypes = ['maven', 'gradle'];
+	let javaFrameworks = ['JAVA', 'SPRING'];
+	let buildType = 'maven';
 	let createTypes = ['enable/', 'microservice'];
 
 	let assertYmlContent = function(actual, expected, label) {
 		assert.strictEqual(actual, expected, 'Expected ' + label + ' to be ' + expected + ', found ' + actual);
 	}
 	javaFrameworks.forEach(language => {
-		javaBuildTypes.forEach(buildType => {
-			createTypes.forEach(createType => {
+		createTypes.forEach(createType => {
 
-				describe('cloud-enablement:cloudfoundry with ' + language + ' with buildType ' + buildType + ' and createType ' + createType, function () {
-					let bluemixJson = language === 'SPRING' ? scaffolderSampleSpring : scaffolderSampleJava;
-					let artifactId = '${CF_APP}';
-					let javaVersion = '1.0-SNAPSHOT';
+			describe('cloud-enablement:cloudfoundry with ' + language + ' with buildType ' + buildType + ' and createType ' + createType, function () {
+				let baseOptions = language === 'SPRING' ? optionsSpring : optionsJava;
+				baseOptions.deploy_options.cloud_foundry.memory = '512M'
+				let artifactId = '${CF_APP}';
+				let javaVersion = '1.0-SNAPSHOT';
 
-					let options = {bluemix: JSON.stringify(bluemixJson), buildType : buildType, createType: createType, artifactId: artifactId, version: javaVersion};
-					if (language === 'libertyBeta') {
-						options.libertyVersion = 'beta'
+				let options = _.extend(baseOptions, {buildType : buildType, createType: createType, artifactId: artifactId, version: javaVersion});
+				if (language === 'libertyBeta') {
+					options.libertyVersion = 'beta'
+				}
+
+				beforeEach(function () {
+					return helpers.run(path.join(__dirname, '../generators/app'))
+						.inDir(path.join(__dirname, './tmp'))
+						.withOptions(options)
+				});
+
+				it('manifest.yml is generated with correct content', function () {
+					assert.file('manifest.yml');
+					let manifestyml = yml.safeLoad(fs.readFileSync('manifest.yml', 'utf8'));
+
+					if (language === 'JAVA' || language === 'libertyBeta') {
+						let targetDir = buildType === 'maven' ? 'target' : 'build'
+						assertYmlContent(manifestyml.applications[0].path, './' + targetDir + '/' + artifactId + '-' + javaVersion +'.zip', 'manifestyml.applications[0].path');
+						assertYmlContent(manifestyml.applications[0].memory, '512M', 'manifestyml.applications[0].memory')
+						assertYmlContent(manifestyml.applications[0].buildpack, 'liberty-for-java', 'manifestyml.applications[0].buildpack')
 					}
 
-					beforeEach(function () {
-						return helpers.run(path.join(__dirname, '../generators/app'))
-							.inDir(path.join(__dirname, './tmp'))
-							.withOptions(options)
-					});
+					if (language === 'JAVA') {
+						assertYmlContent(manifestyml.applications[0].env.IBM_LIBERTY_BETA, undefined, 'manifestyml.applications[0].env.IBM_LIBERTY_BETA')
+						assertYmlContent(manifestyml.applications[0].env.JBP_CONFIG_LIBERTY, undefined, 'manifestyml.applications[0].env.JBP_CONFIG_LIBERTY')
+					}
 
-					it('manifest.yml is generated with correct content', function () {
-						assert.file('manifest.yml');
-						let manifestyml = yml.safeLoad(fs.readFileSync('manifest.yml', 'utf8'));
+					if (language === 'libertyBeta') {
+						assertYmlContent(manifestyml.applications[0].env.IBM_LIBERTY_BETA, true, 'manifestyml.applications[0].env.IBM_LIBERTY_BETA')
+						assertYmlContent(manifestyml.applications[0].env.JBP_CONFIG_LIBERTY, 'version: +', 'manifestyml.applications[0].env.JBP_CONFIG_LIBERTY')
+					}
 
-						if (language === 'JAVA' || language === 'libertyBeta') {
-							let targetDir = buildType === 'maven' ? 'target' : 'build'
-							assertYmlContent(manifestyml.applications[0].path, './' + targetDir + '/' + artifactId + '-' + javaVersion +'.zip', 'manifestyml.applications[0].path');
-							assertYmlContent(manifestyml.applications[0].memory, '512M', 'manifestyml.applications[0].memory')
-							assertYmlContent(manifestyml.applications[0].buildpack, 'liberty-for-java', 'manifestyml.applications[0].buildpack')
-							assertYmlContent(manifestyml.applications[0].env.services_autoconfig_excludes, 'cloudantNoSQLDB=config Object-Storage=config', 'manifestyml.applications[0].env.services_autoconfig_excludes');
-						}
-
-						if (language === 'JAVA') {
-							assertYmlContent(manifestyml.applications[0].env.IBM_LIBERTY_BETA, undefined, 'manifestyml.applications[0].env.IBM_LIBERTY_BETA')
-							assertYmlContent(manifestyml.applications[0].env.JBP_CONFIG_LIBERTY, undefined, 'manifestyml.applications[0].env.JBP_CONFIG_LIBERTY')
-						}
-
-						if (language === 'libertyBeta') {
-							assertYmlContent(manifestyml.applications[0].env.IBM_LIBERTY_BETA, true, 'manifestyml.applications[0].env.IBM_LIBERTY_BETA')
-							assertYmlContent(manifestyml.applications[0].env.JBP_CONFIG_LIBERTY, 'version: +', 'manifestyml.applications[0].env.JBP_CONFIG_LIBERTY')
-						}
-
-						if ( language === 'SPRING' ) {
-							let targetDir = buildType === 'maven' ? 'target' : 'build/libs'
-							assertYmlContent(manifestyml.applications[0].path, './'+targetDir+'/' + artifactId + '-'+javaVersion+'.jar', 'manifestyml.applications[0].path');
-							assertYmlContent(manifestyml.applications[0].memory, '1024M', 'manifestyml.applications[0].memory')
-							assertYmlContent(manifestyml.applications[0].buildpack, 'java_buildpack', 'manifestyml.applications[0].buildpack')
-						}
-					});
-
-					it('deploy.json file is generated', function () {
-						assert.file('.bluemix/deploy.json');
-					});
-
-					it('.cfignore file is generated', function () {
-						assert.file('.cfignore');
-						if(language === 'JAVA' || language === 'libertyBeta') {
-							assert.fileContent('.cfignore', '/src/main/liberty/config/server.env');
-						} else /* language === 'SPRING' */ {
-							assert.fileContent('.cfignore', '/src/main/resources/application-local.properties');
-						}
-					});
-
-					it('toolchain.yml file is generated with correct repo.parameters.type', function () {
-						assert.file('.bluemix/toolchain.yml');
-						let toolchainyml = yml.safeLoad(fs.readFileSync('.bluemix/toolchain.yml', 'utf8'));
-						let repoType = toolchainyml.services.repo.parameters.type;
-						if (createType === 'enable/') {
-							assertYmlContent(repoType, 'link', 'toolchainyml.services.repo.parameters.type');
-						} else {
-							assertYmlContent(repoType, 'clone', 'toolchainyml.services.repo.parameters.type');
-						}
-					});
-
-					it('pipeline.yml file is generated with correct content', function () {
-						assert.file('.bluemix/pipeline.yml');
-						let pipelineyml = yml.safeLoad(fs.readFileSync('.bluemix/pipeline.yml', 'utf8'));
-						let stages = pipelineyml.stages;
-						assert(stages.length === 3, 'Expected piplelineyml to have 3 stages, found ' + stages.length);
-						stages.forEach(stage => {
-							if(stage.name === 'Build Stage') {
-								assertYmlContent(stage.triggers[0].type, 'commit', 'pipelineyml.stages[0].triggers[0].type');
-								assertYmlContent(stage.jobs[0].build_type, 'shell', 'pipelineyml.stages[0].jobs[0].build_type');
-								let buildCommand = buildType === 'maven' ? './mvnw install' : 'gradle build';
-								assert(stage.jobs[0].script.includes('#!/bin/bash'), 'Expected pipelineyml.stages[0].jobs[0].script to include "#!/bin/bash", found : ' + stage.jobs[0].script);
-								assert(stage.jobs[0].script.includes('export JAVA_HOME=$JAVA8_HOME'), 'Expected pipelineyml.stages[0].jobs[0].script to include "export JAVA_HOME=$JAVA8_HOME", found : ' + stage.jobs[0].script);
-								assert(stage.jobs[0].script.includes(buildCommand), 'Expected pipelineyml.stages[0].jobs[0].script to include "' + buildCommand + '", found : ' + stage.jobs[0].script);
-							}
-							if(stage.name === 'Deploy Stage') {
-								if ( language === 'JAVA' ) {
-									let targetDir = buildType === 'maven' ? 'target' : 'build'
-									let deployCommand = 'cf push "${CF_APP}" -p ' + targetDir + '/' + artifactId + '-' + javaVersion + '.zip --hostname "${CF_HOSTNAME}" -d "${CF_DOMAIN}"';
-									assert(stage.jobs[0].script.includes(deployCommand), 'Expected deploy script to contain ' + deployCommand + ' found ' + stage.jobs[0].script);
-								}
-								if ( language === 'SPRING' ) {
-									let targetDir = buildType === 'maven' ? 'target' : 'build/libs'
-									let deployCommand = 'cf push "${CF_APP}" -p ' + targetDir + '/' + artifactId + '-' + javaVersion + '.jar --hostname "${CF_HOSTNAME}" -d "${CF_DOMAIN}"'
-									assert(stage.jobs[0].script.includes(deployCommand), 'Expected deploy script to contain ' + deployCommand + ' found ' + stage.jobs[0].script);
-								}
-							}
-						})
-					});
+					if ( language === 'SPRING' ) {
+						let targetDir = buildType === 'maven' ? 'target' : 'build/libs'
+						assertYmlContent(manifestyml.applications[0].path, './'+targetDir+'/' + artifactId + '-'+javaVersion+'.jar', 'manifestyml.applications[0].path');
+						assertYmlContent(manifestyml.applications[0].memory, '1024M', 'manifestyml.applications[0].memory')
+						assertYmlContent(manifestyml.applications[0].buildpack, 'java_buildpack', 'manifestyml.applications[0].buildpack')
+					}
 				});
-			})
-		});
+
+				it('.cfignore file is generated', function () {
+					assert.file('.cfignore');
+					if(language === 'JAVA' || language === 'libertyBeta') {
+						assert.fileContent('.cfignore', '/src/main/liberty/config/server.env');
+					} else /* language === 'SPRING' */ {
+						assert.fileContent('.cfignore', '/src/main/resources/application-local.properties');
+					}
+				});
+			});
+		})
 	});
 
 	describe('cloud-enablement:cloudfoundry with java-liberty with NO services', function () {
 		beforeEach(function () {
 			return helpers.run(path.join(__dirname, '../generators/app'))
 				.inDir(path.join(__dirname, './tmp'))
-				.withOptions({bluemix: JSON.stringify(scaffolderSampleJavaNoServices)});
+				.withOptions(optionsJavaNoServices);
 		});
 
 		it('manifest.yml is generated with correct content', function () {
@@ -262,233 +195,17 @@ describe('cloud-enablement:cloudfoundry', function () {
 		});
 	});
 
-	describe('cloud-enablement:cloudfoundry with java-liberty with NO platforms', function () {
-		beforeEach(function () {
-			return helpers.run(path.join(__dirname, '../generators/app'))
-				.inDir(path.join(__dirname, './tmp'))
-				.withOptions({bluemix: JSON.stringify(scaffolderSampleJava), platforms: []});
-		});
-
-		it('no cloud foundry files should be created', function () {
-			assert.noFile('manifest.yml');
-			assert.noFile('.bluemix/pipeline.yml');
-			assert.noFile('.bluemix/toolchain.yml');
-			assert.noFile('.bluemix/deploy.json');
-			assert.noFile('.cfignore');
-		});
-	});
-
 	describe('cloud-enablement:cloudfoundry with java-liberty with platforms array specified', function () {
 		beforeEach(function () {
 			return helpers.run(path.join(__dirname, '../generators/app'))
 				.inDir(path.join(__dirname, './tmp'))
-				.withOptions({bluemix: JSON.stringify(scaffolderSampleJava), platforms: ['bluemix']});
+				.withOptions(_.extend(optionsJava, {platforms: ['bluemix']}));
 		});
 
 		it('no cloud foundry files should be created', function () {
 			assert.file('manifest.yml');
-			assert.file('.bluemix/toolchain.yml');
-			assert.file('.bluemix/deploy.json');
 			assert.file('.cfignore');
 		});
 	});
 
-	describe('cloud-enablement:cloudfoundry with java-liberty and createType = bff/liberty', function () {
-		beforeEach(function () {
-			let bluemixJson = scaffolderSampleJava;
-			return helpers.run(path.join(__dirname, '../generators/app'))
-				.withOptions({ bluemix: JSON.stringify(bluemixJson), createType: 'bff/liberty' })
-		});
-		it('should contain the OPENAPI_SPEC env var', function () {
-			let manifestyml = yml.safeLoad(fs.readFileSync('manifest.yml', 'utf8'));
-			assertYmlContent(manifestyml.applications[0].env["OPENAPI_SPEC"], '/my-application/swagger/api', 'manifest.yml.env["OPENAPI_SPEC"]');
-		});
-	});
-
-	describe('cloud-enablement:cloudfoundry with java-spring and createType = bff/spring', function () {
-		beforeEach(function () {
-			let bluemixJson = scaffolderSampleSpring;
-			return helpers.run(path.join(__dirname, '../generators/app'))
-				.withOptions({ bluemix: JSON.stringify(bluemixJson), createType: 'bff/spring' })
-		});
-		it('should contain the OPENAPI_SPEC env var', function () {
-			let manifestyml = yml.safeLoad(fs.readFileSync('manifest.yml', 'utf8'));
-			assertYmlContent(manifestyml.applications[0].env["OPENAPI_SPEC"], '/swagger/api', 'manifest.yml.env["OPENAPI_SPEC"]');
-		});
-	});
-
-	describe('cloud-enablement:cloudfoundry with node with NO server', function () {
-		beforeEach(function () {
-			return helpers.run(path.join(__dirname, '../generators/app'))
-				.inDir(path.join(__dirname, './tmp'))
-				.withOptions({bluemix: JSON.stringify(scaffolderSampleNodeNoServer), repoType: "link"});
-		});
-
-		it('manifest has no server details', function () {
-			assert.file('manifest.yml');
-			assert.fileContent('manifest.yml', 'name: AcmeProject');
-			assert.fileContent('manifest.yml', 'random-route: true');
-			assert.noFileContent('manifest.yml', 'env:');
-		});
-
-		it('toolchain.yml repo type is link', function () {
-			assert.file('.bluemix/toolchain.yml');
-			assert.fileContent('.bluemix/toolchain.yml', 'type: link');
-		});
-	});
-	describe('cloud-enablement:cloudfoundry with node and minimum memory defined', function () {
-		const  minMem = '384M';
-		beforeEach(function () {
-			return helpers.run(path.join(__dirname, '../generators/app'))
-				.inDir(path.join(__dirname, './tmp'))
-				.withOptions({bluemix: JSON.stringify(scaffolderSampleNodeNoServer), repoType: "link", nodeCFMinMemory: minMem});
-		});
-
-		it('manifest has no server details', function () {
-			assert.file('manifest.yml');
-			assert.fileContent('manifest.yml', 'name: AcmeProject');
-			assert.fileContent('manifest.yml', 'random-route: true');
-			assert.fileContent('manifest.yml', `memory: ${minMem}`);
-			assert.noFileContent('manifest.yml', 'env:');
-		});
-
-
-
-		it('toolchain.yml repo type is link', function () {
-			assert.file('.bluemix/toolchain.yml');
-			assert.fileContent('.bluemix/toolchain.yml', 'type: link');
-		});
-	});
-	describe('cloud-enablement:cloudfoundry with Go with NO server', function () {
-		beforeEach(function () {
-			return helpers.run(path.join(__dirname, '../generators/app'))
-				.inDir(path.join(__dirname, './tmp'))
-				.withOptions({bluemix: JSON.stringify(scaffolderSampleGoNoServer), repoType: "link"});
-		});
-
-		it('manifest has no server details', function () {
-			assert.file('manifest.yml');
-			assert.fileContent('manifest.yml', 'name: AcmeProject');
-			assert.fileContent('manifest.yml', 'random-route: true');
-			assert.noFileContent('manifest.yml', 'services:');
-			assert.fileContent('manifest.yml', 'memory: 128M');
-		});
-
-		it('toolchain.yml repo type is link', function () {
-			assert.file('.bluemix/toolchain.yml');
-			assert.fileContent('.bluemix/toolchain.yml', 'type: link');
-		});
-
-		it('cfignore contains vendor folder', function () {
-			assert.file('.cfignore');
-			assert.fileContent('.cfignore', 'vendor/');
-		})
-	});
 });
-
-// describe('generator-cf-deploy', function () {
-//   // Where options are what generator-cf-deploy LIKES to recieve------------------
-//   describe('Node-ExpectedUse', function () {
-//     it('Node cf-format test', function () {
-//       return helpers.run(path.join(__dirname, '../generators/cloudfoundry'))
-//         .withOptions(data.test_node_raw).then(function () {
-//           assert.file("manifest.yml");
-//           assert.file(".cfignore");
-//           //we given our input, we expect to see manifest.yml contain an env OPENAPI_SPEC,
-//           //a list of services, a command that corresponds with the NodeJS project; and .cfignore has expected content
-//           assert.fileContent([
-//             ['manifest.yml', 'OPENAPI_SPEC : /swagger/api'],
-//             ['manifest.yml', /services:[\s\r\n\t]*- my-cloudant-service[\s\r\n\t]*- my-watson-service/g],
-//             ['manifest.yml', 'command: npm start'],
-//             ['.cfignore', /\.git\/[\s\r\n\t]*node_modules\/[\s\r\n\t]*test\/[\s\r\n\t]*vcap-local\.js/g]
-//           ]);
-//         });
-//     });
-//   });//end node-raw test
-
-//   describe('Java-ExpectedUse', function () {
-//     it('Java cf-format test', function () {
-//       return helpers.run(path.join(__dirname, '../generators/cloudfoundry'))
-//         .withOptions(data.test_java_raw).then(function () {
-//           assert.file("manifest.yml");
-//           assert.file(".cfignore");
-//           //we given our input, we expect to see manifest.yml contain an env OPENAPI_SPEC with the appname injected,
-//           //a list of environment variables, and a path
-//           assert.fileContent([
-//             ['manifest.yml', 'OPENAPI_SPEC : /angela-app/swagger/api'],
-//             ['manifest.yml', /env:[\s\r\n\t]*services_autoconfig_excludes : Object-Storage=config/g],
-//             ['manifest.yml', 'path: target/angela-app.zip'],
-//             ['.cfignore', 'target/']
-//           ]);
-//         });
-//     });
-//   });//end java-raw test
-
-
-//   describe('Swift-ExpectedUse', function () {
-//     it('Node cf-format test', function () {
-//       return helpers.run(path.join(__dirname, '../generators/cloudfoundry'))
-//         .withOptions(data.test_swift_raw).then(function () {
-//           assert.file("manifest.yml");
-//           assert.file(".cfignore");
-//           //we given our input, we expect to see manifest.yml contain the start command with the app name injected
-//           //and the two entries in the .cfignore file
-//           assert.fileContent([
-//             ['manifest.yml', 'angela-app --bind 0.0.0.0:'],
-//             ['.cfignore', /\.build\/\*[\s\r\n\t]*Packages\/\*/g]
-//           ]);
-//         });
-//     });
-//   });//end swift-raw test
-
-//   //End where options are what generator-cf-deploy LIKES to recieve---------------
-//   //Where options are what scaffolder is expected to pass ------------------------
-
-//   describe('Node-ScaffolderUse', function () {
-//     it('Node cf-format-scaffolder test', function () {
-//       return helpers.run(path.join(__dirname, '../generators/cloudfoundry'))
-//         .withOptions(data.test_node_spec).then(function () {
-//           assert.file("manifest.yml");
-//           assert.file(".cfignore");
-//           assert.fileContent([
-//             ['manifest.yml', 'command: npm start'],
-//             ['manifest.yml', ' buildpack: sdk-for-nodejs'],
-//             ['.cfignore', /\.git\/[\s\r\n\t]*node_modules\/[\s\r\n\t]*test\/[\s\r\n\t]*vcap-local\.js/g]
-//           ]);
-//         });
-//     });
-//   });//end node-spec test
-
-//   describe('Swift-ScaffolderUse', function () {
-//     it('Swift cf-format-scaffolder test', function () {
-//       return helpers.run(path.join(__dirname, '../generators/cloudfoundry'))
-//         .withOptions(data.test_swift_spec).then(function () {
-//           assert.file("manifest.yml");
-//           assert.file(".cfignore");
-//           assert.fileContent([
-//             ['manifest.yml', ' buildpack: swift_buildpack'],
-//             ['manifest.yml', 'my-application --bind 0.0.0.0:'],
-//             ['.cfignore', /\.build\/\*[\s\r\n\t]*Packages\/\*/g]
-//           ]);
-//         });
-//     });
-//   });//end swift-spec test
-
-//   describe('java-ScaffolderUse', function () {
-//     it('java cf-format-scaffolder test', function () {
-//       return helpers.run(path.join(__dirname, '../generators/cloudfoundry'))
-//         .withOptions(data.test_java_spec).then(function () {
-//           assert.file("manifest.yml");
-//           assert.file(".cfignore");
-//           assert.fileContent([
-//             ['manifest.yml', 'buildpack: liberty-for-java'],
-//             ['manifest.yml', 'OPENAPI_SPEC : /my-application/swagger/api'],
-//             ['manifest.yml', /services_autoconfig_excludes : Object-Storage=config/g],
-//             ['manifest.yml', 'path: ./target/my-application.zip'],
-//             ['.cfignore', 'target/']
-//           ]);
-//         });
-//     });
-//   });//end java-spec test
-//   //End Where options are what scaffolder is expected to pass --------------------
-// });//end generator-cf-deploy

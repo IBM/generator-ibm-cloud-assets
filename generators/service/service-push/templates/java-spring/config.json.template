@@ -1,5 +1,0 @@
-{
-  "dependencies" : [
-    {"groupId" : "com.ibm.mobilefirstplatform.serversdk.java", "artifactId" : "push", "version" : "1.3.0"}
-  ]
-}

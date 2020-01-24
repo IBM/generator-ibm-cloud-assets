@@ -1,5 +1,5 @@
 /*
- © Copyright IBM Corp. 2017, 2018
+ © Copyright IBM Corp. 2019, 2020
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
@@ -12,30 +12,17 @@
  */
 
 'use strict';
-
+const Log4js = require('log4js');
+const logger = Log4js.getLogger('generator-ibm-cloud-assets:ks');
 const Generator = require('yeoman-generator');
-let _ = require('lodash');
 const Handlebars = require('../lib/handlebars.js');
-const Utils = require('../lib/utils');
 
 module.exports = class extends Generator {
 
 	constructor(args, opts) {
 		super(args, opts);
-
-		if (typeof (opts.bluemix) === 'string') {
-			this.bluemix = JSON.parse(opts.bluemix || '{}');
-		} else {
-			this.bluemix = opts.bluemix;
-		}
-
-		if(typeof (opts) === 'string'){
-			this.opts = JSON.parse(opts || '{}');
-		} else {
-			this.opts = opts.cloudContext || opts;
-		}
+		this.opts = opts;
 	}
-
 
 	initializing() {
 		this.fileLocations = {
@@ -49,23 +36,11 @@ module.exports = class extends Generator {
 		};
 	}
 
-	configuring() {
-		// work out app name and language
-		this.opts.chartName = Utils.sanitizeAlphaNumLowerCase(this.opts.bluemix.name);
-		this.opts.services = typeof(this.opts.services) === 'string' ? JSON.parse(this.opts.services || '[]') : this.opts.services;
-
-	}
-
 	writing() {
-		//skip writing files if platforms is specified via options and it doesn't include kube
-		if(this.opts.platforms && !this.opts.platforms.includes('kube')) {
-			return;
-		}
-		// setup output directory name for helm chart
-		// chart/<applicationName>/...
-		let chartDir = 'chart/' + this.opts.chartName;
+		// setup output directory name for helm chart as chart/<applicationName>/...
+		let chartDir = 'chart/' + this.opts.application.chartName;
 
-		if (this.opts.bluemix.backendPlatform.toLowerCase() === 'java' || this.opts.bluemix.backendPlatform.toLowerCase() === 'spring') {
+		if (this.opts.application.language.toLowerCase() === 'java' || this.opts.application.language.toLowerCase() === 'spring') {
 			this.fileLocations.deployment.source = 'java/deployment.yaml';
 			this.fileLocations.basedeployment.source = 'java/basedeployment.yaml';
 			this.fileLocations.service.source = 'java/service.yaml';
@@ -73,7 +48,7 @@ module.exports = class extends Generator {
 			this.fileLocations.values.source = 'java/values.yaml';
 		}
 
-		// iterate over file names
+		// iterate over file names for processing
 		let files = Object.keys(this.fileLocations);
 		files.forEach(file => {
 			let source = this.fileLocations[file].source;
@@ -82,7 +57,8 @@ module.exports = class extends Generator {
 				target = chartDir + target.slice('chartDir'.length);
 			}
 			if(this.fileLocations[file].process) {
-				this._writeHandlebarsFile(source, target, this.opts.bluemix);
+
+				this._writeHandlebarsFile(source, target, this.opts);
 			} else {
 				this.fs.copy(
 					this.templatePath(source),
@@ -96,6 +72,7 @@ module.exports = class extends Generator {
 		let template = this.fs.read(this.templatePath(templateFile));
 		let compiledTemplate = Handlebars.compile(template);
 		let output = compiledTemplate(data);
+		logger.trace(`Generating ${destinationFile} for ${this.opts.application.language}`);
 		this.fs.write(this.destinationPath(destinationFile), output);
 	}
 };
