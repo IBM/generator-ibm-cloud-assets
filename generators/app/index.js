@@ -25,31 +25,6 @@ const DEFAULT_LOG_LEVEL = "info";
 const DEPLOY_OPTIONS = 'deploy_options';
 const APPLICATION_OPTIONS = 'application';
 
-const portDefault = {
-	java: {
-		http: '9080',
-		https: '9443'
-	},
-	spring: {
-		http: '8080'
-	},
-	node: {
-		http: '3000'
-	},
-	python: {
-		http: '3000'
-	},
-	swift: {
-		http: '8080'
-	},
-	django: {
-		http: '3000'
-	},
-	go: {
-		http: '8080'
-	}
-}
-
 module.exports = class extends Generator {
 	constructor(args, opts) {
 		super(args, opts);
@@ -158,7 +133,7 @@ module.exports = class extends Generator {
 	configuring() {
 		this.opts.application.sanitizedName = Utils.sanitizeAlphaNumLowerCase(this.opts.application.name);
 		this.opts.application.chartName = Utils.sanitizeAlphaNumLowerCase( this.opts.application.name );
-		this.opts.deploy_options.servicePorts = portDefault[this.opts.application.language.toLowerCase()]
+		this.opts.deploy_options.servicePorts = Utils.portDefault[this.opts.application.language.toLowerCase()]
 	}
 
 	writing() {

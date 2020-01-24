@@ -27,12 +27,7 @@ const FILENAME_DEV = "run-dev";
 module.exports = class extends Generator {
 	constructor(args, opts) {
 		super(args, opts);
-
-		if (typeof (opts) === 'string') {
-			this.opts = JSON.parse(opts || '{}');
-		} else {
-			this.opts = opts.cloudContext || opts;
-		}
+		this.opts = opts;
 	}
 
 	configuring() {
@@ -41,24 +36,31 @@ module.exports = class extends Generator {
 	writing() {
 		switch (this.opts.application.language) {
 			case 'NODE':
+				logger.trace("Generating CLI tools for NODE");
 				this._generateNodeJS();
 				break;
 			case 'JAVA':
+				logger.trace("Generating CLI tools for JAVA");
 				this._generateJava();
 				break;
 			case 'SPRING':
+				logger.trace("Generating CLI tools for SPRING");
 				this._generateJava();
 				break;
 			case 'SWIFT':
+				logger.trace("Generating CLI tools for SWIFT");
 				this._generateSwift();
 				break;
 			case 'PYTHON':
+				logger.trace("Generating CLI tools for PYTHON");
 				this._generatePython();
 				break;
 			case 'DJANGO':
+				logger.trace("Generating CLI tools for DJANGO");
 				this._generateDjango();
 				break;
 			case 'GO':
+				logger.trace("Generating CLI tools for GO");
 				this._generateGo();
 				break;
 			default:
@@ -93,6 +95,7 @@ module.exports = class extends Generator {
 			applicationId: `${this.opts.application.app_id}`
 		};
 
+		logger.trace(`Generating cli-config with cliConfig: ${JSON.stringify(cliConfig,null,3)}`  )
 		this._writeHandlebarsFile('../templates/cli-config-common.yml', FILENAME_CLI_CONFIG, { cliConfig });
 	}
 
@@ -125,6 +128,7 @@ module.exports = class extends Generator {
 			applicationId: `${this.opts.application.app_id}`
 		};
 
+		logger.trace( `Generating cli-config with cliConfig: ${JSON.stringify(cliConfig,null,3)}` )
 		this._writeHandlebarsFile('../templates/cli-config-common.yml', FILENAME_CLI_CONFIG, { cliConfig });
 
 		this._copyTemplateIfNotExists(FILENAME_DEBUG, 'node/run-debug', {});
@@ -155,7 +159,7 @@ module.exports = class extends Generator {
 		this.opts.applicationId = `${this.opts.application.app_id}`;
 
 		if (this.fs.exists(this.destinationPath(FILENAME_CLI_CONFIG))) {
-			this.log(FILENAME_CLI_CONFIG, "already exists, skipping.");
+			logger.trace(FILENAME_CLI_CONFIG, "already exists, skipping.");
 		} else {
 			this._writeHandlebarsFile(
 				'java/cli-config.yml.template',
@@ -197,13 +201,14 @@ module.exports = class extends Generator {
 		};
 
 		if (this.fs.exists(this.destinationPath(FILENAME_CLI_CONFIG))) {
-			this.log(FILENAME_CLI_CONFIG, "already exists, skipping.");
+			logger.trace(FILENAME_CLI_CONFIG, "already exists, skipping.");
 		} else {
+			logger.trace(`Generating cli-config with cliConfig: ${JSON.stringify(cliConfig,null,3)}`  )
 			this._writeHandlebarsFile('cli-config-common.yml', FILENAME_CLI_CONFIG, { cliConfig });
 		}
 
 		if (this.fs.exists(this.destinationPath(FILENAME_DEV))) {
-			this.log(FILENAME_DEV, "already exists, skipping.");
+			logger.trace(FILENAME_DEV, "already exists, skipping.");
 		} else {
 			this._writeHandlebarsFile('python/run-dev', FILENAME_DEV, {
 				port: port,
@@ -245,16 +250,14 @@ module.exports = class extends Generator {
 		};
 
 		if (this.fs.exists(this.destinationPath(FILENAME_CLI_CONFIG))) {
-			this.log(FILENAME_CLI_CONFIG, "already exists, skipping.");
+			logger.trace(FILENAME_CLI_CONFIG, "already exists, skipping.");
 		} else {
-			this._writeHandlebarsFile('../templates/cli-config-common.yml', FILENAME_CLI_CONFIG, {
-				cliConfig
-			}
-			);
+			logger.trace( `Generating cli-config with cliConfig: ${JSON.stringify(cliConfig,null,3)}` )
+			this._writeHandlebarsFile('../templates/cli-config-common.yml', FILENAME_CLI_CONFIG, { cliConfig });
 		}
 
 		if (this.fs.exists(this.destinationPath(FILENAME_DEV))) {
-			this.log(FILENAME_DEV, "already exists, skipping.");
+			logger.trace(FILENAME_DEV, "already exists, skipping.");
 		} else {
 			this._writeHandlebarsFile('python/run-dev', FILENAME_DEV, {
 				port: port,
@@ -294,6 +297,7 @@ module.exports = class extends Generator {
 			applicationId: `${this.opts.application.app_id}`
 		};
 
+		logger.trace( `Generating cli-config with cliConfig: ${JSON.stringify(cliConfig,null,3)}` )
 		this._writeHandlebarsFile('../templates/cli-config-common.yml', FILENAME_CLI_CONFIG, { cliConfig });
 
 	}

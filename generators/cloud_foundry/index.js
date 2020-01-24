@@ -18,7 +18,6 @@ const logger = Log4js.getLogger('generator-ibm-cloud-assets:cf');
 const Handlebars = require('../lib/handlebars.js');
 const Generator = require('yeoman-generator');
 const _ = require('lodash');
-const Utils = require('../lib/utils');
 const xmljs = require('xml-js');
 const jsyaml = require('js-yaml');
 const fs = require('fs');
@@ -261,6 +260,8 @@ module.exports = class extends Generator {
 		if (this.manifestConfig.services && !_.isEmpty(this.manifestConfig.services) ) {
 			this.manifestConfig.hasServices = true;
 		}
+		
+		logger.trace( `Generating manifest.yml for ${this.opts.application.language} with manifestConfig: ${JSON.stringify(this.manifestConfig,null,3)}` )
 		this._writeHandlebarsFile('manifest_master.yml', 'manifest.yml', this.manifestConfig)
 
 		// if cfIgnnoreContent exists, create/write .cfignore file

@@ -12,7 +12,8 @@
  */
 
 'use strict';
-
+const Log4js = require('log4js');
+const logger = Log4js.getLogger('generator-ibm-cloud-assets:kn');
 const Generator = require('yeoman-generator');
 const Handlebars = require('../lib/handlebars');
 
@@ -20,6 +21,7 @@ module.exports = class extends Generator {
 
 	constructor(args, opts) {
 		super(args, opts);
+		this.opts = opts
 	}
 
 	initializing() {}
@@ -28,6 +30,8 @@ module.exports = class extends Generator {
 		let template = this.fs.read(this.templatePath('service.yaml'));
 		let compiledTemplate = Handlebars.compile(template);
 		let output = compiledTemplate(this.options);
+
+		logger.trace( `Generating service.yaml for ${this.opts.application.sanitizedName.toLowerCase()} with port ${this.opts.deploy_options.servicePorts.http}` )
 		this.fs.write(this.destinationPath('./service.yaml'), output);
 	}
 };
