@@ -183,7 +183,7 @@ module.exports = class extends Generator {
 			} else {
 				deployOpts = this.context.deploy_options.cloud_foundry;
 			}
-			serviceCredentials['serviceInfo'] = deployOpts.service_bindings[this.scaffolderName];
+			serviceCredentials['serviceInfo'] = deployOpts && deployOpts.hasOwnProperty('service_bindings') ? deployOpts.service_bindings[this.scaffolderName] : {};
 		}
 		this.logger.debug(`_addMappings - serviceCredentials=${JSON.stringify(serviceCredentials, null, 3)}`);
 		this.logger.debug(`_addMappings - deploy_options=${JSON.stringify(this.context.deploy_options, null, 3)}`);
