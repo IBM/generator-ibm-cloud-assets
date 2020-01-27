@@ -1,5 +1,5 @@
 /*
- © Copyright IBM Corp. 2017, 2018
+ © Copyright IBM Corp. 2019, 2020
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
@@ -20,10 +20,10 @@ const assert = require('yeoman-assert');
 const path = require('path');
 const utils = require('./test-utils')
 
-describe('cloud-enablement:clitools', function () {
+describe('cloud-assets:clitools', function () {
 	this.timeout(1000*60*10);
 
-	describe('cloud-enablement:clitools with Swift project', function () {
+	describe('cloud-assets:clitools with Swift project', function () {
 		beforeEach(function () {
 			return helpers.run(path.join(__dirname, '../generators/app'))
 				.inDir(path.join(__dirname, './tmp'))
@@ -57,7 +57,7 @@ describe('cloud-enablement:clitools', function () {
 		});
 	});
 
-	describe('cloud-enablement:clitools with NodeJS project', function () {
+	describe('cloud-assets:clitools with NodeJS project', function () {
 		beforeEach(function () {
 			return helpers.run(path.join(__dirname, '../generators/app'))
 				.inDir(path.join(__dirname, './tmp'))
@@ -96,7 +96,7 @@ describe('cloud-enablement:clitools', function () {
 	/* Common Java Project characteristics: Spring or Liberty, maven or gradle */
 	let javaFrameworks = ['JAVA', 'SPRING'];
 	javaFrameworks.forEach(language => {
-		describe('cloud-enablement:clitools for ['+ language +'] project', function () {
+		describe('cloud-assets:clitools for ['+ language +'] project', function () {
 			let artifactId = 'testArtifact-id';
 			let javaVersion = '1.0-SNAPSHOT';
 			let applicationName = `testgenv2apphelm${language}`;
@@ -121,7 +121,7 @@ describe('cloud-enablement:clitools', function () {
 		});
 	});
 
-	describe('cloud-enablement:clitools with Python project', function () {
+	describe('cloud-assets:clitools with Python project', function () {
 		beforeEach(function () {
 			return helpers.run(path.join(__dirname, '../generators/app'))
 				.inDir(path.join(__dirname, './tmp'))
@@ -143,7 +143,7 @@ describe('cloud-enablement:clitools', function () {
 	});
 
 	/*
-	describe('cloud-enablement:clitools with Python project -- ibmcloud dev enable', function () {
+	describe('cloud-assets:clitools with Python project -- ibmcloud dev enable', function () {
 		beforeEach(function () {
 			return helpers.run(path.join(__dirname, '../generators/app'))
 				.inDir(path.join(__dirname, './tmp'))
@@ -186,7 +186,7 @@ describe('cloud-enablement:clitools', function () {
 	});
 	*/
 
-	describe('cloud-enablement:clitools with Python project with no services', function () {
+	describe('cloud-assets:clitools with Python project with no services', function () {
 		beforeEach(function () {
 			return helpers.run(path.join(__dirname, '../generators/app'))
 				.inDir(path.join(__dirname, './tmp'))
@@ -202,7 +202,7 @@ describe('cloud-enablement:clitools', function () {
 
 	});
 
-	describe('cloud-enablement:clitools with Django project', function () {
+	describe('cloud-assets:clitools with Django project', function () {
 		beforeEach(function () {
 			return helpers.run(path.join(__dirname, '../generators/app'))
 				.inDir(path.join(__dirname, './tmp'))
@@ -220,7 +220,7 @@ describe('cloud-enablement:clitools', function () {
 
 	});
 
-	// describe('cloud-enablement:clitools with Django project -- ibmcloud dev enable', function () {
+	// describe('cloud-assets:clitools with Django project -- ibmcloud dev enable', function () {
 	// 	beforeEach(function () {
 	// 		return helpers.run(path.join(__dirname, '../generators/app'))
 	// 			.inDir(path.join(__dirname, './tmp'))
@@ -260,7 +260,7 @@ describe('cloud-enablement:clitools', function () {
 	// 	});
 	// });
 
-	describe('cloud-enablement:clitools with Go project', function () {
+	describe('cloud-assets:clitools with Go project', function () {
 		beforeEach(function () {
 			return helpers.run(path.join(__dirname, '../generators/app'))
 				.inDir(path.join(__dirname, './tmp'))

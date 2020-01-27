@@ -83,56 +83,7 @@ module.exports = class extends Generator {
 	}
 
 	_addDependencies(serviceDepdendenciesString) {
-		let requirementsTxtPath = this.destinationPath(PATH_REQUIREMENTS_TXT);
-		let pipfileUserPath = this.destinationPath(PATH_PIPFILE);
-		let jsonLanguagePath = this.templatePath() + PATH_PIPFILE_JSON;
-		if (serviceDepdendenciesString.indexOf('{') > -1 && this.fs.exists(pipfileUserPath)) {
-			let userPipfile = this.fs.read(pipfileUserPath);
-			let pipFileLanguageContent = JSON.parse(this.fs.read(jsonLanguagePath));
-
-			//only adding services to sources content so these calls are unnecessary for now
-			//this._addServiceToPipfile(pipFileLanguageContent, serviceDepdendenciesString, userPipfile, SOURCES);
-			//this._addServiceToPipfile(pipFileLanguageContent, serviceDepdendenciesString, userPipfile, DEV_PACKAGES);
-			let pipfile = this._addServiceToPipfile(pipFileLanguageContent, serviceDepdendenciesString, userPipfile, PACKAGES);
-
-			this.fs.write(pipfileUserPath, pipfile);
-		}
-		else if (serviceDepdendenciesString.indexOf('{') === -1 && this.fs.exists(pipfileUserPath)) {
-			if (this.fs.exists(requirementsTxtPath)) {
-				// don't add if dependency entry already exists
-				let fileContentString = this.fs.read(requirementsTxtPath);
-				//-1 doesn't exist
-				if (fileContentString.indexOf(serviceDepdendenciesString) === -1) {
-
-					this.fs.append(requirementsTxtPath, serviceDepdendenciesString);
-				} else {
-					logger.debug(`${serviceDepdendenciesString} is already in requirements.txt file, not appending`);
-				}
-			} else {
-				//create new file with content in their
-				this.fs.write(requirementsTxtPath, serviceDepdendenciesString);
-			}
-		}
-		else if (serviceDepdendenciesString.indexOf('{') === -1 && !this.fs.exists(pipfileUserPath)) {
-			if (this.fs.exists(requirementsTxtPath)) {
-				// don't add if dependency entry already exists
-				let fileContentString = this.fs.read(requirementsTxtPath);
-				//-1 doesn't exist
-				if (fileContentString.indexOf(serviceDepdendenciesString) === -1) {
-
-					this.fs.append(requirementsTxtPath, serviceDepdendenciesString);
-				} else {
-					logger.debug(`${serviceDepdendenciesString} is already in requirements.txt file, not appending`);
-				}
-			} else {
-				//create new file with content in their
-				this.fs.write(requirementsTxtPath, serviceDepdendenciesString);
-			}
-		}
-		else {
-			this.fs.write(pipfileUserPath, this._createPipfile(serviceDepdendenciesString));
-		}
-
+			//moving away from injecting dependencies via generators
 	}
 
 	//only called when Pipfile doesn't exist
