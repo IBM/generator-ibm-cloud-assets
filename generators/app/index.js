@@ -116,7 +116,7 @@ module.exports = class extends Generator {
 			],
 			default: "KNATIVE"
 		});
-
+    
 		prompts.push({
 			type: 'input',
 			name: 'cluster_name',
@@ -138,7 +138,6 @@ module.exports = class extends Generator {
 		this.opts.application.sanitizedName = Utils.sanitizeAlphaNumLowerCase(this.opts.application.name);
 		this.opts.application.chartName = Utils.sanitizeAlphaNumLowerCase( this.opts.application.name );
 		this.opts.deploy_options.servicePorts = Utils.portDefault[this.opts.application.language.toLowerCase()]
-
 	}
 
 	writing() {
