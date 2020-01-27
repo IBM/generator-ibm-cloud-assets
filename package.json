@@ -19,6 +19,7 @@
     "testkube": "npm run mocha test/test-kubernetes.js",
     "testknative": "npm run mocha test/test-knative.js",
     "testservice": "npm run mocha test/test-service.js",
+    "testdownload": "npm run mocha test/test-download-code.js",
     "testinsights": "mocha --recursive --reporter mocha-multi-reporters --reporter-options configFile=config.json",
     "testmanual": "cd test/manual && sh test-combos.sh ",
     "lint": "eslint .",
