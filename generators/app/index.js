@@ -37,8 +37,12 @@ module.exports = class extends Generator {
 		this._sanitizeOption(this.options, APPLICATION_OPTIONS);
 		logger.debug("THIS.OPTS: " + JSON.stringify(this.opts, null, 3));
 
-		if (this.options.libertyVersion === 'beta') {
-			this.options.libertyBeta = true
+		if (!this.opts.deploy_options) {
+			this.opts.deploy_options = {};
+		}
+
+		if (!this.opts.application) {
+			throw Error("No application data included for cloud assets")
 		}
 
 		this.shouldPrompt = this.opts.application ? false : true;
@@ -134,6 +138,7 @@ module.exports = class extends Generator {
 		this.opts.application.sanitizedName = Utils.sanitizeAlphaNumLowerCase(this.opts.application.name);
 		this.opts.application.chartName = Utils.sanitizeAlphaNumLowerCase( this.opts.application.name );
 		this.opts.deploy_options.servicePorts = Utils.portDefault[this.opts.application.language.toLowerCase()]
+
 	}
 
 	writing() {
