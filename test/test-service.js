@@ -184,24 +184,8 @@ describe("cloud-assets:service", function() {
 
                 validateDeployAssets(pythonLang, deploy_type, service);
                 validateCreds(pythonLang, service);
-        
-                it('Pipfile with Cloud Env', function () {
-                    assert.file([
-                        'Pipfile'
-                    ]);
-                    assert.fileContent('Pipfile', 'ibmcloudenv =\'~=0.0\'');
-                    assert.fileContent('Pipfile', 'livereload =\'*\'');
-                });
-        
-                it('requirements.txt with Cloud Env', function () {
-                    assert.file([
-                        'requirements.txt'
-                    ]);
-                    assert.fileContent('requirements.txt', 'ibmcloudenv');
-                    assert.fileContent('requirements.txt', 'livereload');
-                });
             });
-            
+
             const javaLang = "JAVA";
             describe(`cloud-assets:service-${service} with ${javaLang} project deployed with ${deploy_type}`, function () {
                 console.log(`beginning test suite ${this.title}`);
