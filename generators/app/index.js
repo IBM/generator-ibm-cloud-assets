@@ -32,17 +32,25 @@ module.exports = class extends Generator {
 		this._setLoggerLevel();
 		this.opts.loggerLevel = logger.level;
 
-		if (this.opts.deployOptions) { this.opts.deploy_options = this.opts.deployOptions }
+		if ( this.opts.deployOptions && this.opts.deployOptions !== true ) { this.opts.deploy_options = this.opts.deployOptions }
 		this._sanitizeOption(this.options, DEPLOY_OPTIONS);
 		this._sanitizeOption(this.options, APPLICATION_OPTIONS);
 		logger.debug("THIS.OPTS: " + JSON.stringify(this.opts, null, 3));
+		if (this.opts.deployOptions) { delete this.opts.deployOptions; }
+		if (this.opts["deploy-options"]) { delete this.opts["deploy-options"]; }
 
-		if (!this.opts.deploy_options) {
-			this.opts.deploy_options = {};
+		if ( !this.opts.application || this.opts.application === true ) {
+			throw Error("No application data included for cloud asset generation")
 		}
 
-		if (!this.opts.application) {
-			throw Error("No application data included for cloud assets")
+		if ( !this.opts.deploy_options || this.opts.deploy_options === true ) { 
+			this.opts.deploy_options = {}; 
+		}
+		if ( !this.opts.deploy_options.service_bindings ) { 
+			this.opts.deploy_options.service_bindings = {}; 
+		}
+		if ( !this.opts.application.service_credentials ) { 
+				this.opts.application.service_credentials = {}; 
 		}
 
 		this.shouldPrompt = this.opts.application ? false : true;
@@ -203,7 +211,7 @@ module.exports = class extends Generator {
 	}
 
 	_sanitizeOption(options, name) {
-		// logger.debug(options);
+		logger.trace(options);
 		const optionValue = options[name];
 		logger.debug(`optionValue=${optionValue}`);
 		if (optionValue && _.isFunction(optionValue.indexOf) && optionValue.indexOf('file:') === 0) {
