@@ -162,7 +162,7 @@ module.exports = class extends Generator {
 			logger.trace(FILENAME_CLI_CONFIG, "already exists, skipping.");
 		} else {
 			this._writeHandlebarsFile(
-				'java/cli-config.yml.template',
+				this.opts.application.language.toLowerCase() + '/cli-config.yml.template',
 				FILENAME_CLI_CONFIG,
 				this.opts
 			);
