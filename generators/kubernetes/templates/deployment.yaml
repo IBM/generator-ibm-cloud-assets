@@ -1,42 +1,60 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: "{{tag '  .Chart.Name '}}-deployment"
+  creationTimestamp: null
   labels:
-    chart: '{{tag ' .Chart.Name '}}-{{tag ' .Chart.Version | replace "+" "_" '}}'
     app: "{{tag '  .Chart.Name '}}"
+    chart: '{{tag ' .Chart.Name '}}-{{tag ' .Chart.Version | replace "+" "_" '}}'
+  name: "{{tag '  .Chart.Name '}}-deployment"
 spec:
+  progressDeadlineSeconds: 2147483647
   replicas: {{tag ' .Values.replicaCount '}}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
+  selector: 
+    matchLabels:
+      app: "{{tag '  .Chart.Name '}}"
+      version: "current"
   strategy:
-    type: RollingUpdate
     rollingUpdate:
-      maxUnavailable: 0
       maxSurge: 1
-  revisionHistoryLimit: {{tag ' .Values.revisionHistoryLimit '}}
+      maxUnavailable: 0
+    type: RollingUpdate
   template:
     metadata:
+      creationTimestamp: null
       labels:
         app: "{{tag '  .Chart.Name '}}"
         version: "current"
     spec:
       containers:
-      - name: "{{tag '  .Chart.Name  '}}"
+      - env:
+        - name: PORT
+          value : "{{tag ' .Values.service.servicePort '}}"
+        - name: APPLICATION_NAME
+          value: "{{tag ' .Release.Name '}}"
         image: "{{tag ' .Values.image.repository '}}:{{tag ' .Values.image.tag '}}"
         imagePullPolicy: {{tag ' .Values.image.pullPolicy '}}
         livenessProbe:
+          failureThreshold: 3
           httpGet:
             path: /health
             port: {{tag ' .Values.service.servicePort '}}
           initialDelaySeconds: {{tag ' .Values.livenessProbe.initialDelaySeconds'}}
           periodSeconds: {{tag ' .Values.livenessProbe.periodSeconds'}}
+        name: "{{tag '  .Chart.Name  '}}"
         ports:
         - containerPort: {{tag ' .Values.service.servicePort'}}
+          protocol: TCP
         resources:
           requests:
             cpu: "{{tag ' .Values.image.resources.requests.cpu '}}"
             memory: "{{tag ' .Values.image.resources.requests.memory '}}"
-        env:
-          - name: PORT
-            value : "{{tag ' .Values.service.servicePort '}}"
-          - name: APPLICATION_NAME
-            value: "{{tag ' .Release.Name '}}"
+terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+status: {}
