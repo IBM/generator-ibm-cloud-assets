@@ -1,15 +1,13 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  creationTimestamp: null
   labels:
     app: "{{tag '  .Chart.Name '}}"
     chart: '{{tag ' .Chart.Name '}}-{{tag ' .Chart.Version | replace "+" "_" '}}'
   name: "{{tag '  .Chart.Name '}}-deployment"
 spec:
-  progressDeadlineSeconds: 2147483647
   replicas: {{tag ' .Values.replicaCount '}}
-  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
+  revisionHistoryLimit: {{tag ' .Values.revisionHistoryLimit '}}
   selector: 
     matchLabels:
       app: "{{tag '  .Chart.Name '}}"
@@ -21,7 +19,6 @@ spec:
     type: RollingUpdate
   template:
     metadata:
-      creationTimestamp: null
       labels:
         app: "{{tag '  .Chart.Name '}}"
         version: "current"
@@ -35,10 +32,10 @@ spec:
         image: "{{tag ' .Values.image.repository '}}:{{tag ' .Values.image.tag '}}"
         imagePullPolicy: {{tag ' .Values.image.pullPolicy '}}
         livenessProbe:
-          failureThreshold: 3
           httpGet:
             path: /health
             port: {{tag ' .Values.service.servicePort '}}
+            scheme: HTTP
           initialDelaySeconds: {{tag ' .Values.livenessProbe.initialDelaySeconds'}}
           periodSeconds: {{tag ' .Values.livenessProbe.periodSeconds'}}
         name: "{{tag '  .Chart.Name  '}}"
@@ -49,12 +46,3 @@ spec:
           requests:
             cpu: "{{tag ' .Values.image.resources.requests.cpu '}}"
             memory: "{{tag ' .Values.image.resources.requests.memory '}}"
-terminationMessagePath: /dev/termination-log
-        terminationMessagePolicy: File
-
-      dnsPolicy: ClusterFirst
-      restartPolicy: Always
-      schedulerName: default-scheduler
-      securityContext: {}
-      terminationGracePeriodSeconds: 30
-status: {}
