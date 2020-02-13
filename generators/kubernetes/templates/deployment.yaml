@@ -1,18 +1,22 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: "{{tag '  .Chart.Name '}}-deployment"
   labels:
-    chart: '{{tag ' .Chart.Name '}}-{{tag ' .Chart.Version | replace "+" "_" '}}'
     app: "{{tag '  .Chart.Name '}}"
+    chart: '{{tag ' .Chart.Name '}}-{{tag ' .Chart.Version | replace "+" "_" '}}'
+  name: "{{tag '  .Chart.Name '}}-deployment"
 spec:
   replicas: {{tag ' .Values.replicaCount '}}
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxUnavailable: 0
-      maxSurge: 1
   revisionHistoryLimit: {{tag ' .Values.revisionHistoryLimit '}}
+  selector: 
+    matchLabels:
+      app: "{{tag '  .Chart.Name '}}"
+      version: "current"
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
   template:
     metadata:
       labels:
@@ -20,23 +24,25 @@ spec:
         version: "current"
     spec:
       containers:
-      - name: "{{tag '  .Chart.Name  '}}"
+      - env:
+        - name: PORT
+          value : "{{tag ' .Values.service.servicePort '}}"
+        - name: APPLICATION_NAME
+          value: "{{tag ' .Release.Name '}}"
         image: "{{tag ' .Values.image.repository '}}:{{tag ' .Values.image.tag '}}"
         imagePullPolicy: {{tag ' .Values.image.pullPolicy '}}
         livenessProbe:
           httpGet:
             path: /health
             port: {{tag ' .Values.service.servicePort '}}
+            scheme: HTTP
           initialDelaySeconds: {{tag ' .Values.livenessProbe.initialDelaySeconds'}}
           periodSeconds: {{tag ' .Values.livenessProbe.periodSeconds'}}
+        name: "{{tag '  .Chart.Name  '}}"
         ports:
         - containerPort: {{tag ' .Values.service.servicePort'}}
+          protocol: TCP
         resources:
           requests:
             cpu: "{{tag ' .Values.image.resources.requests.cpu '}}"
             memory: "{{tag ' .Values.image.resources.requests.memory '}}"
-        env:
-          - name: PORT
-            value : "{{tag ' .Values.service.servicePort '}}"
-          - name: APPLICATION_NAME
-            value: "{{tag ' .Release.Name '}}"
