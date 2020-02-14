@@ -8,7 +8,10 @@ metadata:
 spec:
   replicas: {{tag ' .Values.replicaCount '}}
   revisionHistoryLimit: {{tag ' .Values.revisionHistoryLimit '}}
-  selector: null
+  selector: 
+    matchLabels:
+      app: "{{tag '  .Chart.Name '}}"
+      version: "current"
   template:
     metadata:
       labels:
@@ -44,4 +47,3 @@ spec:
           requests:
             cpu: "{{tag ' .Values.image.resources.requests.cpu '}}"
             memory: "{{tag ' .Values.image.resources.requests.memory '}}"
-        
