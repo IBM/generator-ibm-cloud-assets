@@ -25,6 +25,16 @@ const SPRING_BOOT_SERVICE_KEY_SEPARATOR = "spring_boot_service_key_separator";
 // consts used for deployment.yml
 const REGEX_PORT = /^(\s*)- name: PORT/;
 
+const _credentialsFilepathMap = {
+	JAVA: "src/main/resources/localdev-config.json",
+	SPRING: "src/main/resources/localdev-config.json",
+	NODE: "server/localdev-config.json",
+	PYTHON: "server/localdev-config.json",
+	SWIFT: "config/localdev-config.json",
+	DJANGO: "server/localdev-config.json",
+	GO: "server/localdev-config.json"
+}
+
 // add secretKeyRefs for services in deployment.yaml
 function addServicesEnvToHelmChartAsync(args) {
 	return new Promise((resolve, reject) => {
@@ -302,5 +312,6 @@ module.exports = {
 	SPRING_BOOT_SERVICE_KEY_SEPARATOR: SPRING_BOOT_SERVICE_KEY_SEPARATOR,
 	addServicesEnvToHelmChartAsync: addServicesEnvToHelmChartAsync,
 	addServicesEnvToValuesAsync: addServicesEnvToValuesAsync,
-	addServicesToServiceKnativeYamlAsync: addServicesToServiceKnativeYamlAsync
+	addServicesToServiceKnativeYamlAsync: addServicesToServiceKnativeYamlAsync,
+	credentialsFilepathMap: _credentialsFilepathMap
 };

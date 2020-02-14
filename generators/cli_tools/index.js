@@ -17,8 +17,9 @@ const Log4js = require('log4js');
 const logger = Log4js.getLogger('generator-ibm-cloud-assets:cli');
 const Generator = require('yeoman-generator');
 const Handlebars = require('../lib/handlebars.js');
-const Utils = require('../lib/utils');
+const ServiceUtils = require('../lib/service-utils');
 const xmljs = require('xml-js');
+const _ = require('lodash');
 
 const FILENAME_CLI_CONFIG = "cli-config.yml";
 const FILENAME_DEBUG = "run-debug";
@@ -92,7 +93,8 @@ module.exports = class extends Generator {
 			stopCmd: '',
 			debugCmd: `/swift-utils/tools-utils.sh debug ${executableName} 1024`,
 			chartPath: `chart/${applicationName.toLowerCase()}`,
-			applicationId: `${this.opts.application.app_id}`
+			applicationId: `${this.opts.application.app_id}`,
+			credentialsFilepath: (!_.isEmpty(this.opts.application.service_credentials)) ? ServiceUtils.credentialsFilepathMap.SWIFT : ""
 		};
 
 		logger.trace(`Generating cli-config with cliConfig: ${JSON.stringify(cliConfig,null,3)}`  )
@@ -125,7 +127,8 @@ module.exports = class extends Generator {
 			debugCmd: 'npm run debug',
 			stopCmd: "npm stop",
 			chartPath: `chart/${applicationName.toLowerCase()}`,
-			applicationId: `${this.opts.application.app_id}`
+			applicationId: `${this.opts.application.app_id}`,
+			credentialsFilepath: (!_.isEmpty(this.opts.application.service_credentials)) ? ServiceUtils.credentialsFilepathMap.NODE : ""
 		};
 
 		logger.trace( `Generating cli-config with cliConfig: ${JSON.stringify(cliConfig,null,3)}` )
@@ -152,6 +155,8 @@ module.exports = class extends Generator {
 		if (!this.opts.appName) {
 			this.opts.appName = this.opts.application.sanitizedName;
 		}
+
+		this.opts.credentialsFilepath =  (!_.isEmpty(this.opts.application.service_credentials)) ? ServiceUtils.credentialsFilepathMap.JAVA : ""
 
 		this.opts.appNameRefreshed = this.opts.application.sanitizedName.toLowerCase();
 		this.opts.version = this.opts.version ? this.opts.version : "1.0-SNAPSHOT";
@@ -197,7 +202,8 @@ module.exports = class extends Generator {
 				? 'echo No debug command specified in cli-config'
 				: 'python manage.py debug',
 			chartPath: `chart/${applicationName.toLowerCase()}`,
-			applicationId: `${this.opts.application.app_id}`
+			applicationId: `${this.opts.application.app_id}`,
+			credentialsFilepath: (!_.isEmpty(this.opts.application.service_credentials)) ? ServiceUtils.credentialsFilepathMap.PYTHON : ""
 		};
 
 		if (this.fs.exists(this.destinationPath(FILENAME_CLI_CONFIG))) {
@@ -246,7 +252,8 @@ module.exports = class extends Generator {
 				? 'echo No debug command specified in cli-config'
 				: `python manage.py runserver --noreload`,
 			chartPath: `chart/${applicationName.toLowerCase()}`,
-			applicationId: `${this.opts.application.app_id}`
+			applicationId: `${this.opts.application.app_id}`,
+			credentialsFilepath: (!_.isEmpty(this.opts.application.service_credentials)) ? ServiceUtils.credentialsFilepathMap.DJANGO : ""
 		};
 
 		if (this.fs.exists(this.destinationPath(FILENAME_CLI_CONFIG))) {
@@ -294,7 +301,8 @@ module.exports = class extends Generator {
 			stopCmd: '',
 			debugCmd: 'dlv debug --headless --listen=0.0.0.0:8181',
 			chartPath: `chart/${chartName}`,
-			applicationId: `${this.opts.application.app_id}`
+			applicationId: `${this.opts.application.app_id}`,
+			credentialsFilepath: (!_.isEmpty(this.opts.application.service_credentials)) ? ServiceUtils.credentialsFilepathMap.GO : ""
 		};
 
 		logger.trace( `Generating cli-config with cliConfig: ${JSON.stringify(cliConfig,null,3)}` )

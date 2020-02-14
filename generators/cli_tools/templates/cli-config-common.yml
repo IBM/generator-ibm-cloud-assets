@@ -58,3 +58,4 @@ version : "0.0.3"
 {{#exists cliConfig.applicationId}}
 ibm-cloud-app-id : "{{{cliConfig.applicationId}}}"
 {{/exists}}
+credentials-filepath : "{{{cliConfig.credentialsFilepath}}}"
