@@ -1,13 +1,14 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: "{{tag '  .Chart.Name '}}-deployment"
   labels:
-    chart: '{{tag ' .Chart.Name '}}-{{tag ' .Chart.Version | replace "+" "_" '}}'
     app: "{{tag '  .Chart.Name '}}"
+    chart: '{{tag ' .Chart.Name '}}-{{tag ' .Chart.Version | replace "+" "_" '}}'
+  name: "{{tag '  .Chart.Name '}}-deployment"
 spec:
   replicas: {{tag ' .Values.replicaCount '}}
   revisionHistoryLimit: {{tag ' .Values.revisionHistoryLimit '}}
+  selector: null
   template:
     metadata:
       labels:
@@ -15,21 +16,27 @@ spec:
         version: "current"
     spec:
       containers:
-      - name: "{{tag '  .Chart.Name  '}}"
+      - env:
+        - name: PORT
+          value: "{{tag ' .Values.service.servicePort '}}"
+        - name: APPLICATION_NAME
+          value: "{{tag ' .Release.Name '}}"
         image: "{{tag ' .Values.image.repository '}}:{{tag ' .Values.image.tag '}}"
         imagePullPolicy: {{tag ' .Values.image.pullPolicy '}}
+        name: "{{tag '  .Chart.Name  '}}"
 {{tag ' if .Values.istio.enabled '}}
 {{tag ' else '}}
         readinessProbe:
           httpGet:
-          {{! healthEndpoint is configured in the index.js and is different for basicweb}}
           {{#has application.language 'JAVA'}}
             path: /{{#if healthEndpoint}}{{healthEndpoint}}{{else}}health{{/if}}
             port: 9080
+            scheme: HTTP
           {{/has}}
           {{#has application.language 'SPRING'}}
             path: /{{#if healthEndpoint}}{{healthEndpoint}}{{else}}health{{/if}}
             port: 8080
+            scheme: HTTP
           {{/has}}
           initialDelaySeconds: 20
 {{tag ' end '}}
@@ -37,8 +44,4 @@ spec:
           requests:
             cpu: "{{tag ' .Values.image.resources.requests.cpu '}}"
             memory: "{{tag ' .Values.image.resources.requests.memory '}}"
-        env:
-          - name: PORT
-            value: "{{tag ' .Values.service.servicePort '}}"
-          - name: APPLICATION_NAME
-            value: "{{tag ' .Release.Name '}}"
+        
