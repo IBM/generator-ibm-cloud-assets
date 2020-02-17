@@ -22,8 +22,6 @@ const xmljs = require('xml-js');
 const _ = require('lodash');
 
 const FILENAME_CLI_CONFIG = "cli-config.yml";
-const FILENAME_DEBUG = "run-debug";
-const FILENAME_DEV = "run-dev";
 
 module.exports = class extends Generator {
 	constructor(args, opts) {
@@ -134,9 +132,6 @@ module.exports = class extends Generator {
 		logger.trace( `Generating cli-config with cliConfig: ${JSON.stringify(cliConfig,null,3)}` )
 		this._writeHandlebarsFile('../templates/cli-config-common.yml', FILENAME_CLI_CONFIG, { cliConfig });
 
-		this._copyTemplateIfNotExists(FILENAME_DEBUG, 'node/run-debug', {});
-
-		this._copyTemplateIfNotExists(FILENAME_DEV, 'node/run-dev', {});
 	}
 
 	_generateJava() {
@@ -213,16 +208,6 @@ module.exports = class extends Generator {
 			this._writeHandlebarsFile('cli-config-common.yml', FILENAME_CLI_CONFIG, { cliConfig });
 		}
 
-		if (this.fs.exists(this.destinationPath(FILENAME_DEV))) {
-			logger.trace(FILENAME_DEV, "already exists, skipping.");
-		} else {
-			this._writeHandlebarsFile('python/run-dev', FILENAME_DEV, {
-				port: port,
-				enable: this.opts.enable,
-				language: this.opts.application.language,
-				name: this.opts.application.name
-			});
-		}
 	}
 	_generateDjango() {
 		const applicationName = this.opts.application.sanitizedName;
@@ -263,16 +248,6 @@ module.exports = class extends Generator {
 			this._writeHandlebarsFile('../templates/cli-config-common.yml', FILENAME_CLI_CONFIG, { cliConfig });
 		}
 
-		if (this.fs.exists(this.destinationPath(FILENAME_DEV))) {
-			logger.trace(FILENAME_DEV, "already exists, skipping.");
-		} else {
-			this._writeHandlebarsFile('python/run-dev', FILENAME_DEV, {
-				port: port,
-				enable: this.opts.enable,
-				language: this.opts.application.language,
-				name: this.opts.application.name.toLowerCase()
-			});
-		}
 	}
 
 	_generateGo() {
