@@ -27,7 +27,6 @@ const Utils = require('../../../lib/utils');
 
 const PATH_MAPPINGS_FILE = './src/main/resources/mappings.json';
 const PATH_LOCALDEV_FILE = './src/main/resources/localdev-config.json';
-const TEMPLATE_EXT = '.template';
 const GENERATOR_LOCATION = 'server';
 
 module.exports = class extends Generator {
@@ -41,14 +40,10 @@ module.exports = class extends Generator {
 
 	//setup all the values we need to pass in the context
 	initializing() {
-		this.context.dependenciesFile = 'config.json.template';
 		this.context.languageFileExt = '';
 		this.context.generatorLocation = GENERATOR_LOCATION;
-		this.context.addDependencies = this._addDependencies.bind(this);
 		this.context.addMappings = this._addMappings.bind(this);
 		this.context.addLocalDevConfig = this._addLocalDevConfig.bind(this);
-		this.context.addReadMe = this._addReadMe.bind(this);
-		this.context.addInstrumentation = this._addInstrumentation.bind(this);
 		this.context.srcFolders = [];
 		this.context.instrumentationAdded = false;
 		this.context.metainf = [];
@@ -82,13 +77,6 @@ module.exports = class extends Generator {
 		}
 	}
 
-	_addDependencies(serviceDependenciesString) {
-		logger.debug('Adding dependencies', serviceDependenciesString);
-		if (this.context._addDependencies) {
-			this.context._addDependencies(serviceDependenciesString);
-		}
-	}
-
 	_addMappings(serviceMappingsJSON) {
 		let mappingsFilePath = this.destinationPath(PATH_MAPPINGS_FILE);
 		this.fs.extendJSON(mappingsFilePath, serviceMappingsJSON);
@@ -102,30 +90,6 @@ module.exports = class extends Generator {
 		} else {
 			this.context._addLocalDevConfig(devconf);
 		}
-	}
-
-	_addCoreDependencies() {
-		let dependenciesString = this.fs.read(`${this.templatePath()}/${this.context.application.language}/${this.context.dependenciesFile}`);
-		let template = handlebars.compile(dependenciesString);
-		dependenciesString = template(this.context);
-		if (this.context._addDependencies) {
-			this.context._addDependencies(dependenciesString);
-		}
-	}
-
-	_addReadMe(options) {
-		this.fs.copy(
-			options.sourceFilePath,
-			`${this.destinationPath()}/docs/services/${options.targetFileName}`
-		);
-	}
-
-	_addInstrumentation(instrumentation) {
-		if (!this.context.instrumentationAdded) {
-			this._addCoreDependencies();
-			this.context.instrumentationAdded = true;
-		}
-		this.context.srcFolders = this.context.srcFolders.concat(instrumentation.sourceFilePath);
 	}
 
 	_writeFiles(templatePath, data) {
