@@ -1,11 +1,8 @@
 'use strict';
 const logger = require('log4js').getLogger("generator-cloud-assets:languages-swift-kitura");
 const Generator = require('yeoman-generator');
-const handlebars = require('handlebars');
 const path = require('path');
-const fs = require('fs');
 
-const Utils = require('../../../lib/utils');
 const scaffolderMapping = require('../../templates/scaffolderMapping.json');
 const svcInfo = require('../../templates/serviceInfo.json');
 
@@ -14,7 +11,6 @@ const bluemixLabelMappings = require('./bluemix-label-mappings.json');
 
 const PATH_MAPPINGS_FILE = "./config/mappings.json";
 const PATH_LOCALDEV_CONFIG_FILE = "./config/localdev-config.json";
-const PATH_GIT_IGNORE = "./.gitignore";
 const FILE_SEARCH_PATH_PREFIX = "file:/config/localdev-config.json:";
 
 module.exports = class extends Generator {
@@ -29,9 +25,7 @@ module.exports = class extends Generator {
 	}
 
 	initializing() {
-		this.context.dependenciesFile = "dependencies.txt";
 		this.context.languageFileExt = ".swift";
-		this.context.addDependencies = this._addDependencies.bind(this);
 		this.context.addMappings = this._addMappings.bind(this);
 		this.context.addLocalDevConfig = this._addLocalDevConfig.bind(this);
 
@@ -54,19 +48,6 @@ module.exports = class extends Generator {
 				}
 			}
 		});
-	}
-
-	// TODO: cleanup
-	_addDependencies(serviceDependenciesString) {
-		if (this.context.injectDependency) {
-			// NOTE: Dependencies should be one-per-line
-			serviceDependenciesString.split('\n').forEach(dependency => {
-				let trimmedDependency = dependency.trim();
-				if (trimmedDependency) {
-					this.context.injectDependency(trimmedDependency);
-				}
-			});
-		}
 	}
 
 	_addMappings(serviceMappingsJSON) {

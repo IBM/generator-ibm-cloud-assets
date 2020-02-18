@@ -18,9 +18,7 @@ const Log4js = require('log4js');
 const logger = Log4js.getLogger("generator-ibm-cloud-assets:languages-go");
 let Generator = require('yeoman-generator');
 const path = require('path');
-const fs = require('fs');
 
-const Utils = require('../../../lib/utils');
 const Handlebars = require('../../../lib/handlebars.js');
 const scaffolderMapping = require('../../templates/scaffolderMapping.json');
 const svcInfo = require('../../templates/serviceInfo.json');
@@ -28,8 +26,6 @@ const svcInfo = require('../../templates/serviceInfo.json');
 const GENERATOR_LOCATION = 'server';
 const PATH_MAPPINGS_FILE = "./server/config/mappings.json";
 const PATH_LOCALDEV_CONFIG_FILE = "server/localdev-config.json";
-const PATH_GOPKG = "Gopkg.toml"
-const PATH_GOPKG_TOML = "./Gopkg.toml";
 
 
 module.exports = class extends Generator {
@@ -45,15 +41,10 @@ module.exports = class extends Generator {
 		this.context.service_imports = [];
 		this.context.service_variables = [];
 		this.context.service_initializers = [];
-		this.context.dependencies = [];
-		this.context.dependenciesFile = "dependencies.toml";
 		this.context.languageFileExt = ".go";
 		this.context.generatorLocation = GENERATOR_LOCATION;
-		this.context.addDependencies = this._addDependencies.bind(this);
 		this.context.addMappings = this._addMappings.bind(this);
 		this.context.addLocalDevConfig = this._addLocalDevConfig.bind(this);
-		this.context.addReadMe = this._addReadMe.bind(this);
-		this.context.addInstrumentation = this._addInstrumentation.bind(this);
 
 		let serviceCredentials,
 			serviceKey;
@@ -77,35 +68,6 @@ module.exports = class extends Generator {
 	}
 
 	writing() {
-		// TODO: cleanup
-		// Generate services.go, which acts like a service manager
-		if (this.context.addServices) {
-			this._writeHandlebarsFile('services.go', "services/services.go", {
-				service_imports: this.context.service_imports,
-				service_variables:this.context.service_variables,
-				service_initializers: this.context.service_initializers
-			});
-		}
-
-		// Add the ibm-cloud-env-golang dependency
-		this._addDependencies(this.fs.read(this.templatePath() + "/" + this.context.dependenciesFile));
-		// Append dependencies to the Gopkg.toml
-		let goPkgPath = this.destinationPath(PATH_GOPKG_TOML);
-		// Write a Gopkg.toml if one doesn't exist
-		if (!this.fs.exists(goPkgPath)) {
-			this.fs.copy(this.templatePath() + "/" + PATH_GOPKG, this.destinationPath(PATH_GOPKG_TOML));
-		}
-		this.context.dependencies.forEach((dependency) => {
-			let fileContentString = this.fs.read(this.destinationPath(PATH_GOPKG));
-			// Append if not already found
-			if (fileContentString.indexOf(dependency) === -1) {
-				this.fs.append(this.destinationPath(PATH_GOPKG), dependency);
-			}
-		});
-	}
-
-	_addDependencies(serviceDepdendenciesString) {
-		this.context.dependencies.push(serviceDepdendenciesString);
 	}
 
 	_addMappings(serviceMappingsJSON) {
@@ -116,48 +78,6 @@ module.exports = class extends Generator {
 	_addLocalDevConfig(serviceLocalDevConfigJSON){
 		let localDevConfigFilePath = this.destinationPath(PATH_LOCALDEV_CONFIG_FILE);
 		this.fs.extendJSON(localDevConfigFilePath, serviceLocalDevConfigJSON);
-	}
-
-	_addReadMe(options){
-		this.fs.copy(
-			options.sourceFilePath,
-			this.destinationPath() + "/docs/services/" + options.targetFileName
-		);
-	}
-
-	_addInstrumentation(options) {
-		function pascalize(name) {
-			return name.split('-').map(part => part.charAt(0).toUpperCase() + part.substring(1).toLowerCase()).join('');
-		}
-
-		this.context.addServices = true;
-		let extension = path.extname(options.targetFileName);
-		let targetName = pascalize(path.basename(options.targetFileName, extension));
-		options.targetFileName = options.targetFileName.replace(/-/g, "_");
-
-		// Copy service instrumenation file to services/my_service.go
-		let targetFilePath = this.destinationPath('services', options.targetFileName);
-		this.fs.copyTpl(options.sourceFilePath, targetFilePath, this.context);
-
-		// Read metadata (imports, variable names, variable type) from each service's meta.json
-		let metaFile = options.sourceFilePath.substring(0, options.sourceFilePath.lastIndexOf("/")) + '/meta.json';
-		let metaData = this.fs.readJSON(metaFile);
-		let metaImport = metaData.import;
-
-		// Service imports that need to be injected at the top of services.go
-		if (typeof metaImport !== 'undefined') {
-			this.context.service_imports.push(`${metaImport}`);
-		}
-		// The instrumentation file defines a function as an entry point for initialization
-		// The function will have a name of the form: 'InitializeMyService()'.
-		// For example, if the targetFileName is 'service_watson_discovery.go'
-		// then the function will be 'InitializeServiceWatsonDiscovery()'
-		if (typeof metaData.variableName !== 'undefined' && typeof metaData.type !== 'undefined' && typeof targetName !== 'undefined') {
-			this.context.service_variables.push(`${metaData.variableName} *${metaData.type}`);
-			this.context.service_initializers.push(`${metaData.variableName}, err = Initialize${targetName}()`);
-		} else if (typeof targetName !== 'undefined') {
-			this.context.service_initializers.push(`Initialize${targetName}()`);
-		}
 	}
 
 	end(){

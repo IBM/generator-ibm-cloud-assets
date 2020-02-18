@@ -36,18 +36,13 @@ module.exports = class extends Generator {
 	}
 
 	configuring() {
-		this.context.dependenciesFile = ["requirements.txt", "Pipfile.json"];
 		this.context.languageFileExt = ".py";
 		this.context.generatorLocation = GENERATOR_LOCATION;
-		this.context.addDependencies = this._addDependencies.bind(this);
 		this.context.addMappings = this._addMappings.bind(this);
 		this.context.addLocalDevConfig = this._addLocalDevConfig.bind(this);
 	}
 
 	writing() {
-		for (let i = 0; i < this.context.dependenciesFile.length; i++) {
-			this._addDependencies(this.fs.read(this.templatePath() + "/" + this.context.dependenciesFile[i]));
-		}
 
 		/*
 		this.fs.copy(
@@ -80,91 +75,6 @@ module.exports = class extends Generator {
 				}
 			}
 		});
-	}
-
-	_addDependencies(serviceDepdendenciesString) {
-			//moving away from injecting dependencies via generators
-	}
-
-	//only called when Pipfile doesn't exist
-	_createPipfile(serviceDepdendenciesString) {
-		let sourcesContent,
-			devPackagesContent,
-			packagesContent;
-		//stuff that will go into user's pipfile
-		let pipfileText = SOURCES + '\n' + SOURCES_CONTENT + '\n';
-		//pipfile info from service
-		let parsedJson = JSON.parse(serviceDepdendenciesString);
-		sourcesContent = parsedJson[SOURCES];
-
-		let keys = Object.keys(sourcesContent);
-		for (let i = 0; i < keys.length; i++) {
-			let snippet = `${keys[i]} ='${sourcesContent[keys[i]]}'`;
-			pipfileText += snippet + '\n';
-		}
-		devPackagesContent = parsedJson[DEV_PACKAGES];
-		// add sources from the json
-		pipfileText += '[dev-packages]' + '\n';
-		keys = Object.keys(devPackagesContent);
-		for (let i = 0; i < keys.length; i++) {
-			let snippet = `${keys[i]} ='${devPackagesContent[keys[i]]}'`;
-			pipfileText += snippet + '\n';
-		}
-		packagesContent = parsedJson[PACKAGES];
-		pipfileText += '[packages]' + '\n';
-		keys = Object.keys(packagesContent);
-		for (let i = 0; i < keys.length; i++) {
-			let snippet = `${keys[i]} ='${packagesContent[keys[i]]}'`;
-			pipfileText += snippet + '\n';
-		}
-		return pipfileText;
-	}
-
-	//add service info to an existing pipfile
-	_addServiceToPipfile(languageJson, serviceJson, userPipfile, packageType) {
-		//if the json isn't empty
-		if (serviceJson.length > 2) {
-			let content = languageJson[packageType];
-			let keys = Object.keys(content);
-			//go through the json object and check the packageType pipfile snippet in the languageJson
-			for (let i = 0; i < keys.length; i++) {
-				//get the pipfile snippet
-				let snippet = `${keys[i]} ='${content[keys[i]]}'`;
-				//see if that pipfile snippet is in the user's Pipfile.json
-				if (userPipfile.indexOf(snippet) === -1) {
-					//add the snippet to the user's pipfile
-					let splitArray = userPipfile.split(`${packageType}\n`);
-
-					userPipfile = splitArray[0] + '[packages]\n' + `${snippet}\n` + splitArray[1];
-
-
-				} else {
-					// snippet does not exist in Pipfile.json append
-					logger.debug(`${userPipfile} is already in Pipfile file, not appending`);
-				}
-			}
-			content = JSON.parse(serviceJson)[packageType];
-			keys = Object.keys(content);
-			for (let i = 0; i < keys.length; i++) {
-
-				let snippet = `${keys[i]} ='${content[keys[i]]}'`;
-
-				if (userPipfile.indexOf(snippet) === -1) {
-					//add the source to the pipfile
-					let splitArray = userPipfile.split(`${packageType}\n`);
-					userPipfile = splitArray[0] + '[packages]\n' + `${snippet}\n` + splitArray[1];
-
-				} else {
-					logger.debug(`${userPipfile} is already in Pipfile file, not appending`);
-				}
-			}
-
-			return userPipfile;
-		}
-		//just use the Pipfile already in the user directory
-		else {
-			return userPipfile;
-		}
 	}
 
 	_addMappings(serviceMappingsJSON) {
