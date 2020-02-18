@@ -127,7 +127,7 @@ module.exports = class extends Generator {
 
 		this.manifestConfig.buildpack = 'sdk-for-nodejs';
 		this.manifestConfig.memory = this._getHighestMemorySize(this.manifestConfig.memory, this.opts.nodeCFMinMemory);
-		this.cfIgnoreContent = ['.git/', 'node_modules/', 'test/', 'vcap-local.js'];
+		this.cfIgnoreContent = ['.git/', 'node_modules/', 'test/', 'vcap-local.js', 'Dockerfile'];
 	}
 
 	_configureGo() {
@@ -145,7 +145,7 @@ module.exports = class extends Generator {
 			// cannot read file or find a command, return to default behavior
 		}
 
-		this.cfIgnoreContent = ['.git/', 'vendor/'];
+		this.cfIgnoreContent = ['.git/', 'vendor/', 'Dockerfile'];
 	}
 
 	_configureSwift() {
@@ -208,7 +208,7 @@ module.exports = class extends Generator {
 
 	_configureSpring() {
 		let version = this.opts.version ? this.opts.version : "1.0-SNAPSHOT";
-		this.cfIgnoreContent = ['/.classpath', '/.project', '/.settings', '/src/main/resources/application-local.properties', 'target/', 'build/'];
+		this.cfIgnoreContent = ['/.classpath', '/.project', '/.settings', '/src/main/resources/application-local.properties', 'target/', 'build/', 'Dockerfile'];
 		this.manifestConfig.buildpack = 'java_buildpack';
 		this.manifestConfig.memory = this._getHighestMemorySize(this.manifestConfig.memory, '1024M');
 		let buildDir = 'target';
@@ -225,7 +225,7 @@ module.exports = class extends Generator {
 		this.manifestConfig.memory = this.manifestConfig.memory || '128M';
 		this.manifestConfig.env.FLASK_APP = 'server';
 		this.manifestConfig.env.FLASK_DEBUG = 'false';
-		this.cfIgnoreContent = ['.pyc', '.egg-info'];
+		this.cfIgnoreContent = ['.pyc', '.egg-info', 'Dockerfile'];
 	}
 
 	_configureDjango() {
@@ -242,7 +242,7 @@ module.exports = class extends Generator {
 		//TODO: generalize manifestCommand for bx dev enable commands passed
 		this.manifestConfig.command = this.opts.enable ? 'echo No run command specified in manifest.yml' : manifestCommand;
 		this.manifestConfig.memory = this.manifestConfig.memory || '128M';
-		this.cfIgnoreContent = ['.pyc', '.egg-info'];
+		this.cfIgnoreContent = ['.pyc', '.egg-info', 'Dockerfile'];
 	}
 
 	cleanUpPass() {
