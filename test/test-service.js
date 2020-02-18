@@ -141,11 +141,10 @@ describe("cloud-assets:service", function() {
                 validateDeployAssets(goLang, deploy_type, service);
                 validateCreds(goLang, service);
         
-                it('Gopkg.toml with Cloud Env', function () {
-                    assert.file([
+                it('Gopkg.toml not created', function () {
+                    assert.noFile([
                         'Gopkg.toml'
                     ]);
-                    assert.fileContent('Gopkg.toml', 'name = "github.com/ibm-developer/ibm-cloud-env-golang"');
                 });
             });
 
@@ -163,11 +162,10 @@ describe("cloud-assets:service", function() {
                 validateDeployAssets(nodeLang, deploy_type, service);
                 validateCreds(nodeLang, service);
         
-                it('package.json with Cloud Env', function () {
-                    assert.file([
+                it('package.json not created', function () {
+                    assert.noFile([
                         'package.json'
                     ]);
-                    assert.fileContent('package.json', '"ibm-cloud-env": "^0"');
                 });
             });
             
@@ -193,7 +191,6 @@ describe("cloud-assets:service", function() {
                     return helpers.run(main_gen)
                         .inTmpDir(function (dir) {
                             console.log(`generator temp dir: ${dir}`);
-                            fse.copySync(path.join(__dirname, `/templates/${javaLang.toLowerCase()}`), dir);
                         })
                         .withOptions(testUtils.generateTestPayload(deploy_type, javaLang, [service]));
                 });
@@ -209,7 +206,6 @@ describe("cloud-assets:service", function() {
                     return helpers.run(main_gen)
                         .inTmpDir(function (dir) {
                             console.log(`generator temp dir: ${dir}`);
-                            fse.copySync(path.join(__dirname, `/templates/${springLang.toLowerCase()}`), dir);
                         })
                         .withOptions(testUtils.generateTestPayload(deploy_type, springLang, [service]));
                 });
@@ -225,7 +221,6 @@ describe("cloud-assets:service", function() {
                     return helpers.run(main_gen)
                         .inTmpDir(function (dir) {
                             console.log(`generator temp dir: ${dir}`);
-                            fse.copySync(path.join(__dirname, `/templates/${swiftLang.toLowerCase()}`), dir);
                         })
                         .withOptions(testUtils.generateTestPayload(deploy_type, swiftLang, [service]));
                 });
@@ -233,11 +228,10 @@ describe("cloud-assets:service", function() {
                 validateDeployAssets(swiftLang, deploy_type, service);
                 validateCreds(swiftLang, service);
         
-                it('Package.swift with Cloud Env', function () {
-                    assert.file([
+                it('Package.swift not created', function () {
+                    assert.noFile([
                         'Package.swift'
                     ]);
-                    assert.fileContent('Package.swift', '.package(url: "https://github.com/IBM-Swift/CloudEnvironment.git", from: "9.1.0")');
                 });
             });
         });
