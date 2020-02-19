@@ -38,7 +38,7 @@ container-port-map : "8080:8080,8443:8443"
 container-port-map-debug : "8000:8000"
 
 # The command to execute debug of the code in the tools container
-debug-cmd : "java -Dspring.profiles.active=local -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=y -jar ./target/{{#firstAvailable artifactId appNameRefreshed}}{{/firstAvailable}}-{{version}}.jar"
+debug-cmd : "java -Dspring.profiles.active=local -Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=8000,suspend=y -jar ./target/{{artifactId}}-{{version}}.jar"
 
 # The name for the dockerfile for the run container
 dockerfile-run : "Dockerfile"
