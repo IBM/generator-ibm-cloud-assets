@@ -135,6 +135,7 @@ module.exports = class extends Generator {
 	}
 
 	_generateJava() {
+		this.opts.appNameRefreshed = this.opts.application.sanitizedName.toLowerCase();
 		if (!this.opts.artifactId) {
 			try {
 				const data = this.fs.read(this.destinationPath("pom.xml"));
@@ -143,7 +144,7 @@ module.exports = class extends Generator {
 				this.opts.artifactId = pom.project.artifactId._text;
 			} catch (err) {
 				// file not found
-				this.opts.artifactId = "<replace-me-with-artifactId-from-pom.xml>";
+				this.opts.artifactId = this.opts.appNameRefreshed;
 			}
 		} 
 
@@ -153,7 +154,6 @@ module.exports = class extends Generator {
 
 		this.opts.credentialsFilepath =  (!_.isEmpty(this.opts.application.service_credentials)) ? ServiceUtils.credentialsFilepathMap.JAVA : ""
 
-		this.opts.appNameRefreshed = this.opts.application.sanitizedName.toLowerCase();
 		this.opts.version = this.opts.version ? this.opts.version : "1.0-SNAPSHOT";
 
 		this.opts.applicationId = `${this.opts.application.app_id}`;
