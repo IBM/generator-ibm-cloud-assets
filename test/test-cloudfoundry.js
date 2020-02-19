@@ -167,13 +167,16 @@ describe('cloud-enablement:cloudfoundry', function () {
 					}
 				});
 
-				it('.cfignore file is generated', function () {
+				it('.cfignore file is generated and has base content', function () {
 					assert.file('.cfignore');
 					if(language === 'JAVA' || language === 'libertyBeta') {
 						assert.fileContent('.cfignore', '/src/main/liberty/config/server.env');
 					} else /* language === 'SPRING' */ {
 						assert.fileContent('.cfignore', '/src/main/resources/application-local.properties');
 					}
+					['Dockerfile', 'Dockerfile-tools', '.dockerignore', '.git/', '.github/', '.gitignore'].forEach( ignoreFile => {
+						assert.fileContent('.cfignore', ignoreFile);
+					})
 				});
 			});
 		})
