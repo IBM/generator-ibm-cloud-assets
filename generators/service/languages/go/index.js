@@ -17,17 +17,9 @@
 const Log4js = require('log4js');
 const logger = Log4js.getLogger("generator-ibm-cloud-assets:languages-go");
 let Generator = require('yeoman-generator');
-const path = require('path');
 const ServiceUtils = require('../../../lib/service-utils');
-
 const Handlebars = require('../../../lib/handlebars.js');
-const scaffolderMapping = require('../../templates/scaffolderMapping.json');
-const svcInfo = require('../../templates/serviceInfo.json');
-
 const GENERATOR_LOCATION = 'server';
-const PATH_MAPPINGS_FILE = "./server/config/mappings.json";
-const PATH_LOCALDEV_CONFIG_FILE = "server/localdev-config.json";
-
 
 module.exports = class extends Generator {
 	constructor(args, opts) {
@@ -45,20 +37,12 @@ module.exports = class extends Generator {
 		this.context.languageFileExt = ".go";
 		this.context.generatorLocation = GENERATOR_LOCATION;
 		this.context.addMappings = ServiceUtils.addMappings.bind(this);
-		this.context.addLocalDevConfig = this._addLocalDevConfig.bind(this);
+		this.context.addLocalDevConfig = ServiceUtils.addLocalDevConfig.bind(this);
 		this.context.enable = ServiceUtils.enable.bind(this);
 	}
 
 	writing() {
 		this.context.enable()
-	}
-
-	_addLocalDevConfig(serviceLocalDevConfigJSON){
-		let localDevConfigFilePath = this.destinationPath(PATH_LOCALDEV_CONFIG_FILE);
-		this.fs.extendJSON(localDevConfigFilePath, serviceLocalDevConfigJSON);
-	}
-
-	end(){
 	}
 
 	_writeHandlebarsFile(templateFile, destinationFile, data) {

@@ -1,17 +1,11 @@
 'use strict';
 const Log4js = require('log4js');
 const logger = Log4js.getLogger("generator-ibm-cloud-assets:languages-node-express");
-const path = require('path');
-let Generator = require('yeoman-generator');
 const ServiceUtils = require('../../../lib/service-utils');
-
-const scaffolderMapping = require('../../templates/scaffolderMapping.json');
-const svcInfo = require('../../templates/serviceInfo.json');
+let Generator = require('yeoman-generator');
 
 const GENERATE_HERE = "// GENERATE HERE";
 const GENERATOR_LOCATION = 'server';
-const PATH_MAPPINGS_FILE = "./server/config/mappings.json";
-const PATH_LOCALDEV_CONFIG_FILE = "server/localdev-config.json";
 
 module.exports = class extends Generator {
 	constructor(args, opts) {
@@ -25,17 +19,12 @@ module.exports = class extends Generator {
 		this.context.languageFileExt = ".js";
 		this.context.generatorLocation = GENERATOR_LOCATION;
 		this.context.addMappings = ServiceUtils.addMappings.bind(this);
-		this.context.addLocalDevConfig = this._addLocalDevConfig.bind(this);
+		this.context.addLocalDevConfig = ServiceUtils.addLocalDevConfig.bind(this);
 		this.context.enable = ServiceUtils.enable.bind(this);
 	}
 
 	writing() {
 		this.context.enable()
-	}
-
-	_addLocalDevConfig(serviceLocalDevConfigJSON){
-		let localDevConfigFilePath = this.destinationPath(PATH_LOCALDEV_CONFIG_FILE);
-		this.fs.extendJSON(localDevConfigFilePath, serviceLocalDevConfigJSON);
 	}
 
 	end(){

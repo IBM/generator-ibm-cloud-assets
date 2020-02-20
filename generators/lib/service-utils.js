@@ -47,6 +47,16 @@ const _mappingsFilepathMap = {
 	GO: "./server/config/mappings.json"
 }
 
+const _localDevConfigFilepathMap = {
+	JAVA: "./src/main/resources/localdev-config.json",
+	SPRING: "./src/main/resources/localdev-config.json",
+	NODE: "server/localdev-config.json",
+	PYTHON: "server/localdev-config.json",
+	SWIFT: "./config/localdev-config.json",
+	DJANGO: "server/localdev-config.json",
+	GO: "server/localdev-config.json"
+}
+
 // add secretKeyRefs for services in deployment.yaml
 function addServicesEnvToHelmChartAsync(args) {
 	return new Promise((resolve, reject) => {
@@ -345,6 +355,10 @@ function _addMappings(serviceMappingsJSON) {
 	this.fs.extendJSON(mappingsFilePath, serviceMappingsJSON);
 }
 
+function _addLocalDevConfig(serviceLocalDevConfigJSON){
+	let localDevConfigFilePath = this.destinationPath(_localDevConfigFilepathMap[this.context.application.language]);
+	this.fs.extendJSON(localDevConfigFilePath, serviceLocalDevConfigJSON);
+}
 
 module.exports = {
 	getSpringServiceInfo: getSpringServiceInfo,
@@ -355,5 +369,6 @@ module.exports = {
 	addServicesToServiceKnativeYamlAsync: addServicesToServiceKnativeYamlAsync,
 	credentialsFilepathMap: _credentialsFilepathMap,
 	enable: _enable,
-	addMappings: _addMappings
+	addMappings: _addMappings,
+	addLocalDevConfig: _addLocalDevConfig
 };

@@ -19,10 +19,7 @@ const logger = require('log4js').getLogger("generator-ibm-cloud-assets:languages
 const Generator = require('yeoman-generator');
 const handlebars = require('handlebars');
 const ServiceUtils = require('../../../lib/service-utils');
-
 const Utils = require('../../../lib/utils');
-
-const PATH_MAPPINGS_FILE = './src/main/resources/mappings.json';
 const PATH_LOCALDEV_FILE = './src/main/resources/localdev-config.json';
 const GENERATOR_LOCATION = 'server';
 
@@ -40,7 +37,7 @@ module.exports = class extends Generator {
 		this.context.languageFileExt = '';
 		this.context.generatorLocation = GENERATOR_LOCATION;
 		this.context.addMappings = ServiceUtils.addMappings.bind(this);
-		this.context.addLocalDevConfig = this._addLocalDevConfig.bind(this);
+		this.context.addLocalDevConfig = ServiceUtils.addLocalDevConfig.bind(this);
 		this.context.srcFolders = [];
 		this.context.instrumentationAdded = false;
 		this.context.metainf = [];
@@ -56,17 +53,7 @@ module.exports = class extends Generator {
 		}
 		this.context.enable()
 	}
-
-	_addLocalDevConfig(devconf) {
-		logger.debug('Adding devconf', devconf);
-		if (this.context.application.service_credentials) {
-			let localDevFilePath = this.destinationPath(PATH_LOCALDEV_FILE);
-			this.fs.extendJSON(localDevFilePath, devconf);
-		} else {
-			this.context._addLocalDevConfig(devconf);
-		}
-	}
-
+	
 	_writeFiles(templatePath, data) {
 		// TODO cleanup
 		//do not write out any files that are marked as processing templates

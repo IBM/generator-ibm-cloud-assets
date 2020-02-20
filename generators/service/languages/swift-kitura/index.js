@@ -1,16 +1,9 @@
 'use strict';
 const logger = require('log4js').getLogger("generator-cloud-assets:languages-swift-kitura");
 const Generator = require('yeoman-generator');
-const path = require('path');
 const ServiceUtils = require('../../../lib/service-utils');
-
-
-const scaffolderMapping = require('../../templates/scaffolderMapping.json');
-const svcInfo = require('../../templates/serviceInfo.json');
-
 // Load mappings between bluemix/scaffolder labels and the labels generated in the localdev-config.json files
 const bluemixLabelMappings = require('./bluemix-label-mappings.json');
-
 const PATH_MAPPINGS_FILE = "./config/mappings.json";
 const PATH_LOCALDEV_CONFIG_FILE = "./config/localdev-config.json";
 const FILE_SEARCH_PATH_PREFIX = "file:/config/localdev-config.json:";
@@ -29,7 +22,7 @@ module.exports = class extends Generator {
 	initializing() {
 		this.context.languageFileExt = ".swift";
 		this.context.addMappings = ServiceUtils.addMappings.bind(this);
-		this.context.addLocalDevConfig = this._addLocalDevConfig.bind(this);
+		this.context.addLocalDevConfig = ServiceUtils.addLocalDevConfig.bind(this);
 		this.context.enable = ServiceUtils.enable.bind(this);
 	}
 
@@ -38,11 +31,6 @@ module.exports = class extends Generator {
 		//fine-grained vs. coarse-grained
 		this._transformCredentialsOutput();
 		this.context.enable();
-	}
-
-	_addLocalDevConfig(serviceLocalDevConfigJSON) {
-		let localDevConfigFilePath = this.destinationPath(PATH_LOCALDEV_CONFIG_FILE);
-		this.fs.extendJSON(localDevConfigFilePath, serviceLocalDevConfigJSON);
 	}
 
 	_getServiceInstanceName(bluemixKey) {
