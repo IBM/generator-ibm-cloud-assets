@@ -28,7 +28,7 @@ module.exports = class extends Generator {
 
 	initializing() {
 		this.context.languageFileExt = ".swift";
-		this.context.addMappings = this._addMappings.bind(this);
+		this.context.addMappings = ServiceUtils.addMappings.bind(this);
 		this.context.addLocalDevConfig = this._addLocalDevConfig.bind(this);
 		this.context.enable = ServiceUtils.enable.bind(this);
 	}
@@ -38,13 +38,6 @@ module.exports = class extends Generator {
 		//fine-grained vs. coarse-grained
 		this._transformCredentialsOutput();
 		this.context.enable();
-	}
-
-	_addMappings(serviceMappingsJSON) {
-		// Swift overwrites theses mappings and the local dev config file in the _transformCredentialsOutput() function below,
-		// while we are awaiting fine-grained vs. coarse-grained approaches for laying down credential.
-		let mappingsFilePath = this.destinationPath(PATH_MAPPINGS_FILE);
-		this.fs.extendJSON(mappingsFilePath, serviceMappingsJSON);
 	}
 
 	_addLocalDevConfig(serviceLocalDevConfigJSON) {
@@ -83,6 +76,9 @@ module.exports = class extends Generator {
 	}
 
 	_transformCredentialsOutput() {
+		// Swift overwrites the mappings and the local dev config file in the _transformCredentialsOutput() function below,
+		// while we are awaiting fine-grained vs. coarse-grained approaches for laying down credential.
+
 		// Get array with all the bluemix/scaffolder keys in the dictionary
 		const bluemixKeys = Object.keys(bluemixLabelMappings);
 		// Load the generated localdev-config.json

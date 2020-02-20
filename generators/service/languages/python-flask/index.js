@@ -39,7 +39,7 @@ module.exports = class extends Generator {
 	configuring() {
 		this.context.languageFileExt = ".py";
 		this.context.generatorLocation = GENERATOR_LOCATION;
-		this.context.addMappings = this._addMappings.bind(this);
+		this.context.addMappings = ServiceUtils.addMappings.bind(this);
 		this.context.addLocalDevConfig = this._addLocalDevConfig.bind(this);
 		this.context.enable = ServiceUtils.enable.bind(this);
 	}
@@ -48,10 +48,7 @@ module.exports = class extends Generator {
 		this.context.enable()
 	}
 
-	_addMappings(serviceMappingsJSON) {
-		let mappingsFilePath = this.destinationPath(PATH_MAPPINGS_FILE);
-		this.fs.extendJSON(mappingsFilePath, serviceMappingsJSON);
-	}
+
 
 	_addLocalDevConfig(serviceLocalDevConfigJSON) {
 		let localDevConfigFilePath = this.destinationPath(PATH_LOCALDEV_CONFIG_FILE);

@@ -17,13 +17,9 @@
 'use strict';
 const logger = require('log4js').getLogger("generator-ibm-cloud-assets:languages-java");
 const Generator = require('yeoman-generator');
-const filesys = require('fs');
-const path = require('path');
 const handlebars = require('handlebars');
 const ServiceUtils = require('../../../lib/service-utils');
 
-const scaffolderMapping = require('../../templates/scaffolderMapping.json');
-const svcInfo = require('../../templates/serviceInfo.json');
 const Utils = require('../../../lib/utils');
 
 const PATH_MAPPINGS_FILE = './src/main/resources/mappings.json';
@@ -43,7 +39,7 @@ module.exports = class extends Generator {
 	initializing() {
 		this.context.languageFileExt = '';
 		this.context.generatorLocation = GENERATOR_LOCATION;
-		this.context.addMappings = this._addMappings.bind(this);
+		this.context.addMappings = ServiceUtils.addMappings.bind(this);
 		this.context.addLocalDevConfig = this._addLocalDevConfig.bind(this);
 		this.context.srcFolders = [];
 		this.context.instrumentationAdded = false;
@@ -59,11 +55,6 @@ module.exports = class extends Generator {
 			this._addJavaDependencies();
 		}
 		this.context.enable()
-	}
-
-	_addMappings(serviceMappingsJSON) {
-		let mappingsFilePath = this.destinationPath(PATH_MAPPINGS_FILE);
-		this.fs.extendJSON(mappingsFilePath, serviceMappingsJSON);
 	}
 
 	_addLocalDevConfig(devconf) {
@@ -91,6 +82,4 @@ module.exports = class extends Generator {
 		}
 	}
 
-	end() {
-	}
 };

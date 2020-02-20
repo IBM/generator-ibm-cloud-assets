@@ -44,19 +44,13 @@ module.exports = class extends Generator {
 		this.context.service_initializers = [];
 		this.context.languageFileExt = ".go";
 		this.context.generatorLocation = GENERATOR_LOCATION;
-		this.context.addMappings = this._addMappings.bind(this);
+		this.context.addMappings = ServiceUtils.addMappings.bind(this);
 		this.context.addLocalDevConfig = this._addLocalDevConfig.bind(this);
 		this.context.enable = ServiceUtils.enable.bind(this);
-
 	}
 
 	writing() {
 		this.context.enable()
-	}
-
-	_addMappings(serviceMappingsJSON) {
-		let mappingsFilePath = this.destinationPath(PATH_MAPPINGS_FILE);
-		this.fs.extendJSON(mappingsFilePath, serviceMappingsJSON);
 	}
 
 	_addLocalDevConfig(serviceLocalDevConfigJSON){
