@@ -3,6 +3,7 @@ const Log4js = require('log4js');
 const logger = Log4js.getLogger("generator-ibm-cloud-assets:languages-node-express");
 const path = require('path');
 let Generator = require('yeoman-generator');
+const Utils = require('../../../lib/service-utils');
 
 const scaffolderMapping = require('../../templates/scaffolderMapping.json');
 const svcInfo = require('../../templates/serviceInfo.json');
@@ -25,29 +26,11 @@ module.exports = class extends Generator {
 		this.context.generatorLocation = GENERATOR_LOCATION;
 		this.context.addMappings = this._addMappings.bind(this);
 		this.context.addLocalDevConfig = this._addLocalDevConfig.bind(this);
-
-		let serviceCredentials,
-			serviceKey;
-		//initializing ourselves by composing with the service enabler
-		let root = path.dirname(require.resolve('../../enabler'));
-		Object.keys(svcInfo).forEach(svc => {
-			serviceKey = svc;
-			serviceCredentials = this.context.application.service_credentials[serviceKey];
-			if (serviceCredentials) {
-				this.context.scaffolderKey = serviceKey;
-				logger.debug("Composing with service : " + svc);
-				try {
-					this.context.cloudLabel = serviceCredentials && serviceCredentials.serviceInfo && serviceCredentials.serviceInfo.cloudLabel;
-					this.composeWith(root, {context: this.context});
-				} catch (err) {
-					/* istanbul ignore next */	//ignore for code coverage as this is just a warning - if the service fails to load the subsequent service test will fail
-					logger.warn('Unable to compose with service', svc, err);
-				}
-			}
-		});
+		this.context.enable = Utils.enable.bind(this);
 	}
 
 	writing() {
+		this.context.enable()
 	}
 
 	_addMappings(serviceMappingsJSON){
