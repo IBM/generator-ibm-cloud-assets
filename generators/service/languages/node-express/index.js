@@ -3,7 +3,7 @@ const Log4js = require('log4js');
 const logger = Log4js.getLogger("generator-ibm-cloud-assets:languages-node-express");
 const path = require('path');
 let Generator = require('yeoman-generator');
-const Utils = require('../../../lib/service-utils');
+const ServiceUtils = require('../../../lib/service-utils');
 
 const scaffolderMapping = require('../../templates/scaffolderMapping.json');
 const svcInfo = require('../../templates/serviceInfo.json');
@@ -26,7 +26,7 @@ module.exports = class extends Generator {
 		this.context.generatorLocation = GENERATOR_LOCATION;
 		this.context.addMappings = this._addMappings.bind(this);
 		this.context.addLocalDevConfig = this._addLocalDevConfig.bind(this);
-		this.context.enable = Utils.enable.bind(this);
+		this.context.enable = ServiceUtils.enable.bind(this);
 	}
 
 	writing() {

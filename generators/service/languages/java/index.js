@@ -20,6 +20,7 @@ const Generator = require('yeoman-generator');
 const filesys = require('fs');
 const path = require('path');
 const handlebars = require('handlebars');
+const ServiceUtils = require('../../../lib/service-utils');
 
 const scaffolderMapping = require('../../templates/scaffolderMapping.json');
 const svcInfo = require('../../templates/serviceInfo.json');
@@ -48,26 +49,8 @@ module.exports = class extends Generator {
 		this.context.instrumentationAdded = false;
 		this.context.metainf = [];
 		this._addJavaDependencies = Utils.addJavaDependencies.bind(this);
+		this.context.enable = ServiceUtils.enable.bind(this);
 
-		let serviceCredentials,
-			serviceKey;
-		//initializing ourselves by composing with the service enabler
-		let root = path.dirname(require.resolve('../../enabler'));
-		Object.keys(svcInfo).forEach(svc => {
-			serviceKey = svc;
-			serviceCredentials = this.context.application.service_credentials[serviceKey];
-			if (serviceCredentials) {
-				this.context.scaffolderKey = serviceKey;
-				logger.debug("Composing with service : " + svc);
-				try {
-					this.context.cloudLabel = serviceCredentials && serviceCredentials.serviceInfo && serviceCredentials.serviceInfo.cloudLabel;
-					this.composeWith(root, {context: this.context});
-				} catch (err) {
-					/* istanbul ignore next */	//ignore for code coverage as this is just a warning - if the service fails to load the subsequent service test will fail
-					logger.warn('Unable to compose with service', svc, err);
-				}
-			}
-		});
 	}
 
 	writing() {
@@ -75,6 +58,7 @@ module.exports = class extends Generator {
 		if (typeof this.context.parentContext === "undefined") {
 			this._addJavaDependencies();
 		}
+		this.context.enable()
 	}
 
 	_addMappings(serviceMappingsJSON) {
