@@ -18,6 +18,8 @@ const readline = require('readline');
 const fs = require('fs');
 const yaml = require('js-yaml');
 const _ = require('lodash');
+const path = require('path');
+const svcInfo = require('../service/templates/serviceInfo.json');
 
 const SPRING_BOOT_SERVICE_NAME = "spring_boot_service_name";
 const SPRING_BOOT_SERVICE_KEY_SEPARATOR = "spring_boot_service_key_separator";
@@ -31,6 +33,26 @@ const _credentialsFilepathMap = {
 	NODE: "server/localdev-config.json",
 	PYTHON: "server/localdev-config.json",
 	SWIFT: "config/localdev-config.json",
+	DJANGO: "server/localdev-config.json",
+	GO: "server/localdev-config.json"
+}
+
+const _mappingsFilepathMap = {
+	JAVA: "./src/main/resources/mappings.json",
+	SPRING: "./src/main/resources/mappings.json",
+	NODE: "./server/config/mappings.json",
+	PYTHON: "./server/config/mappings.json",
+	SWIFT: "./config/mappings.json",
+	DJANGO: "./server/config/mappings.json",
+	GO: "./server/config/mappings.json"
+}
+
+const _localDevConfigFilepathMap = {
+	JAVA: "./src/main/resources/localdev-config.json",
+	SPRING: "./src/main/resources/localdev-config.json",
+	NODE: "server/localdev-config.json",
+	PYTHON: "server/localdev-config.json",
+	SWIFT: "./config/localdev-config.json",
 	DJANGO: "server/localdev-config.json",
 	GO: "server/localdev-config.json"
 }
@@ -306,6 +328,38 @@ function generateSecretRefsValues(services) {
 	return servicesEnvString;
 }
 
+function _enable() {
+	let serviceCredentials, serviceKey;
+
+	//initializing ourselves by composing with the service enabler
+	let root = path.dirname(require.resolve('../service/enabler'));
+	Object.keys(svcInfo).forEach(svc => {
+	serviceKey = svc;
+	serviceCredentials = this.context.application.service_credentials[serviceKey];
+	if (serviceCredentials) {
+		this.context.scaffolderKey = serviceKey;
+		logger.debug("Composing with service : " + svc);
+		try {
+			this.context.cloudLabel = serviceCredentials && serviceCredentials.serviceInfo && serviceCredentials.serviceInfo.cloudLabel;
+			this.composeWith(root, {context: this.context});
+		} catch (err) {
+			/* istanbul ignore next */	//ignore for code coverage as this is just a warning - if the service fails to load the subsequent service test will fail
+			logger.warn('Unable to compose with service', svc, err);
+		}
+	}
+	});
+}
+
+function _addMappings(serviceMappingsJSON) {
+	let mappingsFilePath = this.destinationPath(_mappingsFilepathMap[this.context.application.language]);
+	this.fs.extendJSON(mappingsFilePath, serviceMappingsJSON);
+}
+
+function _addLocalDevConfig(serviceLocalDevConfigJSON){
+	let localDevConfigFilePath = this.destinationPath(_localDevConfigFilepathMap[this.context.application.language]);
+	this.fs.extendJSON(localDevConfigFilePath, serviceLocalDevConfigJSON);
+}
+
 module.exports = {
 	getSpringServiceInfo: getSpringServiceInfo,
 	SPRING_BOOT_SERVICE_NAME: SPRING_BOOT_SERVICE_NAME,
@@ -313,5 +367,8 @@ module.exports = {
 	addServicesEnvToHelmChartAsync: addServicesEnvToHelmChartAsync,
 	addServicesEnvToValuesAsync: addServicesEnvToValuesAsync,
 	addServicesToServiceKnativeYamlAsync: addServicesToServiceKnativeYamlAsync,
-	credentialsFilepathMap: _credentialsFilepathMap
+	credentialsFilepathMap: _credentialsFilepathMap,
+	enable: _enable,
+	addMappings: _addMappings,
+	addLocalDevConfig: _addLocalDevConfig
 };
