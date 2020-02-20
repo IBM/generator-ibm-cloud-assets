@@ -1,11 +1,10 @@
 'use strict';
 const logger = require('log4js').getLogger("generator-cloud-assets:languages-swift-kitura");
 const Generator = require('yeoman-generator');
-const handlebars = require('handlebars');
 const path = require('path');
-const fs = require('fs');
+const ServiceUtils = require('../../../lib/service-utils');
 
-const Utils = require('../../../lib/utils');
+
 const scaffolderMapping = require('../../templates/scaffolderMapping.json');
 const svcInfo = require('../../templates/serviceInfo.json');
 
@@ -14,7 +13,6 @@ const bluemixLabelMappings = require('./bluemix-label-mappings.json');
 
 const PATH_MAPPINGS_FILE = "./config/mappings.json";
 const PATH_LOCALDEV_CONFIG_FILE = "./config/localdev-config.json";
-const PATH_GIT_IGNORE = "./.gitignore";
 const FILE_SEARCH_PATH_PREFIX = "file:/config/localdev-config.json:";
 
 module.exports = class extends Generator {
@@ -29,30 +27,17 @@ module.exports = class extends Generator {
 	}
 
 	initializing() {
-		this.context.dependenciesFile = "dependencies.txt";
 		this.context.languageFileExt = ".swift";
 		this.context.addMappings = this._addMappings.bind(this);
 		this.context.addLocalDevConfig = this._addLocalDevConfig.bind(this);
+		this.context.enable = ServiceUtils.enable.bind(this);
+	}
 
-		let serviceCredentials,
-			serviceKey;
-		//initializing ourselves by composing with the service enabler
-		let root = path.dirname(require.resolve('../../enabler'));
-		Object.keys(svcInfo).forEach(svc => {
-			serviceKey = svc;
-			serviceCredentials = this.context.application.service_credentials[serviceKey];
-			if (serviceCredentials) {
-				this.context.scaffolderKey = serviceKey;
-				logger.debug("Composing with service : " + svc);
-				try {
-					this.context.cloudLabel = serviceCredentials && serviceCredentials.serviceInfo && serviceCredentials.serviceInfo.cloudLabel;
-					this.composeWith(root, {context: this.context});
-				} catch (err) {
-					/* istanbul ignore next */	//ignore for code coverage as this is just a warning - if the service fails to load the subsequent service test will fail
-					logger.warn('Unable to compose with service', svc, err);
-				}
-			}
-		});
+	writing() {
+		//Stopgap solution while we get both approaches for laying down credentials:
+		//fine-grained vs. coarse-grained
+		this._transformCredentialsOutput();
+		this.context.enable();
 	}
 
 	_addMappings(serviceMappingsJSON) {
@@ -172,12 +157,4 @@ module.exports = class extends Generator {
 		this.fs.writeJSON(this.destinationPath(PATH_MAPPINGS_FILE), mappings);
 	}
 
-	writing() {
-		//Stopgap solution while we get both approaches for laying down credentials:
-		//fine-grained vs. coarse-grained
-		this._transformCredentialsOutput();
-	}
-
-	end() {
-	}
 };
