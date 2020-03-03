@@ -28,13 +28,15 @@ const SPRING_BOOT_SERVICE_KEY_SEPARATOR = "spring_boot_service_key_separator";
 const REGEX_PORT = /^(\s*)- name: PORT/;
 
 const _credentialsFilepathMap = {
-	JAVA: "src/main/resources/localdev-config.json",
-	SPRING: "src/main/resources/localdev-config.json",
-	NODE: "server/localdev-config.json",
-	PYTHON: "server/localdev-config.json",
-	SWIFT: "config/localdev-config.json",
-	DJANGO: "server/localdev-config.json",
-	GO: "server/localdev-config.json"
+	JAVA: "src/main/resources/credentials.json",
+	SPRING: "src/main/resources/credentials.json",
+	NODE: "server/credentials.json",
+	PYTHON: "server/credentials.json",
+	SWIFT: "config/credentials.json",
+	DJANGO: "server/credentials.json",
+	GO: "server/credentials.json",
+	IOS_SWIFT: "credentials.json",
+	ANDROID: "credentials.json"
 }
 
 const _mappingsFilepathMap = {
@@ -54,7 +56,9 @@ const _localDevConfigFilepathMap = {
 	PYTHON: "server/localdev-config.json",
 	SWIFT: "./config/localdev-config.json",
 	DJANGO: "server/localdev-config.json",
-	GO: "server/localdev-config.json"
+	GO: "server/localdev-config.json",
+	IOS_SWIFT: "localdev-config.json",
+	ANDROID: "localdev-config.json"
 }
 
 // add secretKeyRefs for services in deployment.yaml

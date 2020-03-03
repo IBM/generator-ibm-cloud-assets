@@ -20,7 +20,6 @@ module.exports = class extends Generator {
 	}
 
 	initializing() {
-		this.context.languageFileExt = ".swift";
 		this.context.addMappings = ServiceUtils.addMappings.bind(this);
 		this.context.addLocalDevConfig = ServiceUtils.addLocalDevConfig.bind(this);
 		this.context.enable = ServiceUtils.enable.bind(this);
@@ -29,14 +28,14 @@ module.exports = class extends Generator {
 	writing() {
 		//Stopgap solution while we get both approaches for laying down credentials:
 		//fine-grained vs. coarse-grained
-		this._transformCredentialsOutput();
 		this.context.enable();
+		this._transformCredentialsOutputSwift();
 	}
 
-	_getServiceInstanceName(bluemixKey) {
+	_getServiceInstanceNameSwift(bluemixKey) {
 		// Lookup metadata object using bluemix/scaffolder key
 		const serviceMetaData = this.context.application.service_credentials[bluemixKey];
-		logger.debug(`_getServiceInstanceName - serviceMetaData=${JSON.stringify(serviceMetaData, null, 3)}`);
+		logger.debug(`_getServiceInstanceNameSwift - serviceMetaData=${JSON.stringify(serviceMetaData, null, 3)}`);
 
 		if (!serviceMetaData) {
 			return null;
@@ -46,7 +45,7 @@ module.exports = class extends Generator {
 		return instanceName;
 	}
 
-	_createServiceCredentials(credentials, mappings, instanceName, prefix) {
+	_createServiceCredentialsSwift(credentials, mappings, instanceName, prefix) {
 		let serviceCredentials = {};
 		credentials[instanceName] = serviceCredentials;
 		// Note that environment variables should not use the '-' character
@@ -63,8 +62,8 @@ module.exports = class extends Generator {
 		return serviceCredentials;
 	}
 
-	_transformCredentialsOutput() {
-		// Swift overwrites the mappings and the local dev config file in the _transformCredentialsOutput() function below,
+	_transformCredentialsOutputSwift() {
+		// Swift overwrites the mappings and the local dev config file in the _transformCredentialsOutputSwift() function below,
 		// while we are awaiting fine-grained vs. coarse-grained approaches for laying down credential.
 
 		// Get array with all the bluemix/scaffolder keys in the dictionary
@@ -114,7 +113,7 @@ module.exports = class extends Generator {
 			}
 
 			// Generate entry for mappings.json
-			const instanceName = this._getServiceInstanceName(bluemixKey);
+			const instanceName = this._getServiceInstanceNameSwift(bluemixKey);
 
 			if (!instanceName) {
 				logger.error(`Service ${bluemixKey} was not provisioned`);
@@ -125,7 +124,7 @@ module.exports = class extends Generator {
 			let serviceCredentials;
 			if (lastPrefix !== currentPrefix) {
 				lastPrefix = currentPrefix;
-				serviceCredentials = this._createServiceCredentials(credentials, mappings, instanceName, currentPrefix);
+				serviceCredentials = this._createServiceCredentialsSwift(credentials, mappings, instanceName, currentPrefix);
 			} else {
 				serviceCredentials = credentials[instanceName];
 			}
