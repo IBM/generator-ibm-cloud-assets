@@ -18,8 +18,6 @@ const Log4js = require('log4js');
 const logger = Log4js.getLogger("generator-ibm-cloud-assets:languages-go");
 let Generator = require('yeoman-generator');
 const ServiceUtils = require('../../../lib/service-utils');
-const Handlebars = require('../../../lib/handlebars.js');
-const GENERATOR_LOCATION = 'server';
 
 module.exports = class extends Generator {
 	constructor(args, opts) {
@@ -34,8 +32,6 @@ module.exports = class extends Generator {
 		this.context.service_imports = [];
 		this.context.service_variables = [];
 		this.context.service_initializers = [];
-		this.context.languageFileExt = ".go";
-		this.context.generatorLocation = GENERATOR_LOCATION;
 		this.context.addMappings = ServiceUtils.addMappings.bind(this);
 		this.context.addLocalDevConfig = ServiceUtils.addLocalDevConfig.bind(this);
 		this.context.enable = ServiceUtils.enable.bind(this);
@@ -43,13 +39,6 @@ module.exports = class extends Generator {
 
 	writing() {
 		this.context.enable()
-	}
-
-	_writeHandlebarsFile(templateFile, destinationFile, data) {
-		let template = this.fs.read(this.templatePath(templateFile));
-		let compiledTemplate = Handlebars.compile(template);
-		let output = compiledTemplate(data);
-		this.fs.write(this.destinationPath(destinationFile), output);
 	}
 
 };

@@ -18,6 +18,9 @@
 const Log4js = require('log4js');
 const logger = Log4js.getLogger('generator-ibm-cloud-assets:service');
 const Generator = require('yeoman-generator');
+const xmlbuilder = require('xmlbuilder');
+const plist = require('plist');
+const fs = require('fs');
 
 const ServiceUtils = require('../lib/service-utils');
 const Utils = require('../lib/utils');
@@ -26,6 +29,9 @@ const Bundle = require("./../../package.json");
 
 const REGEX_LEADING_ALPHA = /^[^a-zA-Z]*/;
 const REGEX_ALPHA_NUM = /[^a-zA-Z0-9]/g;
+
+const BMS_CREDENTIALS_FP = `iosapp/BMSCredentials.plist`
+const CREDENTIALS_XML_FP = `app/src/main/res/values/credentials.xml`
 
 module.exports = class extends Generator {
 	constructor(args, opts) {
@@ -60,35 +66,40 @@ module.exports = class extends Generator {
 
 	intializing() {
 		let context = this.context;
-		let languageGeneratorPath = "./languages";
+		let languageGeneratorPath = "";
 		switch (context.application.language.toLowerCase()) {
 			case "node":
-				languageGeneratorPath += '/node-express';
+				languageGeneratorPath = './languages/node-express';
 				break;
 			case "python":
 			case "django":
-				languageGeneratorPath += '/python-flask';
+				languageGeneratorPath = './languages/python';
 				break;
 			case "java":
-				languageGeneratorPath += '/java';
-				break;
 			case "spring":
-				languageGeneratorPath += '/java';
+				languageGeneratorPath = './languages/java';
 				break;
 			case "swift":
-				languageGeneratorPath += '/swift-kitura';
+				languageGeneratorPath = './languages/swift-kitura';
 				break;
 			case "go":
-				languageGeneratorPath += '/go'
+				languageGeneratorPath = './languages/go'
 				break;
+			case "android":
+				this._generateCredentialsAndroid(this.context.application.service_credentials, CREDENTIALS_XML_FP, this.context.sanitizedAppName)
+				break;
+			case "ios_swift":
+				this._generatePlistIOS(this.context.application.service_credentials, BMS_CREDENTIALS_FP, this.context.sanitizedAppName)			
+				break;
+			default:
+				logger.info(`No match found for language ${context.application.language.toLowerCase()}`)
 		}
 
-		if (this.parentContext) {	// set a parent context to let the language generator know if there is a parent
-			context.parentContext = this.parentContext;
-		}
+		if (languageGeneratorPath) {
+			logger.info(`Composing with ${languageGeneratorPath}`);
+			this.composeWith(require.resolve(languageGeneratorPath), {context: context});				
+		} else { logger.info(`Not running language subgen for language ${context.application.language.toLowerCase()}`) }
 
-		logger.info("Composing with", languageGeneratorPath);
-		this.composeWith(require.resolve(languageGeneratorPath), {context: context});
 	}
 
 	_sanitizeAppName(name) {
@@ -97,6 +108,34 @@ module.exports = class extends Generator {
 			cleanName = name.replace(REGEX_LEADING_ALPHA, '').replace(REGEX_ALPHA_NUM, '');
 		}
 		return (cleanName || 'APP').toLowerCase();
+	}
+
+	_generateCredentialsAndroid(credentials, filePath, appName) {
+		if ( typeof credentials === "object" && Object.keys(credentials).length > 0 ) {
+            credentials.appName = appName;
+            const xmlString = xmlbuilder.create({resources: credentials }).end({ pretty: true });
+            logger.info("Writing credentials.xml")
+			fs.writeFile(this.destinationPath(filePath), xmlString, (err) => {
+				if (err && filePath !== "./") {
+					logger.info("Failed to create credentials.xml")
+				// this._generateCredentialsAndroid(credentials, "./", appName);
+				}
+            });
+		} else { logger.info("Project does not contain credentials, not creating credentials.xml") }
+	}
+
+	_generatePlistIOS(credentials, filePath, appName) {
+		if (typeof credentials === "object" && Object.keys(credentials).length > 0) {
+            credentials.appName = appName;
+			const plistString = plist.build(credentials);
+			logger.info("Writing BMSCredentials.plist")
+			fs.writeFile(this.destinationPath(filePath), plistString, (err) => {
+				if (err && filePath !== "./") {
+					logger.info("Failed to create BMSCredentials.plist")
+				//  this._generatePlist(credentials, "./", appName); 
+				}
+			});
+		} else { logger.info("Project does not contain credentials, not creating BMSCredentials.plist") }
 	}
 
 	end() {

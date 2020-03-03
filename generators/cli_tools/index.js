@@ -62,6 +62,10 @@ module.exports = class extends Generator {
 				logger.trace("Generating CLI tools for GO");
 				this._generateGo();
 				break;
+			case 'IOS_SWIFT':
+			case 'ANDROID':
+				logger.trace("Not generating CLI tools for mobile");
+				break;
 			default:
 				throw new Error(`No language ${this.opts.application.language} found`);
 		}
@@ -308,7 +312,6 @@ module.exports = class extends Generator {
 				ctx
 			);
 		}
-
 	}
 
 };

@@ -10,10 +10,10 @@ APP_DIR=$OPTS_FILE.dir
 #APP_DIR=test.dir
 
 if [[ $GIT_REPO_URL=="meta" ]]; then
-    GIT_REPO_URL=$( cat $OPTS_FILE | jq '.metadata.git_url' )
+    GIT_REPO_URL=$( cat $OPTS_FILE | jq '.metadata.git_url' | tr -d '"')
 fi
 
-if [[ -z $GIT_URL ]]; then
+if [[ -z $GIT_REPO_URL ]]; then
     GIT_REPO_URL=https://github.com/IBM/nodejs-express-app
 fi
 
@@ -23,7 +23,7 @@ fi
 
 echo "Removing existing app dir"
 rm -rf ./$APP_DIR
-git clone --single-branch -b master $GIT_REPO_URL $APP_DIR
+git clone $GIT_REPO_URL $APP_DIR --single-branch -b master  
 
 DEPLOY_OPTS=$( cat $OPTS_FILE | jq '.deploy_options' | tr -d ' \t\n\r\f' )
 APP_OPTS=$( cat $OPTS_FILE | jq '.application' | tr -d ' \t\n\r\f' )
