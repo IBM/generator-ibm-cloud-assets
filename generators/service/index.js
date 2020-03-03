@@ -64,31 +64,44 @@ module.exports = class extends Generator {
 		switch (context.application.language.toLowerCase()) {
 			case "node":
 				languageGeneratorPath += '/node-express';
+				logger.info("Composing with", languageGeneratorPath);
+				this.composeWith(require.resolve(languageGeneratorPath), {context: context});				
 				break;
 			case "python":
 			case "django":
 				languageGeneratorPath += '/python-flask';
+				logger.info("Composing with", languageGeneratorPath);
+				this.composeWith(require.resolve(languageGeneratorPath), {context: context});				
 				break;
 			case "java":
-				languageGeneratorPath += '/java';
-				break;
 			case "spring":
 				languageGeneratorPath += '/java';
+				logger.info("Composing with", languageGeneratorPath);
+				this.composeWith(require.resolve(languageGeneratorPath), {context: context});				
 				break;
 			case "swift":
 				languageGeneratorPath += '/swift-kitura';
+				logger.info("Composing with", languageGeneratorPath);
+				this.composeWith(require.resolve(languageGeneratorPath), {context: context});				
 				break;
 			case "go":
 				languageGeneratorPath += '/go'
+				logger.info("Composing with", languageGeneratorPath);
+				this.composeWith(require.resolve(languageGeneratorPath), {context: context});				
 				break;
+			case "android":
+				languageGeneratorPath += '/android'
+				logger.info("Composing with", languageGeneratorPath);
+				this.composeWith(require.resolve(languageGeneratorPath), {context: context});				
+				break;
+			case "ios_swift":
+				languageGeneratorPath += '/ios-swift'
+				logger.info("Composing with", languageGeneratorPath);
+				this.composeWith(require.resolve(languageGeneratorPath), {context: context});				
+				break;
+			default:
+				logger.info(`Not generating service assets for language ${context.application.language.toLowerCase()}`)
 		}
-
-		if (this.parentContext) {	// set a parent context to let the language generator know if there is a parent
-			context.parentContext = this.parentContext;
-		}
-
-		logger.info("Composing with", languageGeneratorPath);
-		this.composeWith(require.resolve(languageGeneratorPath), {context: context});
 	}
 
 	_sanitizeAppName(name) {

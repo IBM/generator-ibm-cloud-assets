@@ -256,7 +256,6 @@ module.exports = class extends Generator {
 			credentialKeys: localCredentialKeys,
 			map: credKeysToScaffolderKeysMap,
 			cloudFoundryKey: this.cloudFoundryName,
-			generatorLocation: this.context.generatorLocation,
 			cloudFoundryIsArray: config.cloudFoundryIsArray,
 			nestedJSON: config.nestedJSON
 		};

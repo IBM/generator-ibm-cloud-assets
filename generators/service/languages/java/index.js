@@ -17,10 +17,8 @@
 'use strict';
 const logger = require('log4js').getLogger("generator-ibm-cloud-assets:languages-java");
 const Generator = require('yeoman-generator');
-const handlebars = require('handlebars');
 const ServiceUtils = require('../../../lib/service-utils');
 const Utils = require('../../../lib/utils');
-const PATH_LOCALDEV_FILE = './src/main/resources/localdev-config.json';
 const GENERATOR_LOCATION = 'server';
 
 module.exports = class extends Generator {
@@ -34,8 +32,6 @@ module.exports = class extends Generator {
 
 	//setup all the values we need to pass in the context
 	initializing() {
-		this.context.languageFileExt = '';
-		this.context.generatorLocation = GENERATOR_LOCATION;
 		this.context.addMappings = ServiceUtils.addMappings.bind(this);
 		this.context.addLocalDevConfig = ServiceUtils.addLocalDevConfig.bind(this);
 		this.context.srcFolders = [];
@@ -47,26 +43,7 @@ module.exports = class extends Generator {
 	}
 
 	writing() {
-		// add missing pom.xml dependencies when running service enablement standalone
-		if (typeof this.context.parentContext === "undefined") {
-			this._addJavaDependencies();
-		}
 		this.context.enable()
-	}
-	
-	_writeFiles(templatePath, data) {
-		// TODO cleanup
-		//do not write out any files that are marked as processing templates
-		try {
-			this.fs.copy([this.templatePath(templatePath), '!**/*.template'], this.destinationPath(), {
-				process: function (contents) {
-					let compiledTemplate = handlebars.compile(contents.toString());
-					return compiledTemplate(data);
-				}
-			});
-		} catch (e) {
-			logger.warn(`No files to copy from ${this.templatePath(templatePath)}`);
-		}
 	}
 
 };

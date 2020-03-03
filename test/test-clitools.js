@@ -23,7 +23,7 @@ const utils = require('./test-utils')
 describe('cloud-assets:clitools', function () {
 	this.timeout(1000*60*10);
 
-	describe('cloud-assets:clitools with Swift project', function () {
+	describe('cloud-assets:clitools with Swift Kitura project', function () {
 		beforeEach(function () {
 			return helpers.run(path.join(__dirname, '../generators/app'))
 				.inDir(path.join(__dirname, './tmp'))
@@ -283,4 +283,17 @@ describe('cloud-assets:clitools', function () {
 		});
 	});
 
+	['IOS_SWIFT', 'ANDROID'].forEach( language => {
+		describe(`cloud-assets:clitools with ${language} project`, function () {
+			beforeEach(function () {
+				return helpers.run(path.join(__dirname, '../generators/app'))
+					.inDir(path.join(__dirname, './tmp'))
+					.withOptions(utils.generateTestPayload("none", language, ['appid', 'cloudant']))
+			});
+	
+			it('mobile should have no cli-config', function() {
+				assert.noFile('cli-config.yml');
+			});
+		});
+	});
 });

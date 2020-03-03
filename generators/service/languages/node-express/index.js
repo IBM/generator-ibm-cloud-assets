@@ -16,8 +16,6 @@ module.exports = class extends Generator {
 	}
 
 	configuring(){
-		this.context.languageFileExt = ".js";
-		this.context.generatorLocation = GENERATOR_LOCATION;
 		this.context.addMappings = ServiceUtils.addMappings.bind(this);
 		this.context.addLocalDevConfig = ServiceUtils.addLocalDevConfig.bind(this);
 		this.context.enable = ServiceUtils.enable.bind(this);
@@ -25,15 +23,5 @@ module.exports = class extends Generator {
 
 	writing() {
 		this.context.enable()
-	}
-
-	end(){
-		// Remove GENERATE_HERE from /server/services/index.js
-		let servicesIndexJsFilePath = this.destinationPath("./server/services/index.js");
-		if (this.fs.exists(servicesIndexJsFilePath)) {
-			let indexFileContent = this.fs.read(servicesIndexJsFilePath);
-			indexFileContent = indexFileContent.replace(GENERATE_HERE, "");
-			this.fs.write(servicesIndexJsFilePath, indexFileContent);
-		}
 	}
 };
