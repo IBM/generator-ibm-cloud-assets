@@ -1,8 +1,0 @@
-{
-  "[[source]]": "",
-  "[dev-packages]": "",
-  "[packages]": {
-    "ibmcloudenv": "~=0.0",
-    "livereload": "*"
-  }
-}
