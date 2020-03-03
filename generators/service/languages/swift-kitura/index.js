@@ -1,14 +1,9 @@
 'use strict';
 const logger = require('log4js').getLogger("generator-cloud-assets:languages-swift-kitura");
 const Generator = require('yeoman-generator');
-const path = require('path');
-
-const scaffolderMapping = require('../../templates/scaffolderMapping.json');
-const svcInfo = require('../../templates/serviceInfo.json');
-
+const ServiceUtils = require('../../../lib/service-utils');
 // Load mappings between bluemix/scaffolder labels and the labels generated in the localdev-config.json files
 const bluemixLabelMappings = require('./bluemix-label-mappings.json');
-
 const PATH_MAPPINGS_FILE = "./config/mappings.json";
 const PATH_LOCALDEV_CONFIG_FILE = "./config/localdev-config.json";
 const FILE_SEARCH_PATH_PREFIX = "file:/config/localdev-config.json:";
@@ -25,47 +20,22 @@ module.exports = class extends Generator {
 	}
 
 	initializing() {
-		this.context.languageFileExt = ".swift";
-		this.context.addMappings = this._addMappings.bind(this);
-		this.context.addLocalDevConfig = this._addLocalDevConfig.bind(this);
-
-		let serviceCredentials,
-			serviceKey;
-		//initializing ourselves by composing with the service enabler
-		let root = path.dirname(require.resolve('../../enabler'));
-		Object.keys(svcInfo).forEach(svc => {
-			serviceKey = svc;
-			serviceCredentials = this.context.application.service_credentials[serviceKey];
-			if (serviceCredentials) {
-				this.context.scaffolderKey = serviceKey;
-				logger.debug("Composing with service : " + svc);
-				try {
-					this.context.cloudLabel = serviceCredentials && serviceCredentials.serviceInfo && serviceCredentials.serviceInfo.cloudLabel;
-					this.composeWith(root, {context: this.context});
-				} catch (err) {
-					/* istanbul ignore next */	//ignore for code coverage as this is just a warning - if the service fails to load the subsequent service test will fail
-					logger.warn('Unable to compose with service', svc, err);
-				}
-			}
-		});
+		this.context.addMappings = ServiceUtils.addMappings.bind(this);
+		this.context.addLocalDevConfig = ServiceUtils.addLocalDevConfig.bind(this);
+		this.context.enable = ServiceUtils.enable.bind(this);
 	}
 
-	_addMappings(serviceMappingsJSON) {
-		// Swift overwrites theses mappings and the local dev config file in the _transformCredentialsOutput() function below,
-		// while we are awaiting fine-grained vs. coarse-grained approaches for laying down credential.
-		let mappingsFilePath = this.destinationPath(PATH_MAPPINGS_FILE);
-		this.fs.extendJSON(mappingsFilePath, serviceMappingsJSON);
+	writing() {
+		//Stopgap solution while we get both approaches for laying down credentials:
+		//fine-grained vs. coarse-grained
+		this.context.enable();
+		this._transformCredentialsOutputSwift();
 	}
 
-	_addLocalDevConfig(serviceLocalDevConfigJSON) {
-		let localDevConfigFilePath = this.destinationPath(PATH_LOCALDEV_CONFIG_FILE);
-		this.fs.extendJSON(localDevConfigFilePath, serviceLocalDevConfigJSON);
-	}
-
-	_getServiceInstanceName(bluemixKey) {
+	_getServiceInstanceNameSwift(bluemixKey) {
 		// Lookup metadata object using bluemix/scaffolder key
 		const serviceMetaData = this.context.application.service_credentials[bluemixKey];
-		logger.debug(`_getServiceInstanceName - serviceMetaData=${JSON.stringify(serviceMetaData, null, 3)}`);
+		logger.debug(`_getServiceInstanceNameSwift - serviceMetaData=${JSON.stringify(serviceMetaData, null, 3)}`);
 
 		if (!serviceMetaData) {
 			return null;
@@ -75,7 +45,7 @@ module.exports = class extends Generator {
 		return instanceName;
 	}
 
-	_createServiceCredentials(credentials, mappings, instanceName, prefix) {
+	_createServiceCredentialsSwift(credentials, mappings, instanceName, prefix) {
 		let serviceCredentials = {};
 		credentials[instanceName] = serviceCredentials;
 		// Note that environment variables should not use the '-' character
@@ -92,7 +62,10 @@ module.exports = class extends Generator {
 		return serviceCredentials;
 	}
 
-	_transformCredentialsOutput() {
+	_transformCredentialsOutputSwift() {
+		// Swift overwrites the mappings and the local dev config file in the _transformCredentialsOutputSwift() function below,
+		// while we are awaiting fine-grained vs. coarse-grained approaches for laying down credential.
+
 		// Get array with all the bluemix/scaffolder keys in the dictionary
 		const bluemixKeys = Object.keys(bluemixLabelMappings);
 		// Load the generated localdev-config.json
@@ -140,7 +113,7 @@ module.exports = class extends Generator {
 			}
 
 			// Generate entry for mappings.json
-			const instanceName = this._getServiceInstanceName(bluemixKey);
+			const instanceName = this._getServiceInstanceNameSwift(bluemixKey);
 
 			if (!instanceName) {
 				logger.error(`Service ${bluemixKey} was not provisioned`);
@@ -151,7 +124,7 @@ module.exports = class extends Generator {
 			let serviceCredentials;
 			if (lastPrefix !== currentPrefix) {
 				lastPrefix = currentPrefix;
-				serviceCredentials = this._createServiceCredentials(credentials, mappings, instanceName, currentPrefix);
+				serviceCredentials = this._createServiceCredentialsSwift(credentials, mappings, instanceName, currentPrefix);
 			} else {
 				serviceCredentials = credentials[instanceName];
 			}
@@ -167,12 +140,4 @@ module.exports = class extends Generator {
 		this.fs.writeJSON(this.destinationPath(PATH_MAPPINGS_FILE), mappings);
 	}
 
-	writing() {
-		//Stopgap solution while we get both approaches for laying down credentials:
-		//fine-grained vs. coarse-grained
-		this._transformCredentialsOutput();
-	}
-
-	end() {
-	}
 };

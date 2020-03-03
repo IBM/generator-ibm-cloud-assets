@@ -77,19 +77,21 @@ function generateTestPayload(tc_type, language, service_keys) {
     let deploy_opts = generateDeployOpts()[tc_type];
     let app_opts = generateAppOpts(tc_type, language);
     _.forEach(service_keys, (key) => {
-        if (tc_type === "cf") {
-            let binding = {}
-            binding["name"] = PREFIX_SVC_BINDING_NAME + key;
-            binding["label"] = CF_SVC_MAPPINGS[key];
-            deploy_opts[Object.keys(deploy_opts)[0]]["service_bindings"][key] = binding;
-        } else {
-            deploy_opts[Object.keys(deploy_opts)[0]]["service_bindings"][key] = PREFIX_SVC_BINDING_NAME + key;
+        if (deploy_opts) {
+            if (tc_type === "cf") {
+                let binding = {}
+                binding["name"] = PREFIX_SVC_BINDING_NAME + key;
+                binding["label"] = CF_SVC_MAPPINGS[key];
+                deploy_opts[Object.keys(deploy_opts)[0]]["service_bindings"][key] = binding;
+            } else {
+                deploy_opts[Object.keys(deploy_opts)[0]]["service_bindings"][key] = PREFIX_SVC_BINDING_NAME + key;
+            }
         }
         app_opts["service_credentials"][key] = getServiceCreds(key);
     });
-    _.extend(payload, deploy_opts);
-    _.extend(payload, app_opts);
-    return {"deploy_options": deploy_opts, "application": app_opts};
+    if (deploy_opts) { payload = _.extend(payload, {deploy_options: deploy_opts}); }
+    payload = _.extend(payload, {application: app_opts});
+    return payload;
 }
 
 module.exports = {

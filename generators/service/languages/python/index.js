@@ -1,11 +1,8 @@
 'use strict';
 const Log4js = require('log4js');
-const logger = Log4js.getLogger("generator-ibm-cloud-assets:languages-node-express");
-const ServiceUtils = require('../../../lib/service-utils');
+const logger = Log4js.getLogger("generator-ibm-cloud-assets:languages-python-flask");
 let Generator = require('yeoman-generator');
-
-const GENERATE_HERE = "// GENERATE HERE";
-const GENERATOR_LOCATION = 'server';
+const ServiceUtils = require('../../../lib/service-utils');
 
 module.exports = class extends Generator {
 	constructor(args, opts) {
@@ -15,7 +12,7 @@ module.exports = class extends Generator {
 		logger.debug("Constructing");
 	}
 
-	configuring(){
+	configuring() {
 		this.context.addMappings = ServiceUtils.addMappings.bind(this);
 		this.context.addLocalDevConfig = ServiceUtils.addLocalDevConfig.bind(this);
 		this.context.enable = ServiceUtils.enable.bind(this);
@@ -24,4 +21,5 @@ module.exports = class extends Generator {
 	writing() {
 		this.context.enable()
 	}
+	
 };

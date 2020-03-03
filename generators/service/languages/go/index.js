@@ -17,16 +17,7 @@
 const Log4js = require('log4js');
 const logger = Log4js.getLogger("generator-ibm-cloud-assets:languages-go");
 let Generator = require('yeoman-generator');
-const path = require('path');
-
-const Handlebars = require('../../../lib/handlebars.js');
-const scaffolderMapping = require('../../templates/scaffolderMapping.json');
-const svcInfo = require('../../templates/serviceInfo.json');
-
-const GENERATOR_LOCATION = 'server';
-const PATH_MAPPINGS_FILE = "./server/config/mappings.json";
-const PATH_LOCALDEV_CONFIG_FILE = "server/localdev-config.json";
-
+const ServiceUtils = require('../../../lib/service-utils');
 
 module.exports = class extends Generator {
 	constructor(args, opts) {
@@ -41,53 +32,13 @@ module.exports = class extends Generator {
 		this.context.service_imports = [];
 		this.context.service_variables = [];
 		this.context.service_initializers = [];
-		this.context.languageFileExt = ".go";
-		this.context.generatorLocation = GENERATOR_LOCATION;
-		this.context.addMappings = this._addMappings.bind(this);
-		this.context.addLocalDevConfig = this._addLocalDevConfig.bind(this);
-
-		let serviceCredentials,
-			serviceKey;
-		//initializing ourselves by composing with the service enabler
-		let root = path.dirname(require.resolve('../../enabler'));
-		Object.keys(svcInfo).forEach(svc => {
-			serviceKey = svc;
-			serviceCredentials = this.context.application.service_credentials[serviceKey];
-			if (serviceCredentials) {
-				this.context.scaffolderKey = serviceKey;
-				logger.debug("Composing with service : " + svc);
-				try {
-					this.context.cloudLabel = serviceCredentials && serviceCredentials.serviceInfo && serviceCredentials.serviceInfo.cloudLabel;
-					this.composeWith(root, {context: this.context});
-				} catch (err) {
-					/* istanbul ignore next */	//ignore for code coverage as this is just a warning - if the service fails to load the subsequent service test will fail
-					logger.warn('Unable to compose with service', svc, err);
-				}
-			}
-		});
+		this.context.addMappings = ServiceUtils.addMappings.bind(this);
+		this.context.addLocalDevConfig = ServiceUtils.addLocalDevConfig.bind(this);
+		this.context.enable = ServiceUtils.enable.bind(this);
 	}
 
 	writing() {
-	}
-
-	_addMappings(serviceMappingsJSON) {
-		let mappingsFilePath = this.destinationPath(PATH_MAPPINGS_FILE);
-		this.fs.extendJSON(mappingsFilePath, serviceMappingsJSON);
-	}
-
-	_addLocalDevConfig(serviceLocalDevConfigJSON){
-		let localDevConfigFilePath = this.destinationPath(PATH_LOCALDEV_CONFIG_FILE);
-		this.fs.extendJSON(localDevConfigFilePath, serviceLocalDevConfigJSON);
-	}
-
-	end(){
-	}
-
-	_writeHandlebarsFile(templateFile, destinationFile, data) {
-		let template = this.fs.read(this.templatePath(templateFile));
-		let compiledTemplate = Handlebars.compile(template);
-		let output = compiledTemplate(data);
-		this.fs.write(this.destinationPath(destinationFile), output);
+		this.context.enable()
 	}
 
 };

@@ -24,12 +24,12 @@ const yaml = require('js-yaml');
 
 const utils = require('../generators/lib/utils');
 const testUtils = require('./test-utils');
-// const fs = require('fs');
-var memFs = require("mem-fs");
-var editor = require("mem-fs-editor");
-var store = memFs.create();
-var fs = editor.create(store);
-const fse = require('fs-extra');
+const fs = require('fs');
+// var memFs = require("mem-fs");
+// var editor = require("mem-fs-editor");
+// var store = memFs.create();
+// var fs = editor.create(store);
+// const fse = require('fs-extra');
 
 const SERVICES = testUtils.SERVICES;
 const DEPLOY_OBJECTS = testUtils.generateDeployOpts();
@@ -82,7 +82,7 @@ function validateDeployAssets(lang, deploy_type, service) {
     });
 }
 
-function validateCreds(lang, services) {
+function validateCreds(lang, service) {
     it('mappings.json and localdev-config.json exist', function () {
         var mappings_path = "";
         var localdev_path = "";
@@ -106,25 +106,44 @@ function validateCreds(lang, services) {
             mappings_path = 'server/config/mappings.json';
             localdev_path = 'server/localdev-config.json';
         }
-        assert.file([mappings_path]);
+        assert.file([mappings_path, localdev_path]);
         // these language and service combos are not supported
-        if (lang !== "SWIFT" && services !== "cloudObjectStorage" && services !== "db2OnCloud" && services !== "conversation"
-            && services !== "discovery" && services !== "languageTranslator" && services !== "naturalLanguageClassifier"
-            && services !== "naturalLanguageUnderstanding" && services !== "personalityInsights" && services !== "speechToText"
-            && services !== "textToSpeech" && services != "toneAnalyzer" && services !== "visualRecognition") {
+        if (lang !== "SWIFT" && !["cloudObjectStorage", "db2OnCloud", "conversation"
+            , "discovery" , "languageTranslator" , "naturalLanguageClassifier"
+            , "naturalLanguageUnderstanding" , "personalityInsights" , "speechToText"
+            , "textToSpeech", "toneAnalyzer" , "visualRecognition"].includes(service)) {
             // assert.fileContent(mappings_path, testUtils.PREFIX_SVC_BINDING_NAME + services);
-            assert.fileContent(mappings_path, `service_${SvcInfo[services]["customServiceKey"].replace(/-/g, '_')}`);
+            assert.fileContent(mappings_path, `service_${SvcInfo[service]["customServiceKey"].replace(/-/g, '_')}`);
         }
-        assert.file([localdev_path]);
     });
 }
+
+function validateCredsMobile(lang, service) {
+    let credentials_path = ""
+    let mappings_and_configs_paths = ['server/config', 'server', 'src/main/resources', 'config'] 
+    it('mobile mappings.json and localdev-config.json dont exist', function () {
+        mappings_and_configs_paths.forEach( path => {
+            assert.noFile(`${path}/localdev-config.json`)
+            assert.noFile(`${path}/mappings.json`)
+        })
+    })
+    if (lang == "IOS_SWIFT") {
+        credentials_path = 'iosapp/BMSCredentials.plist'
+    } else if (lang == "ANDROID") {
+        credentials_path = `app/src/main/res/values/credentials.xml`
+    }
+    it( 'contains credential file with reference to service', function () {
+        assert.file(credentials_path);
+        assert.fileContent(credentials_path, `${service}`)
+    })
+}
+
 
 describe("cloud-assets:service", function() {
     this.timeout(120000);
     console.log("beginning test suites");
     const test_dir = path.join(__dirname, './tmp');
     const main_gen = path.join(__dirname, '../generators/app');
-
     _.forEach(SERVICES, (service) => {
         _.forEach(Object.keys(DEPLOY_OBJECTS), (deploy_type) => {
             const goLang = "GO";
@@ -233,6 +252,28 @@ describe("cloud-assets:service", function() {
                         'Package.swift'
                     ]);
                 });
+            });
+        });
+    });
+
+
+    ["IOS_SWIFT", "ANDROID"].forEach(language => {
+        SERVICES.forEach(service => {
+            describe(`cloud-assets:service-${service} with ${language} project`, function () {
+                console.log(`beginning test suite ${this.title}`);
+                beforeEach( function () {
+                    return helpers.run(main_gen)
+                        .inTmpDir(function (dir) {
+                            console.log(`generator temp dir: ${dir}`);
+                            if (language == "IOS_SWIFT") {
+                                fs.mkdirSync(`${dir}/iosapp`, function (err) {console.log(err)})
+                            } else if (language == "ANDROID") {
+                                fs.mkdirSync(`${dir}/app/src/main/res/values/`, {recursive: true}, function (err) {console.log(err)})
+                            }
+                        })
+                        .withOptions(testUtils.generateTestPayload("none", language, [service]));
+                });
+                validateCredsMobile(language, service)
             });
         });
     });
