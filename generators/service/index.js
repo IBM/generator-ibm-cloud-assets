@@ -114,16 +114,14 @@ module.exports = class extends Generator {
 		if ( typeof credentials === "object" && Object.keys(credentials).length > 0 ) {
             credentials.appName = appName;
             const xmlString = xmlbuilder.create({resources: credentials }).end({ pretty: true });
-            logger.info("Writing credentials.xml")
+			logger.info("Writing credentials.xml")
 			try {
-				fs.writeFileSync(this.destinationPath(filePath), xmlString)/*, (err) => {
-				if (err && filePath !== "./") {
-					logger.info("Failed to create credentials.xml")
-				// this._generateCredentialsAndroid(credentials, "./", appName);
-				}
-			});*/
-			} catch (err) {logger.info("Failed to create credentials.xml")}
-			
+				fs.writeFileSync(this.destinationPath(filePath), xmlString)
+			} catch (err) {
+				logger.info(`Failed to create ${filePath}`)
+				// retry in base dir
+				if (filePath == CREDENTIALS_XML_FP) { this._generateCredentialsAndroid(credentials, "./", appName);}
+			}
 		} else { logger.info("Project does not contain credentials, not creating credentials.xml") }
 	}
 
@@ -133,13 +131,12 @@ module.exports = class extends Generator {
 			const plistString = plist.build(credentials);
 			logger.info("Writing BMSCredentials.plist")
 			try {
-				fs.writeFileSync(this.destinationPath(filePath), plistString)/*, (err) => {
-					if (err && filePath !== "./") {
-						logger.info("Failed to create BMSCredentials.plist")
-					//  this._generatePlist(credentials, "./", appName); 
-					}
-				});*/ //TODO: writeFile sync was failing unit tests
-			} catch (err) {logger.info("Failed to create BMSCredentials.plist")}
+				fs.writeFileSync(this.destinationPath(filePath), plistString)
+			} catch (err) {
+				logger.info(`Failed to create BMSCredentials.plist in ${filePath}`)
+				// retry in base dir
+				if (filePath == BMS_CREDENTIALS_FP) {this._generatePlist(credentials, "./", appName)}
+			}
 		} else { logger.info("Project does not contain credentials, not creating BMSCredentials.plist") }
 	}
 
