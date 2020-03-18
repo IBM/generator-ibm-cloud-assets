@@ -17,6 +17,7 @@
   "finance-instrument-analytics": "instrumentAnalytics",
   "finance-investment-portfolio": "investmentPortfolio",
   "watson-language-translator": "languageTranslator",
+  "databasesForMongo": "databasesForMongo",
   "mongodb": "mongodb",
   "watson-natural-language-classifier": "naturalLanguageClassifier",
   "watson-natural-language-understanding": "naturalLanguageUnderstanding",
