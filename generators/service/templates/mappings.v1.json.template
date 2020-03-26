@@ -11,7 +11,7 @@
             {{/if}}
             "env:service_{{../serviceKey}}:$.{{access ../map this.[0] ../nestedJSON}}",
             "env:{{../serviceKey}}_{{access ../map this.[0] ../nestedJSON}}",
-            "file:/{{../generatorLocation}}/localdev-config.json:$.{{../serviceKey}}_{{access ../map this.[0] false}}"
+            "file:/{{../localDevConfigFP}}:$.{{../serviceKey}}_{{access ../map this.[0] false}}"
         ]
     },
     "{{../serviceKey}}": {
@@ -20,7 +20,7 @@
                     "user-provided:{{../serviceName}}:{{access ../map this.[0] ../nestedJSON}}",
                     "cloudfoundry:{{../serviceKey}}",
                     "env:{{../serviceKey}}_credentials",
-                    "file:/{{../generatorLocation}}/localdev-config.json:{{../serviceKey}}_credentials"
+                    "file:/{{../localDevConfigFP}}:{{../serviceKey}}_credentials"
                  ]
             }
         },

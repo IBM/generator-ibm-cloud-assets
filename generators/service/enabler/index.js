@@ -257,7 +257,8 @@ module.exports = class extends Generator {
 			map: credKeysToScaffolderKeysMap,
 			cloudFoundryKey: this.cloudFoundryName,
 			cloudFoundryIsArray: config.cloudFoundryIsArray,
-			nestedJSON: config.nestedJSON
+			nestedJSON: config.nestedJSON,
+			localDevConfigFP: ServiceUtils.localDevConfigFilepathMap[this.options.context.application.language]
 		};
 
 		let generatedMappingString = this._sanitizeJSONString(template(context));
