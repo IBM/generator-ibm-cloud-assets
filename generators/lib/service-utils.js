@@ -372,6 +372,7 @@ module.exports = {
 	addServicesEnvToValuesAsync: addServicesEnvToValuesAsync,
 	addServicesToServiceKnativeYamlAsync: addServicesToServiceKnativeYamlAsync,
 	credentialsFilepathMap: _credentialsFilepathMap,
+	localDevConfigFilepathMap: _localDevConfigFilepathMap,
 	enable: _enable,
 	addMappings: _addMappings,
 	addLocalDevConfig: _addLocalDevConfig
