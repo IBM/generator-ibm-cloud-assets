@@ -135,7 +135,7 @@ module.exports = class extends Generator {
 			} catch (err) {
 				logger.info(`Failed to create BMSCredentials.plist in ${filePath}`)
 				// retry in base dir
-				if (filePath == BMS_CREDENTIALS_FP) {this._generatePlist(credentials, "./", appName)}
+				if (filePath == BMS_CREDENTIALS_FP) {this._generatePlistIOS(credentials, "./", appName)}
 			}
 		} else { logger.info("Project does not contain credentials, not creating BMSCredentials.plist") }
 	}
