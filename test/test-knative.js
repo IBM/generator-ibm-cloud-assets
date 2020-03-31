@@ -26,7 +26,6 @@ let knativeOptions = utils.generateTestPayload("knative", "NODE", ['appid', 'clo
 
 describe('cloud-assets:knative', function () {
 	this.timeout(5000);
-	const lang = 'NODE';
 
 	before(function () {
 		return helpers.run(path.join(__dirname, '../generators/app'))
@@ -44,48 +43,48 @@ describe('cloud-assets:knative', function () {
 			"apiVersion": "serving.knative.dev/v1alpha1",
 			"kind": "Service",
 			"metadata": {
-			  "name": knativeOptions.application.chartName
+				"name": knativeOptions.application.chartName
 			},
 			"spec": {
-			  "template": {
-				"spec": {
-				  "containers": [
-					{
-					  "image": "REGISTRY_URL/REGISTRY_NAMESPACE/IMAGE_NAME:BUILD_NUMBER",
-					  "ports": [
-						{
-						  "containerPort": 3000
-						}
-					  ],
-					  "env": [
-						{
-						  "name": "service_appid",
-						  "valueFrom": {
-							"secretKeyRef": {
-							  "name": "my-service-appid",
-							  "key": "binding"
+				"template": {
+					"spec": {
+						"containers": [
+							{
+								"image": "REGISTRY_URL/REGISTRY_NAMESPACE/IMAGE_NAME:BUILD_NUMBER",
+								"ports": [
+									{
+										"containerPort": 3000
+									}
+								],
+								"env": [
+									{
+										"name": "service_appid",
+										"valueFrom": {
+											"secretKeyRef": {
+												"name": "my-service-appid",
+												"key": "binding"
+											}
+										}
+									},
+									{
+										"name": "service_cloudant",
+										"valueFrom": {
+											"secretKeyRef": {
+												"name": "my-service-cloudant",
+												"key": "binding"
+											}
+										}
+									}
+								]
 							}
-						  }
-						},
-						{
-						  "name": "service_cloudant",
-						  "valueFrom": {
-							"secretKeyRef": {
-							  "name": "my-service-cloudant",
-							  "key": "binding"
-							}
-						  }
-						}
-					  ]
+						]
 					}
-				  ]
 				}
-			  }
 			}
-		  }
+		}
 
 		let generatedYamlContents = yml.safeLoad(fs.readFileSync(serviceYamlFilePath, 'utf8'));
-		assert(_.isEqual(generatedYamlContents, targetServiceYaml), "\n \n GENERATED: \n" + JSON.stringify(generatedYamlContents) + "\n \n EXPECTED: \n" + JSON.stringify(targetServiceYaml) );
+		assert(_.isEqual(generatedYamlContents, targetServiceYaml), "\n \n GENERATED: \n" + JSON.stringify(generatedYamlContents) + "\n \n EXPECTED: \n" + JSON.stringify(targetServiceYaml));
 	});
 
 	it('does not have helm charts', function () {

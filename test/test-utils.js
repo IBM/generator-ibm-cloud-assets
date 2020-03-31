@@ -14,91 +14,83 @@
 /* eslint-env mocha */
 'use strict';
 
-const helpers = require('yeoman-test');
-const assert = require('yeoman-assert');
 const _ = require('lodash');
-const path = require('path');
-// const fs = require('fs');
-var memFs = require("mem-fs");
-var editor = require("mem-fs-editor");
-var store = memFs.create();
-var fs = editor.create(store);
 
 const SVC_CRED_SAMPLES = require("./templates/service_creds.json");
 const CF_SVC_MAPPINGS = require("./../generators/service/templates/cfServiceMapping.json");
 
 const PREFIX_SVC_BINDING_NAME = "my-service-";
 
-const LANGS = [ "NODE", "PYTHON", "GO", "JAVA", "SPRING", "SWIFT" ];
-const SERVICES = [ 'appid','cloudant','cloudObjectStorage','db2OnCloud','mongodb','hypersecuredb','postgresql','push','redis','conversation','discovery','languageTranslator','naturalLanguageClassifier','naturalLanguageUnderstanding','personalityInsights','speechToText','textToSpeech','toneAnalyzer','visualRecognition' ];
+const LANGS = ["NODE", "PYTHON", "GO", "JAVA", "SPRING", "SWIFT"];
+const SERVICES = ['appid', 'cloudant', 'cloudObjectStorage', 'db2OnCloud', 'mongodb', 'hypersecuredb', 'postgresql', 'push', 'redis', 'conversation', 'discovery', 'languageTranslator', 'naturalLanguageClassifier', 'naturalLanguageUnderstanding', 'personalityInsights', 'speechToText', 'textToSpeech', 'toneAnalyzer', 'visualRecognition'];
 
 function getServiceCreds(serviceKey) {
-    return SVC_CRED_SAMPLES[serviceKey];
+	return SVC_CRED_SAMPLES[serviceKey];
 }
 
 function generateAppOpts(type, language) {
-    return {
-        app_id: `1234-5678-${type}-${language}-0987654321`,
-        name: `test-genv2-app-${type}-${language}`,
-        language: language,
-        service_credentials: {}
-    };
+	return {
+		app_id: `1234-5678-${type}-${language}-0987654321`,
+		name: `test-genv2-app-${type}-${language}`,
+		language: language,
+		service_credentials: {}
+	};
 }
 
 function generateDeployOpts() {
-    return {
-        "cf": {
-            "cloud_foundry": {
-                "disk_quota": "1G",
-                "domain": "mydomain.com",
-                "hostname": "my-app-hostname",
-                "instances": "3",
-                "memory": "256M",
-                "service_bindings": {}
-            }
-        },
-        "helm": { 
-            "kube": {
-                "type": "HELM",
-                "service_bindings": {}      
-            }
-        },
-        "knative": {
-            "kube": {
-                "type": "KNATIVE",
-                "service_bindings": {}      
-            }        
-        }
-    }; 
+	return {
+		"cf": {
+			"cloud_foundry": {
+				"disk_quota": "1G",
+				"domain": "mydomain.com",
+				"hostname": "my-app-hostname",
+				"instances": "3",
+				"memory": "256M",
+				"service_bindings": {}
+			}
+		},
+		"helm": {
+			"kube": {
+				"type": "HELM",
+				"service_bindings": {}
+			}
+		},
+		"knative": {
+			"kube": {
+				"type": "KNATIVE",
+				"service_bindings": {}
+			}
+		}
+	};
 }
 
 function generateTestPayload(tc_type, language, service_keys) {
-    let payload = {};
-    let deploy_opts = generateDeployOpts()[tc_type];
-    let app_opts = generateAppOpts(tc_type, language);
-    _.forEach(service_keys, (key) => {
-        if (deploy_opts) {
-            if (tc_type === "cf") {
-                let binding = {}
-                binding["name"] = PREFIX_SVC_BINDING_NAME + key;
-                binding["label"] = CF_SVC_MAPPINGS[key];
-                deploy_opts[Object.keys(deploy_opts)[0]]["service_bindings"][key] = binding;
-            } else {
-                deploy_opts[Object.keys(deploy_opts)[0]]["service_bindings"][key] = PREFIX_SVC_BINDING_NAME + key;
-            }
-        }
-        app_opts["service_credentials"][key] = getServiceCreds(key);
-    });
-    if (deploy_opts) { payload = _.extend(payload, {deploy_options: deploy_opts}); }
-    payload = _.extend(payload, {application: app_opts});
-    return payload;
+	let payload = {};
+	let deploy_opts = generateDeployOpts()[tc_type];
+	let app_opts = generateAppOpts(tc_type, language);
+	_.forEach(service_keys, (key) => {
+		if (deploy_opts) {
+			if (tc_type === "cf") {
+				let binding = {}
+				binding["name"] = PREFIX_SVC_BINDING_NAME + key;
+				binding["label"] = CF_SVC_MAPPINGS[key];
+				deploy_opts[Object.keys(deploy_opts)[0]]["service_bindings"][key] = binding;
+			} else {
+				deploy_opts[Object.keys(deploy_opts)[0]]["service_bindings"][key] = PREFIX_SVC_BINDING_NAME + key;
+			}
+		}
+		app_opts["service_credentials"][key] = getServiceCreds(key);
+	});
+	if (deploy_opts) { payload = _.extend(payload, { deploy_options: deploy_opts }); }
+	payload = _.extend(payload, { application: app_opts });
+	return payload;
 }
 
 module.exports = {
-    getServiceCreds: getServiceCreds,
-    generateTestPayload: generateTestPayload,
-    generateDeployOpts: generateDeployOpts,
-    LANGS: LANGS,
-    SERVICES: SERVICES,
-    PREFIX_SVC_BINDING_NAME: PREFIX_SVC_BINDING_NAME
+	getServiceCreds: getServiceCreds,
+	generateTestPayload: generateTestPayload,
+	generateDeployOpts: generateDeployOpts,
+	LANGS: LANGS,
+	SERVICES: SERVICES,
+	PREFIX_SVC_BINDING_NAME: PREFIX_SVC_BINDING_NAME
 };
