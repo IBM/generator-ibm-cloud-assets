@@ -56,16 +56,16 @@ function testOutput(applicationName, chartLocation) {
 	});
 
 	it('has valid helm chart when running helm lint', function (done) {
-		exec('helm lint ' + chartLocation + '/', {maxBuffer: 20 * 1024 * 1024}, (error, stdout) => {
+		exec('helm lint ' + chartLocation + '/', { maxBuffer: 20 * 1024 * 1024 }, (error, stdout) => {
 			error ? done(new Error(stdout)) : done();
 		})
 	});
 
 	it('renders a valid chart using helm template', function (done) {
-		exec('helm template ' + chartLocation + '/', {maxBuffer: 20 * 1024 * 1024}, (error, stdout) => {
+		exec('helm template ' + chartLocation + '/', { maxBuffer: 20 * 1024 * 1024 }, (error, stdout) => {
 			// Uncomment to view locally rendered helm charts
 			// console.log(stdout);
-			if ( error ) {
+			if (error) {
 				done(new Error(stdout))
 			} else {
 				// template command will render two charts: service and Deployment
@@ -93,11 +93,11 @@ function getSafeYaml(fileName) {
 
 	const newyml = rawyml.replace('"+" "_"', '\\"+\\" \\"_\\"')
 		.replace(/^{{(-? if)/gm, '#$1')
-		.replace(/^{{ else/gm,  '# else')
+		.replace(/^{{ else/gm, '# else')
 		.replace(/^{{(-? end)/gm, '#$1')
 		.replace(/{{.Files/, '#.Files');
 
-	return  yml.safeLoad(newyml);
+	return yml.safeLoad(newyml);
 }
 
 function assertHpaYmlContent(chartLocation) {
@@ -114,10 +114,10 @@ function assertHpaYmlContent(chartLocation) {
 }
 
 describe('cloud-assets:kubernetes', function () {
-	this.timeout(1000*60*10);
+	this.timeout(1000 * 60 * 10);
 
-	let languages = [ 'JAVA', 'SPRING', 'NODE', 'GO', 'SWIFT', 'PYTHON' ];
-	
+	let languages = ['JAVA', 'SPRING', 'NODE', 'GO', 'SWIFT', 'PYTHON'];
+
 	languages.forEach(language => {
 		describe('kubernetes:app with ' + language + ' project', function () {
 			beforeEach(function () {
@@ -128,7 +128,7 @@ describe('cloud-assets:kubernetes', function () {
 
 			let applicationName = `testgenv2apphelm${language}`;
 			let chartLocation = 'chart/' + applicationName.toLowerCase();
-		
+
 			testOutput(applicationName, chartLocation);
 			it('has deployment.yaml with readiness probe in liberty & spring', function () {
 				let deploymentyml = getSafeYaml(chartLocation + '/templates/deployment.yaml');
@@ -152,8 +152,8 @@ describe('cloud-assets:kubernetes', function () {
 
 			it('has deployment.yaml with correct env settings', () => {
 				let generatedEnv = getSafeYaml(chartLocation + '/templates/deployment.yaml').spec.template.spec.containers[0].env;
-				let envTemplate = [{"name":"service_appid","valueFrom":{"secretKeyRef":{"name":{"[object Object]":null},"key":"binding","optional":true}}},{"name":"service_cloudant","valueFrom":{"secretKeyRef":{"name":{"[object Object]":null},"key":"binding","optional":true}}},{"name":"PORT","value":"{{ .Values.service.servicePort }}"},{"name":"APPLICATION_NAME","value":"{{ .Release.Name }}"}]
-				assert( _.isEqual(generatedEnv, envTemplate), "\n \n GENERATED: \n" + JSON.stringify(generatedEnv) + "\n \n EXPECTED: \n" + JSON.stringify(envTemplate) );
+				let envTemplate = [{ "name": "service_appid", "valueFrom": { "secretKeyRef": { "name": { "[object Object]": null }, "key": "binding", "optional": true } } }, { "name": "service_cloudant", "valueFrom": { "secretKeyRef": { "name": { "[object Object]": null }, "key": "binding", "optional": true } } }, { "name": "PORT", "value": "{{ .Values.service.servicePort }}" }, { "name": "APPLICATION_NAME", "value": "{{ .Release.Name }}" }]
+				assert(_.isEqual(generatedEnv, envTemplate), "\n \n GENERATED: \n" + JSON.stringify(generatedEnv) + "\n \n EXPECTED: \n" + JSON.stringify(envTemplate));
 			});
 
 			it('has service.yaml with correct content', function () {
@@ -178,20 +178,20 @@ describe('cloud-assets:kubernetes', function () {
 				let generatedValuesyml = getSafeYaml(chartLocation + '/values.yaml');
 				let templateValuesYml;
 				if (language === 'JAVA') {
-					templateValuesYml = {"replicaCount":1,"revisionHistoryLimit":1,"image":{"repository":"testgenv2apphelmjava","tag":"v1.0.0","pullPolicy":"IfNotPresent","resources":{"requests":{"cpu":"200m","memory":"300Mi"}}},"service":{"name":"Node","type":"NodePort","servicePort":9080,"servicePortHttps":9443},"hpa":{"enabled":false,"minReplicas":1,"maxReplicas":2,"metrics":{"cpu":{"targetAverageUtilization":70},"memory":{"targetAverageUtilization":70}}},"base":{"enabled":false,"replicaCount":1,"image":{"tag":"v0.9.9"},"weight":100},"istio":{"enabled":false,"weight":100},"services":{"appid":{"secretKeyRef":"my-service-appid"},"cloudant":{"secretKeyRef":"my-service-cloudant"}}}
+					templateValuesYml = { "replicaCount": 1, "revisionHistoryLimit": 1, "image": { "repository": "testgenv2apphelmjava", "tag": "v1.0.0", "pullPolicy": "IfNotPresent", "resources": { "requests": { "cpu": "200m", "memory": "300Mi" } } }, "service": { "name": "Node", "type": "NodePort", "servicePort": 9080, "servicePortHttps": 9443 }, "hpa": { "enabled": false, "minReplicas": 1, "maxReplicas": 2, "metrics": { "cpu": { "targetAverageUtilization": 70 }, "memory": { "targetAverageUtilization": 70 } } }, "base": { "enabled": false, "replicaCount": 1, "image": { "tag": "v0.9.9" }, "weight": 100 }, "istio": { "enabled": false, "weight": 100 }, "services": { "appid": { "secretKeyRef": "my-service-appid" }, "cloudant": { "secretKeyRef": "my-service-cloudant" } } }
 				} else if (language === 'SPRING') {
-					templateValuesYml = {"replicaCount":1,"revisionHistoryLimit":1,"image":{"repository":"testgenv2apphelmspring","tag":"v1.0.0","pullPolicy":"IfNotPresent","resources":{"requests":{"cpu":"200m","memory":"300Mi"}}},"service":{"name":"Node","type":"NodePort","servicePort":8080},"hpa":{"enabled":false,"minReplicas":1,"maxReplicas":2,"metrics":{"cpu":{"targetAverageUtilization":70},"memory":{"targetAverageUtilization":70}}},"base":{"enabled":false,"replicaCount":1,"image":{"tag":"v0.9.9"},"weight":100},"istio":{"enabled":false,"weight":100},"services":{"appid":{"secretKeyRef":"my-service-appid"},"cloudant":{"secretKeyRef":"my-service-cloudant"}}}
+					templateValuesYml = { "replicaCount": 1, "revisionHistoryLimit": 1, "image": { "repository": "testgenv2apphelmspring", "tag": "v1.0.0", "pullPolicy": "IfNotPresent", "resources": { "requests": { "cpu": "200m", "memory": "300Mi" } } }, "service": { "name": "Node", "type": "NodePort", "servicePort": 8080 }, "hpa": { "enabled": false, "minReplicas": 1, "maxReplicas": 2, "metrics": { "cpu": { "targetAverageUtilization": 70 }, "memory": { "targetAverageUtilization": 70 } } }, "base": { "enabled": false, "replicaCount": 1, "image": { "tag": "v0.9.9" }, "weight": 100 }, "istio": { "enabled": false, "weight": 100 }, "services": { "appid": { "secretKeyRef": "my-service-appid" }, "cloudant": { "secretKeyRef": "my-service-cloudant" } } }
 				} else if (language === 'NODE') {
-					templateValuesYml = {"replicaCount":1,"revisionHistoryLimit":1,"image":{"tag":"v1.0.0","pullPolicy":"Always","resources":{"requests":{"cpu":"200m","memory":"300Mi"}}},"livenessProbe":{"initialDelaySeconds":30,"periodSeconds":10},"service":{"name":"node","type":"NodePort","servicePort":3000},"hpa":{"enabled":false,"minReplicas":1,"maxReplicas":2,"metrics":{"cpu":{"targetAverageUtilization":70},"memory":{"targetAverageUtilization":70}}},"base":{"enabled":false,"replicaCount":1,"image":{"tag":"v0.9.9"},"weight":100},"istio":{"enabled":false,"weight":100},"services":{"appid":{"secretKeyRef":"my-service-appid"},"cloudant":{"secretKeyRef":"my-service-cloudant"}}}
+					templateValuesYml = { "replicaCount": 1, "revisionHistoryLimit": 1, "image": { "tag": "v1.0.0", "pullPolicy": "Always", "resources": { "requests": { "cpu": "200m", "memory": "300Mi" } } }, "livenessProbe": { "initialDelaySeconds": 30, "periodSeconds": 10 }, "service": { "name": "node", "type": "NodePort", "servicePort": 3000 }, "hpa": { "enabled": false, "minReplicas": 1, "maxReplicas": 2, "metrics": { "cpu": { "targetAverageUtilization": 70 }, "memory": { "targetAverageUtilization": 70 } } }, "base": { "enabled": false, "replicaCount": 1, "image": { "tag": "v0.9.9" }, "weight": 100 }, "istio": { "enabled": false, "weight": 100 }, "services": { "appid": { "secretKeyRef": "my-service-appid" }, "cloudant": { "secretKeyRef": "my-service-cloudant" } } }
 				} else if (language === 'GO') {
-					templateValuesYml = {"replicaCount":1,"revisionHistoryLimit":1,"image":{"tag":"v1.0.0","pullPolicy":"Always","resources":{"requests":{"cpu":"200m","memory":"300Mi"}}},"livenessProbe":{"initialDelaySeconds":30,"periodSeconds":10},"service":{"name":"go","type":"NodePort","servicePort":8080},"hpa":{"enabled":false,"minReplicas":1,"maxReplicas":2,"metrics":{"cpu":{"targetAverageUtilization":70},"memory":{"targetAverageUtilization":70}}},"base":{"enabled":false,"replicaCount":1,"image":{"tag":"v0.9.9"},"weight":100},"istio":{"enabled":false,"weight":100},"services":{"appid":{"secretKeyRef":"my-service-appid"},"cloudant":{"secretKeyRef":"my-service-cloudant"}}}
+					templateValuesYml = { "replicaCount": 1, "revisionHistoryLimit": 1, "image": { "tag": "v1.0.0", "pullPolicy": "Always", "resources": { "requests": { "cpu": "200m", "memory": "300Mi" } } }, "livenessProbe": { "initialDelaySeconds": 30, "periodSeconds": 10 }, "service": { "name": "go", "type": "NodePort", "servicePort": 8080 }, "hpa": { "enabled": false, "minReplicas": 1, "maxReplicas": 2, "metrics": { "cpu": { "targetAverageUtilization": 70 }, "memory": { "targetAverageUtilization": 70 } } }, "base": { "enabled": false, "replicaCount": 1, "image": { "tag": "v0.9.9" }, "weight": 100 }, "istio": { "enabled": false, "weight": 100 }, "services": { "appid": { "secretKeyRef": "my-service-appid" }, "cloudant": { "secretKeyRef": "my-service-cloudant" } } }
 				} else if (language === 'SWIFT') {
-					templateValuesYml = {"replicaCount":1,"revisionHistoryLimit":1,"image":{"tag":"v1.0.0","pullPolicy":"Always","resources":{"requests":{"cpu":"200m","memory":"300Mi"}}},"livenessProbe":{"initialDelaySeconds":30,"periodSeconds":10},"service":{"name":"swift","type":"NodePort","servicePort":8080},"hpa":{"enabled":false,"minReplicas":1,"maxReplicas":2,"metrics":{"cpu":{"targetAverageUtilization":70},"memory":{"targetAverageUtilization":70}}},"base":{"enabled":false,"replicaCount":1,"image":{"tag":"v0.9.9"},"weight":100},"istio":{"enabled":false,"weight":100},"services":{"appid":{"secretKeyRef":"my-service-appid"},"cloudant":{"secretKeyRef":"my-service-cloudant"}}}
-				} else if ( language === 'PYTHON' || language === 'DJANGO' ) {
-					templateValuesYml = {"replicaCount":1,"revisionHistoryLimit":1,"image":{"tag":"v1.0.0","pullPolicy":"Always","resources":{"requests":{"cpu":"200m","memory":"300Mi"}}},"livenessProbe":{"initialDelaySeconds":30,"periodSeconds":10},"service":{"name":"python","type":"NodePort","servicePort":3000},"hpa":{"enabled":false,"minReplicas":1,"maxReplicas":2,"metrics":{"cpu":{"targetAverageUtilization":70},"memory":{"targetAverageUtilization":70}}},"base":{"enabled":false,"replicaCount":1,"image":{"tag":"v0.9.9"},"weight":100},"istio":{"enabled":false,"weight":100},"services":{"appid":{"secretKeyRef":"my-service-appid"},"cloudant":{"secretKeyRef":"my-service-cloudant"}}}
+					templateValuesYml = { "replicaCount": 1, "revisionHistoryLimit": 1, "image": { "tag": "v1.0.0", "pullPolicy": "Always", "resources": { "requests": { "cpu": "200m", "memory": "300Mi" } } }, "livenessProbe": { "initialDelaySeconds": 30, "periodSeconds": 10 }, "service": { "name": "swift", "type": "NodePort", "servicePort": 8080 }, "hpa": { "enabled": false, "minReplicas": 1, "maxReplicas": 2, "metrics": { "cpu": { "targetAverageUtilization": 70 }, "memory": { "targetAverageUtilization": 70 } } }, "base": { "enabled": false, "replicaCount": 1, "image": { "tag": "v0.9.9" }, "weight": 100 }, "istio": { "enabled": false, "weight": 100 }, "services": { "appid": { "secretKeyRef": "my-service-appid" }, "cloudant": { "secretKeyRef": "my-service-cloudant" } } }
+				} else if (language === 'PYTHON' || language === 'DJANGO') {
+					templateValuesYml = { "replicaCount": 1, "revisionHistoryLimit": 1, "image": { "tag": "v1.0.0", "pullPolicy": "Always", "resources": { "requests": { "cpu": "200m", "memory": "300Mi" } } }, "livenessProbe": { "initialDelaySeconds": 30, "periodSeconds": 10 }, "service": { "name": "python", "type": "NodePort", "servicePort": 3000 }, "hpa": { "enabled": false, "minReplicas": 1, "maxReplicas": 2, "metrics": { "cpu": { "targetAverageUtilization": 70 }, "memory": { "targetAverageUtilization": 70 } } }, "base": { "enabled": false, "replicaCount": 1, "image": { "tag": "v0.9.9" }, "weight": 100 }, "istio": { "enabled": false, "weight": 100 }, "services": { "appid": { "secretKeyRef": "my-service-appid" }, "cloudant": { "secretKeyRef": "my-service-cloudant" } } }
 				}
 
-				assert( _.isEqual(templateValuesYml, generatedValuesyml), "\n \n GENERATED: \n" + JSON.stringify(generatedValuesyml) + "\n \n EXPECTED: \n" + JSON.stringify(templateValuesYml)  );
+				assert(_.isEqual(templateValuesYml, generatedValuesyml), "\n \n GENERATED: \n" + JSON.stringify(generatedValuesyml) + "\n \n EXPECTED: \n" + JSON.stringify(templateValuesYml));
 			});
 
 			it('has basedeployment.yaml with correct content', function () {
@@ -209,7 +209,7 @@ describe('cloud-assets:kubernetes', function () {
 			});
 		});
 	});
-	
+
 
 	describe('kubernetes:app with Java-liberty ', function () {
 
@@ -219,18 +219,18 @@ describe('cloud-assets:kubernetes', function () {
 				.withOptions(utils.generateTestPayload("helm", "JAVA", ['appid', 'cloudant']))
 		});
 
-		  
+
 
 		it('should not have kubernetes files', function () {
 			let applicationName = `testgenv2apphelmjava`;
 			let chartLocation = 'chart/' + applicationName.toLowerCase();
-	
+
 			fs.readdir("./chart/testgenv2apphelmjava/templates", (err, files) => {
 				files.forEach(file => {
-				  console.log(file);
+					console.log(file);
 				});
-			  });
-	
+			});
+
 			assert.file(chartLocation + '/templates/service.yaml');
 			assert.file(chartLocation + '/templates/deployment.yaml');
 			assert.file(chartLocation + '/templates/hpa.yaml');

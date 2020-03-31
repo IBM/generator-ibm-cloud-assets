@@ -23,29 +23,29 @@ const fs = require('fs');
 const _ = require('lodash');
 
 describe('cloud-assets:download-code', function () {
-    this.timeout(1000*60*10);
-    
-    const serviceCombos = [[], ['appid'], ['cloudant'], ['appid', 'cloudant']];
+	this.timeout(1000 * 60 * 10);
 
-    // create object and REMOVE DEPLOY_OPTIONS to mimic download code flow
-    utils.LANGS.forEach(language => {
-        serviceCombos.forEach(serviceCombo => { 
-            describe(`cloud-assets:download-code with ${language} project`, function () {
-                beforeEach(function () {
-                    return helpers.run(path.join(__dirname, '../generators/app'))
-                        .inDir(path.join(__dirname, './tmp'))
-                        .withOptions(_.omit(utils.generateTestPayload("helm", language, serviceCombo), "deploy_options"));
-                });
-        
-                it('create cli-config for CLI tool', function () {
-                    assert.file(['cli-config.yml']);
-                })
+	const serviceCombos = [[], ['appid'], ['cloudant'], ['appid', 'cloudant']];
 
-                it('does not create deployment assets', function () {
-                    assert.noFile(['service.yaml', 'manifest.yaml']);
-                    assert(!fs.existsSync("chart/"));
-                })
-            });
-        });
-    });
+	// create object and REMOVE DEPLOY_OPTIONS to mimic download code flow
+	utils.LANGS.forEach(language => {
+		serviceCombos.forEach(serviceCombo => {
+			describe(`cloud-assets:download-code with ${language} project`, function () {
+				beforeEach(function () {
+					return helpers.run(path.join(__dirname, '../generators/app'))
+						.inDir(path.join(__dirname, './tmp'))
+						.withOptions(_.omit(utils.generateTestPayload("helm", language, serviceCombo), "deploy_options"));
+				});
+
+				it('create cli-config for CLI tool', function () {
+					assert.file(['cli-config.yml']);
+				})
+
+				it('does not create deployment assets', function () {
+					assert.noFile(['service.yaml', 'manifest.yaml']);
+					assert(!fs.existsSync("chart/"));
+				})
+			});
+		});
+	});
 });

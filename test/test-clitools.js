@@ -93,8 +93,6 @@ describe('cloud-assets:clitools', function () {
 	let javaFrameworks = ['JAVA', 'SPRING'];
 	javaFrameworks.forEach(language => {
 		describe('cloud-assets:clitools for ['+ language +'] project', function () {
-			let artifactId = 'testArtifact-id';
-			let javaVersion = '1.0-SNAPSHOT';
 			let applicationName = `testgenv2apphelm${language}`;
 
 			beforeEach(function () {

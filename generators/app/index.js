@@ -32,35 +32,35 @@ module.exports = class extends Generator {
 		this._setLoggerLevel();
 		this.opts.loggerLevel = logger.level;
 
-		if ( this.opts.deployOptions && this.opts.deployOptions !== true ) { this.opts.deploy_options = this.opts.deployOptions }
+		if (this.opts.deployOptions && this.opts.deployOptions !== true) { this.opts.deploy_options = this.opts.deployOptions }
 		this._sanitizeOption(this.options, DEPLOY_OPTIONS);
 		this._sanitizeOption(this.options, APPLICATION_OPTIONS);
 		logger.debug("THIS.OPTS: " + JSON.stringify(this.opts, null, 3));
 		if (this.opts.deployOptions) { delete this.opts.deployOptions; }
 		if (this.opts["deploy-options"]) { delete this.opts["deploy-options"]; }
 
-		if ( !this.opts.application || this.opts.application === true ) {
+		if (!this.opts.application || this.opts.application === true) {
 			throw Error("No application data included for cloud asset generation")
 		}
 
-		if ( !this.opts.deploy_options || this.opts.deploy_options === true ) { 
-			this.opts.deploy_options = {}; 
+		if (!this.opts.deploy_options || this.opts.deploy_options === true) {
+			this.opts.deploy_options = {};
 		}
-		if ( !this.opts.deploy_options.service_bindings ) { 
-			this.opts.deploy_options.service_bindings = {}; 
+		if (!this.opts.deploy_options.service_bindings) {
+			this.opts.deploy_options.service_bindings = {};
 		}
-		if ( !this.opts.application.service_credentials ) { 
-				this.opts.application.service_credentials = {}; 
+		if (!this.opts.application.service_credentials) {
+			this.opts.application.service_credentials = {};
 		}
 
 		this.shouldPrompt = this.opts.application ? false : true;
 	}
 
-	_setLoggerLevel(){
+	_setLoggerLevel() {
 		let level = (process.env.GENERATOR_LOG_LEVEL || DEFAULT_LOG_LEVEL).toUpperCase();
 		logger.info("Setting log level to", level);
 		/* istanbul ignore else */      //ignore for code coverage as the else block will set a known valid log level
-		if(Log4js.levels.hasOwnProperty(level)) {
+		if (Object.prototype.hasOwnProperty.call(Log4js.levels, level)) {
 			logger.level = Log4js.levels[level];
 		} else {
 			logger.warn("Invalid log level specified (using default) : " + level);
@@ -124,7 +124,7 @@ module.exports = class extends Generator {
 			],
 			default: "KNATIVE"
 		});
-    
+
 		prompts.push({
 			type: 'input',
 			name: 'cluster_name',
@@ -144,7 +144,7 @@ module.exports = class extends Generator {
 
 	configuring() {
 		this.opts.application.sanitizedName = Utils.sanitizeAlphaNumLowerCase(this.opts.application.name);
-		this.opts.application.chartName = Utils.sanitizeAlphaNumLowerCase( this.opts.application.name );
+		this.opts.application.chartName = Utils.sanitizeAlphaNumLowerCase(this.opts.application.name);
 		this.opts.deploy_options.servicePorts = Utils.portDefault[this.opts.application.language.toLowerCase()]
 
 	}
@@ -154,8 +154,8 @@ module.exports = class extends Generator {
 		this.composeWith(require.resolve('../cli_tools'), this.opts);
 
 		if (this.opts.deploy_options) {
-			if ( this.opts.deploy_options.kube ) {
-				if ( this.opts.deploy_options.kube.type == "KNATIVE" ) {
+			if (this.opts.deploy_options.kube) {
+				if (this.opts.deploy_options.kube.type == "KNATIVE") {
 					logger.debug("write knative")
 					this.composeWith(require.resolve('../knative'), this.opts);
 				} else {
@@ -177,7 +177,7 @@ module.exports = class extends Generator {
 	_processAnswers(answers) {
 		// processes answers from the prompts, not part of production flow
 
-		if ( answers.deploymentType == "cloud_foundry" ) {
+		if (answers.deploymentType == "cloud_foundry") {
 			//CF
 			this.opts.deploy_options = {
 				"cloud_foundry": {
@@ -187,7 +187,7 @@ module.exports = class extends Generator {
 					"instances": 3,
 					"memory": "512MB",
 					"service_bindings": {}
-			    }
+				}
 			}
 		} else {
 			//KUBE
@@ -199,7 +199,7 @@ module.exports = class extends Generator {
 					"service_bindings": {}
 				}
 			}
-		} 
+		}
 
 		this.opts.application = {
 			"app_id": "4b395cc4-5149-48e2-b711-b3dd80cf3f11",

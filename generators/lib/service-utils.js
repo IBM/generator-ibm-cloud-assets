@@ -87,7 +87,7 @@ function addServicesEnvToHelmChartAsync(args) {
 		let deploymentFileExists = fs.existsSync(deploymentFilePath);
 		logger.info(`deployment.yaml exists (${deploymentFileExists}) at ${deploymentFilePath}`);
 
-		if ( !deploymentFileExists ){
+		if (!deploymentFileExists) {
 			logger.info(`Can't find required yaml files, checking /chart directory`);
 
 			// chart could've been created with different name than expected
@@ -104,8 +104,8 @@ function addServicesEnvToHelmChartAsync(args) {
 			}
 		}
 
-		if ( deploymentFileExists ) {
-			logger.info(`Adding ${context.deploymentServicesEnv.length} to env in deployment.yaml` );
+		if (deploymentFileExists) {
+			logger.info(`Adding ${context.deploymentServicesEnv.length} to env in deployment.yaml`);
 			return appendDeploymentYaml(deploymentFilePath, context.deploymentServicesEnv, resolve, reject);
 		} else {
 			logger.error('deployment.yaml not found, cannot add services to env');
@@ -139,7 +139,7 @@ function appendDeploymentYaml(deploymentFilePath, services, resolve, reject) {
 
 		// NOW append the line to the string
 		deploymentFileString += `${line}\n`;
-		
+
 	}).on('close', () => {
 		if (promiseIsRejected) { return; }
 		fs.writeFile(deploymentFilePath, deploymentFileString, (err) => {
@@ -289,14 +289,14 @@ function addServicesEnvToValuesAsync(args) {
  *  cred key names... 'cause Spring is extra special :-)
  */
 const SPRING_SERVICE_KEY_MAP =
-	{
-		"cloud-object-storage" : {
-			"spring_boot_service_name": "cos",
-			"spring_boot_service_key_separator": ".",
-			"apikey": "api-key",
-			"resource_instance_id": "service_instance_id"
-		}
+{
+	"cloud-object-storage": {
+		"spring_boot_service_name": "cos",
+		"spring_boot_service_key_separator": ".",
+		"apikey": "api-key",
+		"resource_instance_id": "service_instance_id"
 	}
+}
 
 function getSpringServiceInfo(regularServiceKey) {
 	let value = null;
@@ -338,19 +338,19 @@ function _enable() {
 	//initializing ourselves by composing with the service enabler
 	let root = path.dirname(require.resolve('../service/enabler'));
 	Object.keys(svcInfo).forEach(svc => {
-	serviceKey = svc;
-	serviceCredentials = this.context.application.service_credentials[serviceKey];
-	if (serviceCredentials) {
-		this.context.scaffolderKey = serviceKey;
-		logger.debug("Composing with service : " + svc);
-		try {
-			this.context.cloudLabel = serviceCredentials && serviceCredentials.serviceInfo && serviceCredentials.serviceInfo.cloudLabel;
-			this.composeWith(root, {context: this.context});
-		} catch (err) {
-			/* istanbul ignore next */	//ignore for code coverage as this is just a warning - if the service fails to load the subsequent service test will fail
-			logger.warn('Unable to compose with service', svc, err);
+		serviceKey = svc;
+		serviceCredentials = this.context.application.service_credentials[serviceKey];
+		if (serviceCredentials) {
+			this.context.scaffolderKey = serviceKey;
+			logger.debug("Composing with service : " + svc);
+			try {
+				this.context.cloudLabel = serviceCredentials && serviceCredentials.serviceInfo && serviceCredentials.serviceInfo.cloudLabel;
+				this.composeWith(root, { context: this.context });
+			} catch (err) {
+				/* istanbul ignore next */	//ignore for code coverage as this is just a warning - if the service fails to load the subsequent service test will fail
+				logger.warn('Unable to compose with service', svc, err);
+			}
 		}
-	}
 	});
 }
 
@@ -359,7 +359,7 @@ function _addMappings(serviceMappingsJSON) {
 	this.fs.extendJSON(mappingsFilePath, serviceMappingsJSON);
 }
 
-function _addLocalDevConfig(serviceLocalDevConfigJSON){
+function _addLocalDevConfig(serviceLocalDevConfigJSON) {
 	let localDevConfigFilePath = this.destinationPath(_localDevConfigFilepathMap[this.context.application.language]);
 	this.fs.extendJSON(localDevConfigFilePath, serviceLocalDevConfigJSON);
 }

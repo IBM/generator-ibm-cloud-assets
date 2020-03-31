@@ -40,7 +40,7 @@ module.exports = class extends Generator {
 		if (!serviceMetaData) {
 			return null;
 		}
-		const instanceName = serviceMetaData.hasOwnProperty('serviceInfo') ?
+		const instanceName = Object.prototype.hasOwnProperty.call(serviceMetaData, 'serviceInfo') ?
 			serviceMetaData.serviceInfo : serviceMetaData[0].serviceInfo;
 		return instanceName;
 	}
