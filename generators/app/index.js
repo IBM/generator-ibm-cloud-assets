@@ -174,6 +174,7 @@ module.exports = class extends Generator {
 		logger.debug("end writing")
 	}
 
+	// istanbul ignore next
 	_processAnswers(answers) {
 		// processes answers from the prompts, not part of production flow
 
@@ -210,6 +211,7 @@ module.exports = class extends Generator {
 
 	}
 
+	// istanbul ignore next
 	_sanitizeOption(options, name) {
 		logger.trace(options);
 		const optionValue = options[name];

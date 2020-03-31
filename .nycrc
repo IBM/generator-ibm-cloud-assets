@@ -1,15 +1,18 @@
 {
     "check-coverage": true,
-    "statements": 84,
-    "branches": 72,
-    "functions": 92,
-    "lines": 84,
+    "statements": 80,
+    "branches": 65,
+    "functions": 90,
+    "lines": 80,
     "include": [
         "generators/**/*.js"
     ],
     "exclude": [
-        "generators/cloudfoundry/templates/**",
-        "generators/dockertools/templates/**",
-        "generators/kubernetes/templates/**"
+        "generators/cloud_foundry/templates/**",
+        "generators/clitools/templates/**",
+        "generators/kubernetes/templates/**",
+        "generators/knative/templates/**",
+        "generators/service/templates/**",
+        "manual/"
     ]
 }

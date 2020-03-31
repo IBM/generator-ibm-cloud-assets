@@ -136,50 +136,6 @@ describe('cloud-assets:clitools', function () {
 
 	});
 
-	/*
-	describe('cloud-assets:clitools with Python project -- ibmcloud dev enable', function () {
-		beforeEach(function () {
-			return helpers.run(path.join(__dirname, '../generators/app'))
-				.inDir(path.join(__dirname, './tmp'))
-				.withOptions({
-					bluemix: JSON.stringify(scaffolderSamplePython),
-					enable: true
-				})
-		});
-
-		it('create Dockerfile with informative echo prompt', function () {
-			assert.file(['Dockerfile']);
-			assert.fileContent('Dockerfile', 'echo');
-		});
-
-		it('create Dockerfile-tools with flask', function () {
-			assert.file(['Dockerfile-tools']);
-		})
-
-		it('create CLI-config file with informative echo prompt', function () {
-			assert.file(['cli-config.yml']);
-			assert.fileContent('cli-config.yml', 'echo');
-			assert.fileContent('cli-config.yml', 'acmeproject-flask-run');
-			assert.fileContent('cli-config.yml', `chart-path : "chart/${applicationName.toLowerCase()}"`);
-		});
-
-		it('should have Dockerfile and Dockerfile-tools as the docker run commands', function() {
-			assert.fileContent('cli-config.yml', 'dockerfile-run : "Dockerfile"');
-			assert.fileContent('cli-config.yml', 'dockerfile-tools : "Dockerfile-tools"');
-		});
-
-		it('does not create manage.py file for flask', function () {
-			assert.noFile(['manage.py']);
-		})
-
-		it('create dockerignore file', function () {
-			assert.file([
-				'.dockerignore'
-			]);
-		});
-	});
-	*/
-
 	describe('cloud-assets:clitools with Python project with no services', function () {
 		beforeEach(function () {
 			return helpers.run(path.join(__dirname, '../generators/app'))
@@ -214,45 +170,6 @@ describe('cloud-assets:clitools', function () {
 
 	});
 
-	// describe('cloud-assets:clitools with Django project -- ibmcloud dev enable', function () {
-	// 	beforeEach(function () {
-	// 		return helpers.run(path.join(__dirname, '../generators/app'))
-	// 			.inDir(path.join(__dirname, './tmp'))
-	// 			.withOptions({
-	// 				bluemix: JSON.stringify(scaffolderSampleDjango),
-	// 				enable: true
-	// 			})
-	// 	});
-
-	// 	it('create Dockerfile with informative echo prompt', function () {
-	// 		assert.file(['Dockerfile']);
-	// 		assert.fileContent('Dockerfile', 'echo');
-	// 	});
-
-	// 	it('create Dockerfile-tools with django', function () {
-	// 		assert.file(['Dockerfile-tools']);
-	// 	})
-
-
-	// 	it('should have Dockerfile and Dockerfile-tools as the docker run commands', function() {
-	// 		assert.fileContent('cli-config.yml', 'dockerfile-run : "Dockerfile"');
-	// 		assert.fileContent('cli-config.yml', 'dockerfile-tools : "Dockerfile-tools"');
-	// 	});
-
-
-	// 	it('create CLI-config file with informative echo prompt', function () {
-	// 		assert.file(['cli-config.yml']);
-	// 		assert.fileContent('cli-config.yml', 'echo');
-	// 		assert.fileContent('cli-config.yml', 'acmeproject-django-run');
-	// 		assert.fileContent('cli-config.yml', `chart-path : "chart/${applicationName.toLowerCase()}"`);
-	// 	});
-
-	// 	it('create dockerignore file', function () {
-	// 		assert.file([
-	// 			'.dockerignore'
-	// 		]);
-	// 	});
-	// });
 
 	describe('cloud-assets:clitools with Go project', function () {
 		beforeEach(function () {

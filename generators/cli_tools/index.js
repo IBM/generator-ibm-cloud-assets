@@ -162,15 +162,11 @@ module.exports = class extends Generator {
 
 		this.opts.applicationId = `${this.opts.application.app_id}`;
 
-		if (this.fs.exists(this.destinationPath(FILENAME_CLI_CONFIG))) {
-			logger.trace(FILENAME_CLI_CONFIG, "already exists, skipping.");
-		} else {
-			this._writeHandlebarsFile(
-				this.opts.application.language.toLowerCase() + '/cli-config.yml.template',
-				FILENAME_CLI_CONFIG,
-				this.opts
-			);
-		}
+		this._writeHandlebarsFile(
+			this.opts.application.language.toLowerCase() + '/cli-config.yml.template',
+			FILENAME_CLI_CONFIG,
+			this.opts
+		);
 	}
 
 	_generatePython() {
@@ -205,13 +201,8 @@ module.exports = class extends Generator {
 			credentialsFilepath: (!_.isEmpty(this.opts.application.service_credentials)) ? ServiceUtils.credentialsFilepathMap.PYTHON : ""
 		};
 
-		if (this.fs.exists(this.destinationPath(FILENAME_CLI_CONFIG))) {
-			logger.trace(FILENAME_CLI_CONFIG, "already exists, skipping.");
-		} else {
-			logger.trace(`Generating cli-config with cliConfig: ${JSON.stringify(cliConfig,null,3)}`  )
-			this._writeHandlebarsFile('cli-config-common.yml', FILENAME_CLI_CONFIG, { cliConfig });
-		}
-
+		logger.trace(`Generating cli-config with cliConfig: ${JSON.stringify(cliConfig,null,3)}`  )
+		this._writeHandlebarsFile('cli-config-common.yml', FILENAME_CLI_CONFIG, { cliConfig });
 	}
 	_generateDjango() {
 		const applicationName = this.opts.application.sanitizedName;
@@ -245,13 +236,8 @@ module.exports = class extends Generator {
 			credentialsFilepath: (!_.isEmpty(this.opts.application.service_credentials)) ? ServiceUtils.credentialsFilepathMap.DJANGO : ""
 		};
 
-		if (this.fs.exists(this.destinationPath(FILENAME_CLI_CONFIG))) {
-			logger.trace(FILENAME_CLI_CONFIG, "already exists, skipping.");
-		} else {
-			logger.trace( `Generating cli-config with cliConfig: ${JSON.stringify(cliConfig,null,3)}` )
-			this._writeHandlebarsFile('../templates/cli-config-common.yml', FILENAME_CLI_CONFIG, { cliConfig });
-		}
-
+		logger.trace( `Generating cli-config with cliConfig: ${JSON.stringify(cliConfig,null,3)}` )
+		this._writeHandlebarsFile('../templates/cli-config-common.yml', FILENAME_CLI_CONFIG, { cliConfig });
 	}
 
 	_generateGo() {
@@ -299,18 +285,6 @@ module.exports = class extends Generator {
 			let compiledTemplate = Handlebars.compile(template);
 			let output = compiledTemplate(data);
 			this.fs.write(this.destinationPath(destinationFile), output);
-		}
-	}
-
-	_copyTemplateIfNotExists(targetFileName, sourceTemplatePath, ctx) {
-		if (this.fs.exists(this.destinationPath(targetFileName))) {
-			logger.debug(targetFileName, "already exists, skipping.");
-		} else {
-			this.fs.copyTpl(
-				this.templatePath(sourceTemplatePath),
-				this.destinationPath(targetFileName),
-				ctx
-			);
 		}
 	}
 
