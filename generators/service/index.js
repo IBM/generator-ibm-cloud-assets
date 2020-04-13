@@ -89,7 +89,7 @@ module.exports = class extends Generator {
 				this._generateCredentialsAndroid(this.context.application.service_credentials, CREDENTIALS_XML_FP, this.context.sanitizedAppName)
 				break;
 			case "ios_swift":
-				this._generatePlistIOS(this.context.application.service_credentials, BMS_CREDENTIALS_FP, this.context.sanitizedAppName)			
+				this._generatePlistIOS(this.context.application.service_credentials, BMS_CREDENTIALS_FP, this.context.sanitizedAppName)
 				break;
 			default:
 				logger.info(`No match found for language ${context.application.language.toLowerCase()}`)
@@ -97,7 +97,7 @@ module.exports = class extends Generator {
 
 		if (languageGeneratorPath) {
 			logger.info(`Composing with ${languageGeneratorPath}`);
-			this.composeWith(require.resolve(languageGeneratorPath), {context: context});				
+			this.composeWith(require.resolve(languageGeneratorPath), { context: context });
 		} else { logger.info(`Not running language subgen for language ${context.application.language.toLowerCase()}`) }
 
 	}
@@ -111,23 +111,23 @@ module.exports = class extends Generator {
 	}
 
 	_generateCredentialsAndroid(credentials, filePath, appName) {
-		if ( typeof credentials === "object" && Object.keys(credentials).length > 0 ) {
-            credentials.appName = appName;
-            const xmlString = xmlbuilder.create({resources: credentials }).end({ pretty: true });
+		if (typeof credentials === "object" && Object.keys(credentials).length > 0) {
+			credentials.appName = appName;
+			const xmlString = xmlbuilder.create({ resources: credentials }).end({ pretty: true });
 			logger.info("Writing credentials.xml")
 			try {
 				fs.writeFileSync(this.destinationPath(filePath), xmlString)
 			} catch (err) {
 				logger.info(`Failed to create ${filePath}`)
 				// retry in base dir
-				if (filePath == CREDENTIALS_XML_FP) { this._generateCredentialsAndroid(credentials, "./", appName);}
+				if (filePath == CREDENTIALS_XML_FP) { this._generateCredentialsAndroid(credentials, "./", appName); }
 			}
 		} else { logger.info("Project does not contain credentials, not creating credentials.xml") }
 	}
 
 	_generatePlistIOS(credentials, filePath, appName) {
 		if (typeof credentials === "object" && Object.keys(credentials).length > 0) {
-            credentials.appName = appName;
+			credentials.appName = appName;
 			const plistString = plist.build(credentials);
 			logger.info("Writing BMSCredentials.plist")
 			try {
@@ -135,7 +135,7 @@ module.exports = class extends Generator {
 			} catch (err) {
 				logger.info(`Failed to create BMSCredentials.plist in ${filePath}`)
 				// retry in base dir
-				if (filePath == BMS_CREDENTIALS_FP) {this._generatePlistIOS(credentials, "./", appName)}
+				if (filePath == BMS_CREDENTIALS_FP) { this._generatePlistIOS(credentials, "./", appName) }
 			}
 		} else { logger.info("Project does not contain credentials, not creating BMSCredentials.plist") }
 	}
@@ -145,9 +145,9 @@ module.exports = class extends Generator {
 		// add services secretKeyRefs to values.yaml &&
 		// add secretKeyRefs to service.yaml
 		// all fail gracefully
-		return ServiceUtils.addServicesEnvToHelmChartAsync({context: this.context, destinationPath: this.destinationPath()})
-			.then(() => ServiceUtils.addServicesEnvToValuesAsync({context: this.context, destinationPath: this.destinationPath()}))
-			.then(() => ServiceUtils.addServicesToServiceKnativeYamlAsync({context: this.context, destinationPath: this.destinationPath(Utils.PATH_KNATIVE_YAML)}));
+		return ServiceUtils.addServicesEnvToHelmChartAsync({ context: this.context, destinationPath: this.destinationPath() })
+			.then(() => ServiceUtils.addServicesEnvToValuesAsync({ context: this.context, destinationPath: this.destinationPath() }))
+			.then(() => ServiceUtils.addServicesToServiceKnativeYamlAsync({ context: this.context, destinationPath: this.destinationPath(Utils.PATH_KNATIVE_YAML) }));
 	}
 
 };

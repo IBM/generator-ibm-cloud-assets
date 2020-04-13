@@ -64,7 +64,7 @@ module.exports = class extends Generator {
 	 * @returns {undefined}
 	 */
 	configuring() {
-		this.hasSvcProperty = this.context.application.service_credentials.hasOwnProperty(this.scaffolderName);
+		this.hasSvcProperty = Object.prototype.hasOwnProperty.call(this.context.application.service_credentials, this.scaffolderName);
 		if (this.hasSvcProperty) {
 			this.logger.info(`No available sdk available for ${this.scaffolderName} in ${this.context.application.language}; configuring credentials only`);
 			this._addMappings(this.config);
@@ -80,7 +80,7 @@ module.exports = class extends Generator {
 			this._addMappings(this.config);
 			this._addLocalDevConfig();
 		}
-		
+
 		if (serviceInfo !== undefined) {
 			this._createObjectForKubeYamls(serviceInfo);
 		}
@@ -116,7 +116,7 @@ module.exports = class extends Generator {
 		if (this.context.application.service_credentials[this.scaffolderName]) {
 			let service = this.context.application.service_credentials[this.scaffolderName];
 			this.logger.debug(`included service: ${service}`);
-			if (service.hasOwnProperty('serviceInfo')) {
+			if (Object.prototype.hasOwnProperty.call(service, 'serviceInfo')) {
 				serviceInfo = service.serviceInfo;
 			} else if (Array.isArray(service)) {
 				serviceInfo = service[0].serviceInfo;
@@ -138,7 +138,7 @@ module.exports = class extends Generator {
 					key: 'binding'
 				}
 			},
-			keyName: typeof(serviceInfo) === 'string' ? `${serviceInfo}` : `${serviceInfo.name}`,
+			keyName: typeof (serviceInfo) === 'string' ? `${serviceInfo}` : `${serviceInfo.name}`,
 			scaffolderName: `${this.scaffolderName}`
 		};
 
@@ -173,17 +173,17 @@ module.exports = class extends Generator {
 
 		let serviceCredentials = Array.isArray(this.context.application.service_credentials[this.scaffolderName])
 			? this.context.application.service_credentials[this.scaffolderName][0] : this.context.application.service_credentials[this.scaffolderName];
-		if (this.context.application.service_credentials[this.scaffolderName].hasOwnProperty('serviceInfo')) {
+		if (Object.prototype.hasOwnProperty.call(this.context.application.service_credentials[this.scaffolderName], 'serviceInfo')) {
 			serviceCredentials['serviceInfo'] = this.context.application.service_credentials[this.scaffolderName]['serviceInfo'];
-		} 
+		}
 		else {
 			let deployOpts;
-			if (this.context.deploy_options.hasOwnProperty('kube')) {
+			if (Object.prototype.hasOwnProperty.call(this.context.deploy_options, 'kube')) {
 				deployOpts = this.context.deploy_options.kube;
 			} else {
 				deployOpts = this.context.deploy_options.cloud_foundry;
 			}
-			serviceCredentials['serviceInfo'] = deployOpts && deployOpts.hasOwnProperty('service_bindings') ? deployOpts.service_bindings[this.scaffolderName] : {};
+			serviceCredentials['serviceInfo'] = deployOpts && Object.prototype.hasOwnProperty.call(deployOpts, 'service_bindings') ? deployOpts.service_bindings[this.scaffolderName] : {};
 		}
 		this.logger.debug(`_addMappings - serviceCredentials=${JSON.stringify(serviceCredentials, null, 3)}`);
 		this.logger.debug(`_addMappings - deploy_options=${JSON.stringify(this.context.deploy_options, null, 3)}`);
@@ -214,7 +214,7 @@ module.exports = class extends Generator {
 
 		let template = Handlebars.compile(mapping);
 		let localServiceKey = this.serviceKey;
-		let serviceKeySeparator = '_' 
+		let serviceKeySeparator = '_'
 		let localCredentialKeys = [];
 		let springMapping = null
 		if (this.context.application.language === "SPRING") {
@@ -245,7 +245,7 @@ module.exports = class extends Generator {
 			}
 			else {
 				localCredentialKeys[i][1] = credentialKeys[i]
-			} 
+			}
 		}
 
 		let context = {

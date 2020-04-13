@@ -4,9 +4,6 @@ const logger = Log4js.getLogger("generator-ibm-cloud-assets:languages-node-expre
 const ServiceUtils = require('../../../lib/service-utils');
 let Generator = require('yeoman-generator');
 
-const GENERATE_HERE = "// GENERATE HERE";
-const GENERATOR_LOCATION = 'server';
-
 module.exports = class extends Generator {
 	constructor(args, opts) {
 		super(args, opts);
