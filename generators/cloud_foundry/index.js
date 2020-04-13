@@ -128,7 +128,7 @@ module.exports = class extends Generator {
 		} else {
 			this.manifestConfig.command = 'npm start';
 		}
-
+		this.manifestConfig.env.OPTIMIZE_MEMORY = true;
 		this.manifestConfig.buildpack = 'sdk-for-nodejs';
 		this.manifestConfig.memory = this._getHighestMemorySize(this.manifestConfig.memory, this.opts.nodeCFMinMemory);
 		this.cfIgnoreContent = ['node_modules/', 'node_modules_linux', 'test/', 'vcap-local.js', '.npm/', '.npm-global/'];
@@ -137,7 +137,7 @@ module.exports = class extends Generator {
 	_configureGo() {
 		this.manifestConfig.buildpack = 'go_buildpack';
 		this.manifestConfig.command = undefined;
-		this.manifestConfig.memory = this.manifestConfig.memory || '128M';
+		this.manifestConfig.memory = this.manifestConfig.memory || '64M';
 		this.manifestConfig.env.GOPACKAGENAME = this.opts.application.sanitizedName;
 		try {
 			// pattern type skits need a static GOPACKAGE name specified in static manifest for server.go imports
@@ -165,7 +165,7 @@ module.exports = class extends Generator {
 		}
 		this.manifestConfig.command = manifestCommand;
 		this.manifestConfig.env.SWIFT_BUILD_DIR_CACHE = false;
-		this.manifestConfig.memory = this.manifestConfig.memory || '128M';
+		this.manifestConfig.memory = this.manifestConfig.memory || '64M';
 		this.cfIgnoreContent = ['.build/*', '.build-ubuntu/*', 'Packages/*'];
 	}
 
@@ -190,7 +190,10 @@ module.exports = class extends Generator {
 		let version = this.opts.version ? this.opts.version : "1.0-SNAPSHOT";
 		this.cfIgnoreContent = ['/.classpath', '/.project', '/.settings', '/src/main/liberty/config/server.env', 'target/', 'build/'];
 		this.manifestConfig.buildpack = 'liberty-for-java';
-		this.manifestConfig.memory = this.manifestConfig.memory || '512M';
+		this.manifestConfig.memory = this.manifestConfig.memory || '256M';
+		this.manifestConfig.env.JAVA_OPTS = '-XX:ReservedCodeCacheSize=16M -XX:MaxDirectMemorySize=16M';
+		this.manifestConfig.env.JBP_CONFIG_OPEN_JDK_JRE = '[memory_calculator: {stack_threads: 20}]';
+
 		let buildDir = 'target';
 		let zipPath = `${buildDir}/${this.opts.artifactId}` + `-` + version + `.zip`;
 		this.manifestConfig.path = `./${zipPath}`;
@@ -214,7 +217,9 @@ module.exports = class extends Generator {
 		let version = this.opts.version ? this.opts.version : "1.0-SNAPSHOT";
 		this.cfIgnoreContent = ['/.classpath', '/.project', '/.settings', '/src/main/resources/application-local.properties', 'target/', 'build/'];
 		this.manifestConfig.buildpack = 'java_buildpack';
-		this.manifestConfig.memory = this._getHighestMemorySize(this.manifestConfig.memory, '1024M');
+		this.manifestConfig.memory = this._getHighestMemorySize(this.manifestConfig.memory, '256M');
+		this.manifestConfig.env.JAVA_OPTS = '-XX:ReservedCodeCacheSize=32M -XX:MaxDirectMemorySize=32M';
+		this.manifestConfig.env.JBP_CONFIG_OPEN_JDK_JRE = '[memory_calculator: {stack_threads: 30}]';
 		let buildDir = 'target';
 		let jarPath = `${buildDir}/${this.opts.artifactId}` + `-` + version + `.jar`;
 		this.manifestConfig.path = `./${jarPath}`;
@@ -226,7 +231,7 @@ module.exports = class extends Generator {
 		this.manifestConfig.command = this.opts.enable ?
 			'echo No run command specified in manifest.yml' :
 			'python manage.py start 0.0.0.0:$PORT';
-		this.manifestConfig.memory = this.manifestConfig.memory || '128M';
+		this.manifestConfig.memory = this.manifestConfig.memory || '64M';
 		this.manifestConfig.env.FLASK_APP = 'server';
 		this.manifestConfig.env.FLASK_DEBUG = 'false';
 		this.cfIgnoreContent = ['.pyc', '.egg-info'];
@@ -245,7 +250,7 @@ module.exports = class extends Generator {
 		}
 		//TODO: generalize manifestCommand for bx dev enable commands passed
 		this.manifestConfig.command = this.opts.enable ? 'echo No run command specified in manifest.yml' : manifestCommand;
-		this.manifestConfig.memory = this.manifestConfig.memory || '128M';
+		this.manifestConfig.memory = this.manifestConfig.memory || '64M';
 		this.cfIgnoreContent = ['.pyc', '.egg-info'];
 	}
 
