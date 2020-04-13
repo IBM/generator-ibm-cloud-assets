@@ -190,7 +190,7 @@ module.exports = class extends Generator {
 		let version = this.opts.version ? this.opts.version : "1.0-SNAPSHOT";
 		this.cfIgnoreContent = ['/.classpath', '/.project', '/.settings', '/src/main/liberty/config/server.env', 'target/', 'build/'];
 		this.manifestConfig.buildpack = 'liberty-for-java';
-		this.manifestConfig.memory = this.manifestConfig.memory || '256M';
+		this.manifestConfig.memory = this._getHighestMemorySize(this.manifestConfig.memory, '256M');
 		this.manifestConfig.env.JAVA_OPTS = '-XX:ReservedCodeCacheSize=16M -XX:MaxDirectMemorySize=16M';
 		this.manifestConfig.env.JBP_CONFIG_OPEN_JDK_JRE = '[memory_calculator: {stack_threads: 20}]';
 
@@ -250,7 +250,7 @@ module.exports = class extends Generator {
 		}
 		//TODO: generalize manifestCommand for bx dev enable commands passed
 		this.manifestConfig.command = this.opts.enable ? 'echo No run command specified in manifest.yml' : manifestCommand;
-		this.manifestConfig.memory = this.manifestConfig.memory || '64M';
+		this.manifestConfig.memory = this.manifestConfig.memory || '64 M';
 		this.cfIgnoreContent = ['.pyc', '.egg-info'];
 	}
 
