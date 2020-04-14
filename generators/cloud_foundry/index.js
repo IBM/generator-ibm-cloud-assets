@@ -102,7 +102,10 @@ module.exports = class extends Generator {
 		const bytesMap = {
 			k: 1024,
 			m: 1048576,
-			g: 1073741824
+			g: 1073741824, 
+			K: 1024, 
+			M: 1048576, 
+			G: 1073741824
 		};
 		const manifestValue = parseInt(manifestMemoryConfig.replace(/[M,m,G,g,K,k]/g, ''));
 		const definedValue = parseInt(minNecessaryMemory.replace(/[M,m,G,g,K,k]/g, ''));
@@ -190,7 +193,7 @@ module.exports = class extends Generator {
 		let version = this.opts.version ? this.opts.version : "1.0-SNAPSHOT";
 		this.cfIgnoreContent = ['/.classpath', '/.project', '/.settings', '/src/main/liberty/config/server.env', 'target/', 'build/'];
 		this.manifestConfig.buildpack = 'liberty-for-java';
-		this.manifestConfig.memory = this.manifestConfig.memory || '256M';
+		this.manifestConfig.memory = this._getHighestMemorySize(this.manifestConfig.memory,'256M');
 		this.manifestConfig.env.JAVA_OPTS = '-XX:ReservedCodeCacheSize=16M -XX:MaxDirectMemorySize=16M';
 		this.manifestConfig.env.JBP_CONFIG_OPEN_JDK_JRE = '[memory_calculator: {stack_threads: 20}]';
 
@@ -231,7 +234,7 @@ module.exports = class extends Generator {
 		this.manifestConfig.command = this.opts.enable ?
 			'echo No run command specified in manifest.yml' :
 			'python manage.py start 0.0.0.0:$PORT';
-		this.manifestConfig.memory = this.manifestConfig.memory || '64M';
+		this.manifestConfig.memory = this.manifestConfig.memory || '64M'; 
 		this.manifestConfig.env.FLASK_APP = 'server';
 		this.manifestConfig.env.FLASK_DEBUG = 'false';
 		this.cfIgnoreContent = ['.pyc', '.egg-info'];
