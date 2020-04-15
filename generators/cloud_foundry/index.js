@@ -253,7 +253,7 @@ module.exports = class extends Generator {
 		}
 		//TODO: generalize manifestCommand for bx dev enable commands passed
 		this.manifestConfig.command = this.opts.enable ? 'echo No run command specified in manifest.yml' : manifestCommand;
-		this.manifestConfig.memory = this.manifestConfig.memory || '64 M';
+		this.manifestConfig.memory = this.manifestConfig.memory || '64M';
 		this.cfIgnoreContent = ['.pyc', '.egg-info'];
 	}
 
