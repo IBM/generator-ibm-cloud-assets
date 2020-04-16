@@ -76,7 +76,7 @@ describe('cloud-enablement:cloudfoundry', function () {
 
 		it('manifest.yml has SWIFT_BUILD_DIR_CACHE set to false', function () {
 			assert.file('manifest.yml');
-			assert.fileContent('manifest.yml', 'SWIFT_BUILD_DIR_CACHE : false');
+			assert.fileContent('manifest.yml', 'SWIFT_BUILD_DIR_CACHE: false');
 		});
 
 	});
