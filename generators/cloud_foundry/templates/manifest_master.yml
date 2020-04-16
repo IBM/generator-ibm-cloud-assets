@@ -45,6 +45,6 @@ applications:
   {{#if this.env}}
   env:
   {{#each this.env}}
-    {{{@key}}} : {{{this}}}
+    {{{@key}}}: {{{this}}}
   {{/each}}
   {{/if ~}}
