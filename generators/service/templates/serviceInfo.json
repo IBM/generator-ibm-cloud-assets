@@ -52,7 +52,7 @@
     "databasesForMongo": {
       "scaffolderName": "databasesForMongo",
       "customServiceKey": "databases-for-mongodb",
-      "customCredKeys": ["connection", "instance_administration_api"]
+      "customCredKeys": []
     },
     "mongodb": {
         "scaffolderName": "mongodb",
