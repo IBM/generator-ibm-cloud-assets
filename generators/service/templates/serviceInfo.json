@@ -2,244 +2,136 @@
     "alertNotification": {
         "scaffolderName": "alertNotification",
         "customServiceKey": "alert-notification",
-        "customCredKeys": [],
-        "config": {
-            "cloudFoundryIsArray": true,
-            "mappingVersion": 1
-        }
+        "customCredKeys": []
     },
     "apacheSpark": {
         "scaffolderName": "apacheSpark",
         "customServiceKey": "apache-spark",
-        "customCredKeys": [],
-        "config": {
-            "cloudFoundryIsArray": true,
-            "mappingVersion": 1
-        }
+        "customCredKeys": []
     },
     "appid": {
         "scaffolderName": "appid",
         "customServiceKey": "appid",
-        "customCredKeys": ["tenant_id", "oauth_server_url", "profiles_url", "secret", "client_id"],
-        "config": {
-            "cloudFoundryIsArray": true,
-            "mappingVersion": 1
-        }
+        "customCredKeys": ["tenant_id", "oauth_server_url", "profiles_url", "secret", "client_id"]
     },
     "autoscaling": {
         "scaffolderName": "autoscaling",
         "customServiceKey": "autoscaling",
-        "customCredKeys": [],
-        "config": {
-            "cloudFoundryIsArray": true,
-            "mappingVersion": 1
-        }
+        "customCredKeys": []
     },
     "cloudObjectStorage": {
         "scaffolderName": "cloudObjectStorage",
         "customServiceKey": "cloud-object-storage",
-        "customCredKeys": [],
-        "config": {
-            "cloudFoundryIsArray": true,
-            "mappingVersion": 1
-        }
+        "customCredKeys": []
     },
     "cloudant": {
         "scaffolderName": "cloudant",
         "customServiceKey": "cloudant",
-        "customCredKeys": [],
-        "config": {
-            "cloudFoundryIsArray": true,
-            "mappingVersion": 1
-        }
+        "customCredKeys": []
     },
     "dashDb": {
         "scaffolderName": "dashDb",
         "customServiceKey": "dashdb",
-        "customCredKeys": [],
-        "config": {
-            "cloudFoundryIsArray": true,
-            "mappingVersion": 1
-        }
+        "customCredKeys": []
     },
     "db2OnCloud": {
         "scaffolderName": "db2OnCloud",
         "customServiceKey": "db2",
-        "customCredKeys": [],
-        "config": {
-            "cloudFoundryIsArray": true,
-            "mappingVersion": 1
-        }
+        "customCredKeys": []
     },
     "elephantsql": {
         "scaffolderName": "elephantsql",
         "customServiceKey": "elephant-sql",
-        "customCredKeys": [],
-        "config": {
-            "cloudFoundryIsArray": true,
-            "mappingVersion": 1
-        }
+        "customCredKeys": []
     },
     "hypersecuredb": {
         "scaffolderName": "hypersecuredb",
         "customServiceKey": "hypersecure-dbaas-mongodb",
-        "customCredKeys": ["uri", "ca"],
-        "config": {
-            "cloudFoundryIsArray": true,
-            "mappingVersion": 1
-        }
+        "customCredKeys": ["uri", "ca"]
     },
     "databasesForMongo": {
       "scaffolderName": "databasesForMongo",
       "customServiceKey": "databases-for-mongodb",
-      "customCredKeys": ["connection", "instance_administration_api"],
-      "config": {
-        "cloudFoundryIsArray": true,
-        "mappingVersion": 1
-      }
+      "customCredKeys": ["connection", "instance_administration_api"]
     },
     "mongodb": {
         "scaffolderName": "mongodb",
         "customServiceKey": "compose-for-mongodb",
-        "customCredKeys": ["uri", "ca"],
-        "config": {
-            "cloudFoundryIsArray": true,
-            "mappingVersion": 1
-        }
+        "customCredKeys": ["uri", "ca"]
     },
     "objectStorage": {
         "scaffolderName": "objectStorage",
         "customServiceKey": "object-storage",
-        "customCredKeys": ["project_id", "user_id", "password", "region", "auth_url", "project", "domainName"],
-        "config": {
-            "cloudFoundryIsArray": true,
-            "mappingVersion": 1
-        }
+        "customCredKeys": ["project_id", "user_id", "password", "region", "auth_url", "project", "domainName"]
     },
     "postgresql": {
         "scaffolderName": "postgresql",
         "customServiceKey": "postgre",
-        "customCredKeys": [],
-        "config": {
-            "cloudFoundryIsArray": true,
-            "mappingVersion": 1
-        }
+        "customCredKeys": []
     },
     "push": {
         "scaffolderName": "push",
         "customServiceKey": "push",
-        "customCredKeys": ["app_guid", "apikey", "client_secret", "url"],
-        "config": {
-            "cloudFoundryIsArray": true,
-            "mappingVersion": 1
-        }
+        "customCredKeys": ["app_guid", "apikey", "client_secret", "url"]
     },
     "redis": {
         "scaffolderName": "redis",
         "customServiceKey": "redis",
-        "customCredKeys": [],
-        "config": {
-            "cloudFoundryIsArray": true,
-            "mappingVersion": 1
-        }
+        "customCredKeys": []
     },
     "conversation": {
         "scaffolderName": "conversation",
         "customServiceKey": "watson-conversation",
-        "customCredKeys": [],
-        "config": {
-            "cloudFoundryIsArray": true,
-            "mappingVersion": 1
-        }
+        "customCredKeys": []
     },
     "assistant": {
         "scaffolderName": "assistant",
         "customServiceKey": "watson-assistant",
-        "customCredKeys": [],
-        "config": {
-            "cloudFoundryIsArray": true,
-            "mappingVersion": 1
-        }
+        "customCredKeys": []
     },
     "discovery": {
         "scaffolderName": "discovery",
         "customServiceKey": "watson-discovery",
-        "customCredKeys": [],
-        "config": {
-            "cloudFoundryIsArray": true,
-            "mappingVersion": 1
-        }
+        "customCredKeys": []
     },
     "languageTranslator": {
         "scaffolderName": "languageTranslator",
         "customServiceKey": "watson-language-translator",
-        "customCredKeys": [],
-        "config": {
-            "cloudFoundryIsArray": true,
-            "mappingVersion": 1
-        }
+        "customCredKeys": []
     },
     "naturalLanguageClassifier": {
         "scaffolderName": "naturalLanguageClassifier",
         "customServiceKey": "watson-natural-language-classifier",
-        "customCredKeys": [],
-        "config": {
-            "cloudFoundryIsArray": true,
-            "mappingVersion": 1
-        }
+        "customCredKeys": []
     },
     "naturalLanguageUnderstanding": {
         "scaffolderName": "naturalLanguageUnderstanding",
         "customServiceKey": "watson-natural-language-understanding",
-        "customCredKeys": [],
-        "config": {
-            "cloudFoundryIsArray": true,
-            "mappingVersion": 1
-        }
+        "customCredKeys": []
     },
     "personalityInsights": {
         "scaffolderName": "personalityInsights",
         "customServiceKey": "watson-personality-insights",
-        "customCredKeys": [],
-        "config": {
-            "cloudFoundryIsArray": true,
-            "mappingVersion": 1
-        }
+        "customCredKeys": []
     },
     "speechToText": {
         "scaffolderName": "speechToText",
         "customServiceKey": "watson-speech-to-text",
-        "customCredKeys": [],
-        "config": {
-            "cloudFoundryIsArray": true,
-            "mappingVersion": 1
-        }
+        "customCredKeys": []
     },
     "textToSpeech": {
         "scaffolderName": "textToSpeech",
         "customServiceKey": "watson-text-to-speech",
-        "customCredKeys": [],
-        "config": {
-            "cloudFoundryIsArray": true,
-            "mappingVersion": 1
-        }
+        "customCredKeys": []
     },
     "toneAnalyzer": {
         "scaffolderName": "toneAnalyzer",
         "customServiceKey": "watson-tone-analyzer",
-        "customCredKeys": [],
-        "config": {
-            "cloudFoundryIsArray": true,
-            "mappingVersion": 1
-        }
+        "customCredKeys": []
     },
     "visualRecognition": {
         "scaffolderName": "visualRecognition",
         "customServiceKey": "watson-visual-recognition",
-        "customCredKeys": [],
-        "config": {
-            "cloudFoundryIsArray": true,
-            "mappingVersion": 1
-        }
+        "customCredKeys": []
     }
 }

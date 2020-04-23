@@ -33,7 +33,7 @@ const REGEX_HYPHEN = /-/g;
 module.exports = class extends Generator {
 	constructor(args, opts) {
 		super(args, opts);
-		this.scaffolderName = SvcInfo[opts.context.scaffolderKey]["scaffolderName"];
+		this.scaffolderName = opts.context.scaffolderKey;
 		this.serviceKey = SvcInfo[opts.context.scaffolderKey]["customServiceKey"] || this.scaffolderName;
 		this.customCredKeys = SvcInfo[opts.context.scaffolderKey]["customCredKeys"] || [];
 		this.logger = log4js.getLogger("generator-ibm-cloud-assets:" + this.scaffolderName);
@@ -195,7 +195,7 @@ module.exports = class extends Generator {
 			}
 		});
 
-		let version = config.mappingVersion ? config.mappingVersion : 1;
+		let version = 1;
 		let credentialKeys = this.customCredKeys.length > 0 ? this.customCredKeys : scaffolderKeys.filter(key => { return key !== 'serviceInfo' });
 		let credKeysToScaffolderKeysMap = {};
 
@@ -256,8 +256,7 @@ module.exports = class extends Generator {
 			credentialKeys: localCredentialKeys,
 			map: credKeysToScaffolderKeysMap,
 			cloudFoundryKey: this.cloudFoundryName,
-			cloudFoundryIsArray: config.cloudFoundryIsArray,
-			nestedJSON: config.nestedJSON,
+			cloudFoundryIsArray: true,
 			localDevConfigFP: ServiceUtils.localDevConfigFilepathMap[this.options.context.application.language]
 		};
 
