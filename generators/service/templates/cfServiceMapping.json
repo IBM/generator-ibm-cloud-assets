@@ -6,6 +6,7 @@
     "cloudObjectStorage": "cloud-object-storage",
     "cloudant": "cloudantNoSQLDB",
     "dashDb": "dashDB",
+    "databasesForMongo": "databases-for-mongodb",
     "db2OnCloud": "dashDB For Transactions",
     "elephantsql": "elephantsql",
     "hypersecuredb": "hsdbaas-for-mongodb",

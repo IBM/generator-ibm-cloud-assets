@@ -344,6 +344,7 @@ function _enable() {
 			this.context.scaffolderKey = serviceKey;
 			logger.debug("Composing with service : " + svc);
 			try {
+				// this.context.cloudLabel appears to always be undefined
 				this.context.cloudLabel = serviceCredentials && serviceCredentials.serviceInfo && serviceCredentials.serviceInfo.cloudLabel;
 				this.composeWith(root, { context: this.context });
 			} catch (err) {
