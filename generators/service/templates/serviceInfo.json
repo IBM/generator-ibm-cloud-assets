@@ -2,136 +2,136 @@
     "alertNotification": {
         "scaffolderName": "alertNotification",
         "customServiceKey": "alert-notification",
-        "customCredKeys": []
+		"cfServiceName": "alertnotification"
     },
     "apacheSpark": {
         "scaffolderName": "apacheSpark",
         "customServiceKey": "apache-spark",
-        "customCredKeys": []
+		"cfServiceName": "spark"
     },
     "appid": {
         "scaffolderName": "appid",
         "customServiceKey": "appid",
-        "customCredKeys": ["tenant_id", "oauth_server_url", "profiles_url", "secret", "client_id"]
+        "customCredKeys": ["tenant_id", "oauth_server_url", "profiles_url", "secret", "client_id"],
+		"cfServiceName": "AppID"
     },
     "autoscaling": {
         "scaffolderName": "autoscaling",
         "customServiceKey": "autoscaling",
-        "customCredKeys": []
+		"cfServiceName": "autoscaling"
     },
     "cloudObjectStorage": {
         "scaffolderName": "cloudObjectStorage",
         "customServiceKey": "cloud-object-storage",
-        "customCredKeys": []
+		"cfServiceName": "cloud-object-storage"
     },
     "cloudant": {
         "scaffolderName": "cloudant",
         "customServiceKey": "cloudant",
-        "customCredKeys": []
+		"cfServiceName": "cloudantNoSQLDB"
     },
     "dashDb": {
         "scaffolderName": "dashDb",
         "customServiceKey": "dashdb",
-        "customCredKeys": []
+		"cfServiceName": "dashDB"
+    },
+    "databasesForMongo": {
+        "scaffolderName": "databasesForMongo",
+        "customServiceKey": "databases-for-mongodb",
+        "cfServiceName": "databases-for-mongodb"
     },
     "db2OnCloud": {
         "scaffolderName": "db2OnCloud",
         "customServiceKey": "db2",
-        "customCredKeys": []
+		"cfServiceName": "dashDB For Transactions"
     },
     "elephantsql": {
         "scaffolderName": "elephantsql",
         "customServiceKey": "elephant-sql",
-        "customCredKeys": []
+		"cfServiceName": "elephantsql"
     },
     "hypersecuredb": {
         "scaffolderName": "hypersecuredb",
         "customServiceKey": "hypersecure-dbaas-mongodb",
-        "customCredKeys": ["uri", "ca"]
-    },
-    "databasesForMongo": {
-      "scaffolderName": "databasesForMongo",
-      "customServiceKey": "databases-for-mongodb",
-      "customCredKeys": []
+        "customCredKeys": ["uri", "ca"],
+		"cfServiceName": "hsdbaas-for-mongodb"
     },
     "mongodb": {
         "scaffolderName": "mongodb",
         "customServiceKey": "compose-for-mongodb",
-        "customCredKeys": ["uri", "ca"]
+        "customCredKeys": ["uri", "ca"],
+		"cfServiceName": "compose-for-mongodb"
     },
     "objectStorage": {
         "scaffolderName": "objectStorage",
         "customServiceKey": "object-storage",
-        "customCredKeys": ["project_id", "user_id", "password", "region", "auth_url", "project", "domainName"]
+        "customCredKeys": ["project_id", "user_id", "password", "region", "auth_url", "project", "domainName"],
+		"cfServiceName": "Object-Storage"
     },
     "postgresql": {
         "scaffolderName": "postgresql",
         "customServiceKey": "postgre",
-        "customCredKeys": []
+		"cfServiceName": "compose-for-postgresql"
     },
     "push": {
         "scaffolderName": "push",
         "customServiceKey": "push",
-        "customCredKeys": ["app_guid", "apikey", "client_secret", "url"]
+        "customCredKeys": ["app_guid", "apikey", "client_secret", "url"],
+		"cfServiceName": "imfpush"
     },
     "redis": {
         "scaffolderName": "redis",
         "customServiceKey": "redis",
-        "customCredKeys": []
+		"cfServiceName": "compose-for-redis"
     },
     "conversation": {
         "scaffolderName": "conversation",
         "customServiceKey": "watson-conversation",
-        "customCredKeys": []
-    },
-    "assistant": {
-        "scaffolderName": "assistant",
-        "customServiceKey": "watson-assistant",
-        "customCredKeys": []
+		"cfServiceName": "conversation"
     },
     "discovery": {
         "scaffolderName": "discovery",
         "customServiceKey": "watson-discovery",
-        "customCredKeys": []
+		"cfServiceName": "discovery"
     },
     "languageTranslator": {
         "scaffolderName": "languageTranslator",
         "customServiceKey": "watson-language-translator",
-        "customCredKeys": []
+		"cfServiceName": "languageTranslator"
     },
     "naturalLanguageClassifier": {
         "scaffolderName": "naturalLanguageClassifier",
         "customServiceKey": "watson-natural-language-classifier",
-        "customCredKeys": []
+		"cfServiceName": "naturalLanguageClassifier"
     },
     "naturalLanguageUnderstanding": {
         "scaffolderName": "naturalLanguageUnderstanding",
         "customServiceKey": "watson-natural-language-understanding",
-        "customCredKeys": []
+		"cfServiceName": "naturalLanguageUnderstanding"
     },
     "personalityInsights": {
         "scaffolderName": "personalityInsights",
         "customServiceKey": "watson-personality-insights",
-        "customCredKeys": []
+		"cfServiceName": "personalityInsights"
     },
     "speechToText": {
         "scaffolderName": "speechToText",
         "customServiceKey": "watson-speech-to-text",
-        "customCredKeys": []
+		"cfServiceName": "speechToText"
     },
     "textToSpeech": {
         "scaffolderName": "textToSpeech",
         "customServiceKey": "watson-text-to-speech",
-        "customCredKeys": []
+		"cfServiceName": "textToSpeech"
     },
     "toneAnalyzer": {
         "scaffolderName": "toneAnalyzer",
         "customServiceKey": "watson-tone-analyzer",
-        "customCredKeys": []
+		"cfServiceName": "toneAnalyzer"
     },
     "visualRecognition": {
         "scaffolderName": "visualRecognition",
         "customServiceKey": "watson-visual-recognition",
-        "customCredKeys": []
+		"cfServiceName": "visualRecognition"
     }
 }
