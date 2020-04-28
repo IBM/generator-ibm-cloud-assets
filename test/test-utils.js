@@ -17,7 +17,7 @@
 const _ = require('lodash');
 
 const SVC_CRED_SAMPLES = require("./templates/service_creds.json");
-const CF_SVC_MAPPINGS = require("./../generators/service/templates/cfServiceMapping.json");
+const SCV_MAPPINGS = require("./../generators/service/templates/serviceInfo.json");
 
 const PREFIX_SVC_BINDING_NAME = "my-service-";
 
@@ -73,7 +73,7 @@ function generateTestPayload(tc_type, language, service_keys) {
 			if (tc_type === "cf") {
 				let binding = {}
 				binding["name"] = PREFIX_SVC_BINDING_NAME + key;
-				binding["label"] = CF_SVC_MAPPINGS[key];
+				binding["label"] = SCV_MAPPINGS[key]["cfServiceName"];
 				deploy_opts[Object.keys(deploy_opts)[0]]["service_bindings"][key] = binding;
 			} else {
 				deploy_opts[Object.keys(deploy_opts)[0]]["service_bindings"][key] = PREFIX_SVC_BINDING_NAME + key;

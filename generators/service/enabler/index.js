@@ -26,25 +26,24 @@ const Utils = require('../../lib/utils');
 const ServiceUtils = require('../../lib/service-utils');
 
 const SvcInfo = require('../templates/serviceInfo.json');
-const CfSvcMap = require('../templates/cfServiceMapping.json');
 
 const REGEX_HYPHEN = /-/g;
 
 module.exports = class extends Generator {
 	constructor(args, opts) {
 		super(args, opts);
-		this.scaffolderName = SvcInfo[opts.context.scaffolderKey]["scaffolderName"];
-		this.serviceKey = SvcInfo[opts.context.scaffolderKey]["customServiceKey"] || this.scaffolderName;
-		this.customCredKeys = SvcInfo[opts.context.scaffolderKey]["customCredKeys"] || [];
+		let serviceMappings = SvcInfo[opts.context.scaffolderKey] || {};
+		this.scaffolderName = opts.context.scaffolderKey;
+		this.serviceKey = serviceMappings["customServiceKey"] || this.scaffolderName;
 		this.logger = log4js.getLogger("generator-ibm-cloud-assets:" + this.scaffolderName);
 		this.context = opts.context;
-		this.config = SvcInfo[opts.context.scaffolderKey]["config"];
-		this.cloudFoundryName = this.context.cloudLabel || CfSvcMap[opts.context.scaffolderKey];
-		this.serviceName = SvcInfo[opts.context.scaffolderKey]["customServiceKey"] ? `service-${SvcInfo[opts.context.scaffolderKey]["customServiceKey"]}` : `service-${this.scaffolderName}`;
+		this.config = {};
+		this.cloudFoundryName = this.context.cloudLabel || serviceMappings["cfServiceName"] || this.scaffolderName;
+		this.serviceName = serviceMappings["customServiceKey"] ? `service-${serviceMappings["customServiceKey"]}` : `service-${this.scaffolderName}`;
 		this.logger.level = this.context.loggerLevel;
 		this.languageTemplatePath = this.templatePath() + "/" + this.context.application.language;
 		this.applicationType = (this.context.starter && this.context.starter.applicationType) ? this.context.starter.applicationType : "BLANK";
-		this.logger.debug(`Constructing: scaffolderName=${this.scaffolderName}, serviceKey=${this.serviceKey}, customCredKeys=${this.customCredKeys}`);
+		this.logger.debug(`Constructing: scaffolderName=${this.scaffolderName}, serviceKey=${this.serviceKey}`);
 	}
 
 	initializing() {
@@ -52,13 +51,8 @@ module.exports = class extends Generator {
 	}
 
 	/**
-	 * The configuration context for service generators. This phase will execute the appropriate methods to add the mappings,
-	 * implementation code, and deployment configurtation for each service. There are few exceptions to note:
-	 *
-	 *	Only add service credentials to the pipeline.yml if service information (e.g. label, name, etc) exists for that that servive
-	 *	Only add mapping file and local-dev config file if the service is not autoscaling or the service does not have an SDK
-	 *  Only add appid code snippets for node apps when it's a web app
-	 *
+	 * The configuration context for services. This phase will execute the appropriate methods to add the mappings,
+	 *  and deployment configurtation for each service. 
 	 *
 	 * @param config
 	 * @returns {undefined}
@@ -66,7 +60,7 @@ module.exports = class extends Generator {
 	configuring() {
 		this.hasSvcProperty = Object.prototype.hasOwnProperty.call(this.context.application.service_credentials, this.scaffolderName);
 		if (this.hasSvcProperty) {
-			this.logger.info(`No available sdk available for ${this.scaffolderName} in ${this.context.application.language}; configuring credentials only`);
+			this.logger.info(`${this.scaffolderName} in ${this.context.application.language}; configuring credentials only`);
 			this._addMappings(this.config);
 			this._addLocalDevConfig();
 		} else {
@@ -195,8 +189,8 @@ module.exports = class extends Generator {
 			}
 		});
 
-		let version = config.mappingVersion ? config.mappingVersion : 1;
-		let credentialKeys = this.customCredKeys.length > 0 ? this.customCredKeys : scaffolderKeys.filter(key => { return key !== 'serviceInfo' });
+		let version = 1;
+		let credentialKeys = scaffolderKeys.filter(key => { return key !== 'serviceInfo' });
 		let credKeysToScaffolderKeysMap = {};
 
 		scaffolderKeys.sort();
@@ -256,8 +250,7 @@ module.exports = class extends Generator {
 			credentialKeys: localCredentialKeys,
 			map: credKeysToScaffolderKeysMap,
 			cloudFoundryKey: this.cloudFoundryName,
-			cloudFoundryIsArray: config.cloudFoundryIsArray,
-			nestedJSON: config.nestedJSON,
+			cloudFoundryIsArray: true,
 			localDevConfigFP: ServiceUtils.localDevConfigFilepathMap[this.options.context.application.language]
 		};
 
