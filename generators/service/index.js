@@ -120,7 +120,7 @@ module.exports = class extends Generator {
 			} catch (err) {
 				logger.info(`Failed to create ${filePath}`)
 				// retry in base dir
-				if (filePath == CREDENTIALS_XML_FP) { this._generateCredentialsAndroid(credentials, "./", appName); }
+				if (filePath == CREDENTIALS_XML_FP) { this._generateCredentialsAndroid(credentials, "./credentials.xml", appName); }
 			}
 		} else { logger.info("Project does not contain credentials, not creating credentials.xml") }
 	}
@@ -135,7 +135,7 @@ module.exports = class extends Generator {
 			} catch (err) {
 				logger.info(`Failed to create BMSCredentials.plist in ${filePath}`)
 				// retry in base dir
-				if (filePath == BMS_CREDENTIALS_FP) { this._generatePlistIOS(credentials, "./", appName) }
+				if (filePath == BMS_CREDENTIALS_FP) { this._generatePlistIOS(credentials, "./BMSCredentials.plist", appName) }
 			}
 		} else { logger.info("Project does not contain credentials, not creating BMSCredentials.plist") }
 	}
