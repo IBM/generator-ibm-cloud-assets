@@ -161,7 +161,7 @@ module.exports = class extends Generator {
 		return map;
 	}
 
-	_addMappings(config) {
+	_addMappings() {
 		if (this.context.application.language === "swift") return;
 		this.logger.info(`Adding mappings for ${this.scaffolderName}`);
 
@@ -277,14 +277,14 @@ module.exports = class extends Generator {
 			keys = Object.keys(serviceCredentials);
 		for (let i = 0; i < keys.length; i++) {
 			key = keys[i];
-			if (typeof (serviceCredentials[key]) === 'object' && key !== 'serviceInfo') {
-				templateContent = this._setCredentialMapping(templateContent, serviceCredentials[key], `${this.serviceKey}_${key}`);
-				continue;
+			let value = serviceCredentials[key];
+			if (value !== null && value !== undefined && typeof (value) === 'object' && key !== 'serviceInfo') {
+				// if value is object recursively repeat to inject complete object
+				templateContent = this._setCredentialMapping(templateContent, value, `${this.serviceKey}_${key}`);
 			}
-
-			if (key !== 'serviceInfo') {
+			else if (value !== null && value !== undefined && value && key !== 'serviceInfo') {
 				currentKey = currentKey.replace(/-/g, '_');
-				templateContent[`${currentKey}_${key}`] = serviceCredentials[key];
+				templateContent[`${currentKey}_${key}`] = value;
 			}
 		}
 
