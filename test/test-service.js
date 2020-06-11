@@ -108,6 +108,11 @@ function validateCreds(lang, service) {
 			// assert.fileContent(mappings_path, testUtils.PREFIX_SVC_BINDING_NAME + services);
 			assert.fileContent(mappings_path, `service_${SvcInfo[service]["customServiceKey"].replace(/-/g, '_')}`);
 		}
+
+		if (lang == "SWIFT") {
+			//ensure that mappings.json _transformCredentialsOutputSwift has occured
+			assert.noFileContent(mappings_path, `"version": 1,`);
+		}
 	});
 }
 
