@@ -29,6 +29,9 @@ module.exports = class extends Generator {
 		//Stopgap solution while we get both approaches for laying down credentials:
 		//fine-grained vs. coarse-grained
 		this.context.enable();
+	}
+
+	end() {
 		this._transformCredentialsOutputSwift();
 	}
 
