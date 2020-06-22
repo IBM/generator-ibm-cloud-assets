@@ -40,7 +40,7 @@ describe('cloud-assets:knative', function () {
 	it('has correct service.yaml contents', function () {
 		let serviceYamlFilePath = './service.yaml';
 		const targetServiceYaml = {
-			"apiVersion": "serving.knative.dev/v1alpha1",
+			"apiVersion": "serving.knative.dev/v1",
 			"kind": "Service",
 			"metadata": {
 				"name": knativeOptions.application.chartName
@@ -50,7 +50,7 @@ describe('cloud-assets:knative', function () {
 					"spec": {
 						"containers": [
 							{
-								"image": "REGISTRY_URL/REGISTRY_NAMESPACE/IMAGE_NAME:BUILD_NUMBER",
+								"image": "$IMAGE_REPOSITORY",
 								"ports": [
 									{
 										"containerPort": 3000
@@ -76,6 +76,11 @@ describe('cloud-assets:knative', function () {
 										}
 									}
 								]
+							}
+						],
+						"imagePullSecrets": [
+							{
+								"name": "$IMAGE_PULL_SECRET_NAME"
 							}
 						]
 					}
