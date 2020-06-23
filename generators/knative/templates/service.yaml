@@ -1,5 +1,4 @@
----
-apiVersion: serving.knative.dev/v1alpha1
+apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
   name: {{#toLowerCase application.sanitizedName}}{{/toLowerCase}}
@@ -7,6 +6,8 @@ spec:
   template:
     spec:
       containers:
-        - image: REGISTRY_URL/REGISTRY_NAMESPACE/IMAGE_NAME:BUILD_NUMBER
+        - image: $IMAGE_REPOSITORY
           ports:
             - containerPort: {{ deploy_options.servicePorts.http }}
+      imagePullSecrets:
+        - name: $IMAGE_PULL_SECRET_NAME
