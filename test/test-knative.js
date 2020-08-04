@@ -77,11 +77,6 @@ describe('cloud-assets:knative', function () {
 									}
 								]
 							}
-						],
-						"imagePullSecrets": [
-							{
-								"name": "$IMAGE_PULL_SECRET_NAME"
-							}
 						]
 					}
 				}
