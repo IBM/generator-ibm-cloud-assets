@@ -9,5 +9,3 @@ spec:
         - image: $IMAGE_REPOSITORY
           ports:
             - containerPort: {{ deploy_options.servicePorts.http }}
-      imagePullSecrets:
-        - name: $IMAGE_PULL_SECRET_NAME
