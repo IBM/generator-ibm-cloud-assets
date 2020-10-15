@@ -49,6 +49,11 @@ function generateDeployOpts() {
 				"service_bindings": {}
 			}
 		},
+		"code_engine": {
+			"code_engine": {
+				"service_bindings": {}
+			}
+		},
 		"helm": {
 			"kube": {
 				"type": "HELM",
@@ -75,6 +80,9 @@ function generateTestPayload(tc_type, language, service_keys) {
 				binding["name"] = PREFIX_SVC_BINDING_NAME + key;
 				binding["label"] = SCV_MAPPINGS[key]["cfServiceName"];
 				deploy_opts[Object.keys(deploy_opts)[0]]["service_bindings"][key] = binding;
+			}
+			else if (tc_type === "code_engine") {
+				deploy_opts["code_engine"]["service_bindings"][key] = PREFIX_SVC_BINDING_NAME + key;
 			} else {
 				deploy_opts[Object.keys(deploy_opts)[0]]["service_bindings"][key] = PREFIX_SVC_BINDING_NAME + key;
 			}
