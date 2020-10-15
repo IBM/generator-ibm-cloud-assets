@@ -27,6 +27,9 @@
     "coveralls": "nyc report --reporter=text-lcov | coveralls",
     "version": "standard-version"
   },
+  "engines": {
+    "node": ">=14.0.0"
+  },
   "dependencies": {
     "fs-extra": "^9.0.1",
     "glob": "^7.1.6",
@@ -45,10 +48,11 @@
     "yeoman-generator": "^4.10.1"
   },
   "devDependencies": {
+    "babel-eslint": "^10.1.0",
     "coveralls": "^3.1.0",
-    "eslint": "^7.2.0",
+    "eslint": "^7.8.1",
     "eslint-plugin-ejs": "0.0.2",
-    "mocha": "^8.0.1",
+    "mocha": "^8.1.3",
     "mocha-multi-reporters": "^1.1.7",
     "nyc": "^15.1.0",
     "standard-version": "^8.0.2",

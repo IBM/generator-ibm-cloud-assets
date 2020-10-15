@@ -1,18 +1,18 @@
 /*
- * © Copyright IBM Corp. 2019, 2020
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+* © Copyright IBM Corp. 2019, 2020
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 'use strict';
 
 const Log4js = require('log4js');
@@ -110,6 +110,81 @@ module.exports = class extends Generator {
 		return (cleanName || 'APP').toLowerCase();
 	}
 
+	_generateMappingsJson(context) {
+		const credentials = context?.application?.service_credentials;
+
+		if (typeof credentials === "object" && Object.keys(credentials).length > 0) {
+			const localDevConfigFilePath = ServiceUtils.localDevConfigFilepathMap[context.application.language];
+			let mappings = {};
+
+			// loop over all service credentials
+			for (const serviceId in credentials) {
+				const cfLabel = context?.deploy_options?.cloud_foundry?.service_bindings?.[serviceId];
+				const kubeSecret = context?.deploy_options?.kube?.service_bindings?.[serviceId];
+				const cePrefix = context?.deploy_options?.code_engine?.service_bindings?.[serviceId];
+
+				// loop over all keys in credentials
+				for (const key in credentials[serviceId]) {
+					const mapKey = serviceId + '_' + key;
+					mappings[mapKey] = {
+						searchPatterns: []
+					};
+
+					// add CF search pattern if CF deployment
+					if (cfLabel) {
+						// example: "cloudfoundry:$['cloudantNoSQLDB'][0].credentials.url"
+						mappings[mapKey].searchPatterns.push('cloudfoundry:$[\'' + cfLabel + '\'][0].credentials.' + key);
+					}
+
+					// add Kube search pattern if Kube deployment
+					if (kubeSecret) {
+						// example: "env:service_cloudant:$.apikey"
+						mappings[mapKey].searchPatterns.push('env:service_' + serviceId + ':$.' + key);
+					}
+
+					// add Code Engine search pattern if Code Engine deployment
+					if (cePrefix) {
+						mappings[mapKey].searchPatterns.push('env:' + cePrefix + "_");
+					}
+
+					// always add file search pattern for local dev config
+					// example: "file:/server/localdev-config.json:$.cloudant_apikey"
+					mappings[mapKey].searchPatterns.push('file:/' + localDevConfigFilePath + ':$.' + serviceId + '_' + key);
+				}
+			}
+
+			// add a search pattern for the overall credentials object
+			// 		"cloudant": {
+			//   "credentials": {
+			//     "searchPatterns": [
+			//       "user-provided::username",
+			//       "cloudfoundry:cloudant",
+			//       "env:cloudant_credentials",
+			//       "file:/server/localdev-config.json:cloudant_credentials"
+			//     ]
+			//   }
+			// }
+			// mappings[serviceId] = {
+			// 	credentials: {
+			// 		searchPatterns: [
+			// 			"cloudfoundry:" +
+			// 		]
+			// 	}
+			// };
+
+			// save mappings to file
+			const mappingsFilePath = ServiceUtils.mappingsFilepathMap[context.application.language];
+			try {
+				fs.writeFileSync(this.destinationPath(mappingsFilePath), JSON.stringify(mappings, null, 2));
+			} catch (err) {
+				logger.info(`Failed to create ${mappingsFilePath}`)
+			}
+		}
+		else {
+			logger.info("Application does not contain credentials, not creating mappings.json");
+		}
+	}
+
 	_generateCredentialsAndroid(credentials, filePath, appName) {
 		if (typeof credentials === "object" && Object.keys(credentials).length > 0) {
 			credentials.appName = appName;
@@ -145,9 +220,15 @@ module.exports = class extends Generator {
 		// add services secretKeyRefs to values.yaml &&
 		// add secretKeyRefs to service.yaml
 		// all fail gracefully
-		return ServiceUtils.addServicesEnvToHelmChartAsync({ context: this.context, destinationPath: this.destinationPath() })
-			.then(() => ServiceUtils.addServicesEnvToValuesAsync({ context: this.context, destinationPath: this.destinationPath() }))
-			.then(() => ServiceUtils.addServicesToServiceKnativeYamlAsync({ context: this.context, destinationPath: this.destinationPath(Utils.PATH_KNATIVE_YAML) }));
+		return ServiceUtils.addServicesEnvToHelmChartAsync({
+			context: this.context,
+			destinationPath: this.destinationPath()
+		}).then(() => ServiceUtils.addServicesEnvToValuesAsync({
+			context: this.context,
+			destinationPath: this.destinationPath()
+		})).then(() => ServiceUtils.addServicesToServiceKnativeYamlAsync({
+			context: this.context,
+			destinationPath: this.destinationPath(Utils.PATH_KNATIVE_YAML)
+		}));
 	}
-
 };
