@@ -196,9 +196,10 @@ module.exports = class extends Generator {
 		this.manifestConfig.memory = this._getHighestMemorySize(this.manifestConfig.memory,'256M');
 		this.manifestConfig.env.JAVA_OPTS = "'-XX:ReservedCodeCacheSize=16M -XX:MaxDirectMemorySize=16M'";
 		this.manifestConfig.env.JBP_CONFIG_OPEN_JDK_JRE = "'[memory_calculator: {stack_threads: 20}]'";
+		this.manifestConfig.env.JBP_CONFIG_LIBERTY = "'app_archive: {features: [microProfile-3.3]}'";
 
 		let buildDir = 'target';
-		let zipPath = `${buildDir}/${this.opts.artifactId}` + `-` + version + `.zip`;
+		let zipPath = `${buildDir}/javalibertyapp.war`;
 		this.manifestConfig.path = `./${zipPath}`;
 		let excludes = [];
 
