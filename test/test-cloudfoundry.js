@@ -151,7 +151,7 @@ describe('cloud-enablement:cloudfoundry', function () {
 
 					if (language === 'JAVA') {
 						assertYmlContent(manifestyml.applications[0].env.IBM_LIBERTY_BETA, undefined, 'manifestyml.applications[0].env.IBM_LIBERTY_BETA')
-						assertYmlContent(manifestyml.applications[0].env.JBP_CONFIG_LIBERTY, true, 'manifestyml.applications[0].env.JBP_CONFIG_LIBERTY')
+						assertYmlContent(manifestyml.applications[0].env.JBP_CONFIG_LIBERTY, 'app_archive: {features: [microProfile-3.3]}', 'manifestyml.applications[0].env.JBP_CONFIG_LIBERTY')
 					}
 
 					if (language === 'libertyBeta') {
