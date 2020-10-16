@@ -190,7 +190,6 @@ module.exports = class extends Generator {
 	}
 
 	_configureLiberty() {
-		let version = this.opts.version ? this.opts.version : "1.0-SNAPSHOT";
 		this.cfIgnoreContent = ['/.classpath', '/.project', '/.settings', '/src/main/liberty/config/server.env', 'target/', 'build/'];
 		this.manifestConfig.buildpack = 'liberty-for-java';
 		this.manifestConfig.memory = this._getHighestMemorySize(this.manifestConfig.memory,'256M');
