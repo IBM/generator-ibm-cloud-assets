@@ -144,14 +144,14 @@ describe('cloud-enablement:cloudfoundry', function () {
 
 					if (language === 'JAVA' || language === 'libertyBeta') {
 						let targetDir = buildType === 'maven' ? 'target' : 'build'
-						assertYmlContent(manifestyml.applications[0].path, './' + targetDir + '/' + artifactId + '-' + javaVersion +'.zip', 'manifestyml.applications[0].path');
+						assertYmlContent(manifestyml.applications[0].path, './' + targetDir + '/' + 'javalibertyapp.war', 'manifestyml.applications[0].path');
 						assertYmlContent(manifestyml.applications[0].memory, '512M', 'manifestyml.applications[0].memory')
 						assertYmlContent(manifestyml.applications[0].buildpack, 'liberty-for-java', 'manifestyml.applications[0].buildpack')
 					}
 
 					if (language === 'JAVA') {
 						assertYmlContent(manifestyml.applications[0].env.IBM_LIBERTY_BETA, undefined, 'manifestyml.applications[0].env.IBM_LIBERTY_BETA')
-						assertYmlContent(manifestyml.applications[0].env.JBP_CONFIG_LIBERTY, undefined, 'manifestyml.applications[0].env.JBP_CONFIG_LIBERTY')
+						assertYmlContent(manifestyml.applications[0].env.JBP_CONFIG_LIBERTY, true, 'manifestyml.applications[0].env.JBP_CONFIG_LIBERTY')
 					}
 
 					if (language === 'libertyBeta') {
