@@ -190,15 +190,15 @@ module.exports = class extends Generator {
 	}
 
 	_configureLiberty() {
-		let version = this.opts.version ? this.opts.version : "1.0-SNAPSHOT";
 		this.cfIgnoreContent = ['/.classpath', '/.project', '/.settings', '/src/main/liberty/config/server.env', 'target/', 'build/'];
 		this.manifestConfig.buildpack = 'liberty-for-java';
 		this.manifestConfig.memory = this._getHighestMemorySize(this.manifestConfig.memory,'256M');
 		this.manifestConfig.env.JAVA_OPTS = "'-XX:ReservedCodeCacheSize=16M -XX:MaxDirectMemorySize=16M'";
 		this.manifestConfig.env.JBP_CONFIG_OPEN_JDK_JRE = "'[memory_calculator: {stack_threads: 20}]'";
+		this.manifestConfig.env.JBP_CONFIG_LIBERTY = "'app_archive: {features: [microProfile-3.3]}'";
 
 		let buildDir = 'target';
-		let zipPath = `${buildDir}/${this.opts.artifactId}` + `-` + version + `.zip`;
+		let zipPath = `${buildDir}/javalibertyapp.war`;
 		this.manifestConfig.path = `./${zipPath}`;
 		let excludes = [];
 
