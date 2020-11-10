@@ -156,22 +156,21 @@ module.exports = class extends Generator {
 		if (this.opts.deploy_options) {
 			if (this.opts.deploy_options.kube) {
 				if (this.opts.deploy_options.kube.type == "KNATIVE") {
-					logger.debug("write knative")
+					logger.debug("write Knative");
 					this.composeWith(require.resolve('../knative'), this.opts);
 				} else {
-					logger.debug("write helm")
+					logger.debug("write Helm");
 					this.composeWith(require.resolve('../kubernetes'), this.opts);
 				}
-
 			} else if (this.opts.deploy_options.cloud_foundry) {
-				logger.debug("write CF")
+				logger.debug("write CF");
 				this.composeWith(require.resolve('../cloud_foundry'), this.opts);
 			}
 		}
-		logger.debug("write services")
+		logger.debug("write services");
 		this.composeWith(require.resolve('../service'), this.opts);
 
-		logger.debug("end writing")
+		logger.debug("end writing");
 	}
 
 	// istanbul ignore next

@@ -1,18 +1,18 @@
 /*
- * © Copyright IBM Corp. 2019, 2020
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+* © Copyright IBM Corp. 2019, 2020
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 'use strict';
 
 const Log4js = require('log4js');
@@ -145,9 +145,15 @@ module.exports = class extends Generator {
 		// add services secretKeyRefs to values.yaml &&
 		// add secretKeyRefs to service.yaml
 		// all fail gracefully
-		return ServiceUtils.addServicesEnvToHelmChartAsync({ context: this.context, destinationPath: this.destinationPath() })
-			.then(() => ServiceUtils.addServicesEnvToValuesAsync({ context: this.context, destinationPath: this.destinationPath() }))
-			.then(() => ServiceUtils.addServicesToServiceKnativeYamlAsync({ context: this.context, destinationPath: this.destinationPath(Utils.PATH_KNATIVE_YAML) }));
+		return ServiceUtils.addServicesEnvToHelmChartAsync({
+			context: this.context,
+			destinationPath: this.destinationPath()
+		}).then(() => ServiceUtils.addServicesEnvToValuesAsync({
+			context: this.context,
+			destinationPath: this.destinationPath()
+		})).then(() => ServiceUtils.addServicesToServiceKnativeYamlAsync({
+			context: this.context,
+			destinationPath: this.destinationPath(Utils.PATH_KNATIVE_YAML)
+		}));
 	}
-
 };

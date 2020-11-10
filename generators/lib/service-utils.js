@@ -370,6 +370,7 @@ module.exports = {
 	addServicesToServiceKnativeYamlAsync: addServicesToServiceKnativeYamlAsync,
 	credentialsFilepathMap: _credentialsFilepathMap,
 	localDevConfigFilepathMap: _localDevConfigFilepathMap,
+	mappingsFilepathMap: _mappingsFilepathMap,
 	enable: _enable,
 	addMappings: _addMappings,
 	addLocalDevConfig: _addLocalDevConfig

@@ -39,7 +39,7 @@ function validateHelmChart(lang, deploy_type, service, applicationName) {
 	assert.file(chartLocation + '/templates/service.yaml');
 	assert.file(chartLocation + '/templates/hpa.yaml');
 	assert.file(chartLocation + '/templates/basedeployment.yaml');
-	
+
 	assert.fileContent(chartLocation + '/templates/deployment.yaml', `service_${SvcInfo[service]["customServiceKey"].replace(/-/g, '_')}`);
 	assert.fileContent(chartLocation + '/templates/deployment.yaml', `.Values.services.${service}.secretKeyRef`);
 	assert.fileContent(valuesFile, `my-service-${service}`);
@@ -49,7 +49,7 @@ function validateKnativeService(lang, deploy_type, service) {
 	assert.file([
 		'service.yaml'
 	]);
-	
+
 	assert.fileContent('service.yaml', `service_${SvcInfo[service]["customServiceKey"].replace(/-/g, '_')}`);
 	assert.fileContent('service.yaml', `my-service-${service.toLowerCase()}`);
 }
@@ -69,7 +69,7 @@ function validateDeployAssets(lang, deploy_type, service) {
 			validateKnativeService(lang, deploy_type, service);
 		} else if (deploy_type === "helm") {
 			validateHelmChart(lang, deploy_type, service, applicationName);
-		} else {
+		} else if (deploy_type === "cf") {
 			validateCF(lang, deploy_type, service, applicationName);
 		}
 	});
@@ -82,19 +82,19 @@ function validateCreds(lang, service) {
 		if (lang === "NODE") {
 			mappings_path = 'server/config/mappings.json';
 			localdev_path = 'server/localdev-config.json';
-	
+
 		} else if (lang === "PYTHON") {
 			mappings_path = 'server/config/mappings.json';
 			localdev_path = 'server/localdev-config.json';
-	
+
 		} else if (lang === "JAVA" || lang === "SPRING") {
 			mappings_path = 'src/main/resources/mappings.json';
 			localdev_path = 'src/main/resources/localdev-config.json';
-	
+
 		} else if (lang === "SWIFT") {
 			mappings_path = 'config/mappings.json';
 			localdev_path = 'config/localdev-config.json';
-	
+
 		} else if (lang === "GO") {
 			mappings_path = 'server/config/mappings.json';
 			localdev_path = 'server/localdev-config.json';
@@ -106,7 +106,7 @@ function validateCreds(lang, service) {
 			, "naturalLanguageUnderstanding" , "personalityInsights" , "speechToText"
 			, "textToSpeech", "toneAnalyzer" , "visualRecognition"].includes(service)) {
 			// assert.fileContent(mappings_path, testUtils.PREFIX_SVC_BINDING_NAME + services);
-			assert.fileContent(mappings_path, `service_${SvcInfo[service]["customServiceKey"].replace(/-/g, '_')}`);
+			assert.fileContent(mappings_path, service.replace(/-/g, '_'));
 		}
 
 		if (lang == "SWIFT") {
@@ -118,7 +118,7 @@ function validateCreds(lang, service) {
 
 function validateCredsMobile(lang, service) {
 	let credentials_path = ""
-	let mappings_and_configs_paths = ['server/config', 'server', 'src/main/resources', 'config'] 
+	let mappings_and_configs_paths = ['server/config', 'server', 'src/main/resources', 'config']
 	it('mobile mappings.json and localdev-config.json dont exist', function () {
 		mappings_and_configs_paths.forEach( path => {
 			assert.noFile(`${path}/localdev-config.json`)
@@ -156,7 +156,7 @@ describe("cloud-assets:service", function() {
 
 				validateDeployAssets(goLang, deploy_type, service);
 				validateCreds(goLang, service);
-		
+
 				it('Gopkg.toml not created', function () {
 					assert.noFile([
 						'Gopkg.toml'
@@ -177,14 +177,14 @@ describe("cloud-assets:service", function() {
 
 				validateDeployAssets(nodeLang, deploy_type, service);
 				validateCreds(nodeLang, service);
-		
+
 				it('package.json not created', function () {
 					assert.noFile([
 						'package.json'
 					]);
 				});
 			});
-			
+
 			const pythonLang = "PYTHON";
 			describe(`cloud-assets:service-${service} with ${pythonLang} project deployed with ${deploy_type}`, function () {
 				logger.debug(`beginning test suite ${this.title}`);
@@ -214,7 +214,7 @@ describe("cloud-assets:service", function() {
 				validateDeployAssets(javaLang, deploy_type, service);
 				validateCreds(javaLang, service);
 			});
-			
+
 			const springLang = "SPRING";
 			describe(`cloud-assets:service-${service} with ${springLang} project deployed with ${deploy_type}`, function () {
 				logger.debug(`beginning test suite ${this.title}`);
@@ -243,7 +243,7 @@ describe("cloud-assets:service", function() {
 
 				validateDeployAssets(swiftLang, deploy_type, service);
 				validateCreds(swiftLang, service);
-		
+
 				it('Package.swift not created', function () {
 					assert.noFile([
 						'Package.swift'

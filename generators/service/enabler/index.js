@@ -1,26 +1,23 @@
 /*
- * © Copyright IBM Corp. 2019, 2020
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+* © Copyright IBM Corp. 2019, 2020
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 'use strict';
 
 const log4js = require('log4js');
 const Generator = require('yeoman-generator');
-const fs = require('fs');
 const camelCase = require('lodash/camelCase');
-const path = require('path');
-const Handlebars = require('handlebars');
 
 const Utils = require('../../lib/utils');
 const ServiceUtils = require('../../lib/service-utils');
@@ -51,12 +48,12 @@ module.exports = class extends Generator {
 	}
 
 	/**
-	 * The configuration context for services. This phase will execute the appropriate methods to add the mappings,
-	 *  and deployment configurtation for each service. 
-	 *
-	 * @param config
-	 * @returns {undefined}
-	 */
+	* The configuration context for services. This phase will execute the appropriate methods to add the mappings,
+	*  and deployment configurtation for each service.
+	*
+	* @param config
+	* @returns {undefined}
+	*/
 	configuring() {
 		this.hasSvcProperty = Object.prototype.hasOwnProperty.call(this.context.application.service_credentials, this.scaffolderName);
 		if (this.hasSvcProperty) {
@@ -162,11 +159,12 @@ module.exports = class extends Generator {
 	}
 
 	_addMappings() {
-		if (this.context.application.language === "swift") return;
-		this.logger.info(`Adding mappings for ${this.scaffolderName}`);
-
-		let serviceCredentials = Array.isArray(this.context.application.service_credentials[this.scaffolderName])
-			? this.context.application.service_credentials[this.scaffolderName][0] : this.context.application.service_credentials[this.scaffolderName];
+		// This section basically sets a serviceInfo object
+		// that is used when updating Kube/Knative ymls to
+		// include service binding
+		// It's dumb and has nothing to do with mappings.json,
+		// but leaving it here due to legacy code.
+		let serviceCredentials = Array.isArray(this.context.application.service_credentials[this.scaffolderName]) ? this.context.application.service_credentials[this.scaffolderName][0] : this.context.application.service_credentials[this.scaffolderName];
 		if (Object.prototype.hasOwnProperty.call(this.context.application.service_credentials[this.scaffolderName], 'serviceInfo')) {
 			serviceCredentials['serviceInfo'] = this.context.application.service_credentials[this.scaffolderName]['serviceInfo'];
 		}
@@ -179,93 +177,67 @@ module.exports = class extends Generator {
 			}
 			serviceCredentials['serviceInfo'] = deployOpts && Object.prototype.hasOwnProperty.call(deployOpts, 'service_bindings') ? deployOpts.service_bindings[this.scaffolderName] : {};
 		}
-		this.logger.debug(`_addMappings - serviceCredentials=${JSON.stringify(serviceCredentials, null, 3)}`);
-		this.logger.debug(`_addMappings - deploy_options=${JSON.stringify(this.context.deploy_options, null, 3)}`);
-		let scaffolderKeys = this._setCredentialMapping({}, serviceCredentials, this.serviceKey);
-		scaffolderKeys = Object.keys(scaffolderKeys).map(key => {
-			let scaffolderKey = key.split(`${this.serviceKey.replace(/-/g, '_')}_`);
-			if (Array.isArray(scaffolderKey) && scaffolderKey.length > 1) {
-				return scaffolderKey[1];
-			}
-		});
 
-		let version = 1;
-		let credentialKeys = scaffolderKeys.filter(key => { return key !== 'serviceInfo' });
-		let credKeysToScaffolderKeysMap = {};
-
-		scaffolderKeys.sort();
-		credentialKeys.sort();
-
-		credKeysToScaffolderKeysMap = this._mapCredentialKeysToScaffolderKeys(credentialKeys, scaffolderKeys);
-
-
-		let mapping = fs.readFileSync(path.join(__dirname, '../templates', `mappings.v${version}.json.template`), 'utf-8');
-
-		Handlebars.registerHelper('access', (map, key, nestedJSON) => {
-			return nestedJSON ? map[key].replace('_', '.') : map[key];
-
-		});
-
-		let template = Handlebars.compile(mapping);
-		let localServiceKey = this.serviceKey;
-		let serviceKeySeparator = '_'
-		let localCredentialKeys = [];
-		let springMapping = null
-		if (this.context.application.language === "SPRING") {
-			springMapping = ServiceUtils.getSpringServiceInfo(this.serviceKey)
-			if (springMapping) {
-				if (ServiceUtils.SPRING_BOOT_SERVICE_NAME in springMapping) {
-					localServiceKey = springMapping[ServiceUtils.SPRING_BOOT_SERVICE_NAME]
-				}
-				if (ServiceUtils.SPRING_BOOT_SERVICE_KEY_SEPARATOR in springMapping) {
-					serviceKeySeparator = springMapping[ServiceUtils.SPRING_BOOT_SERVICE_KEY_SEPARATOR]
-				}
-				console.log("Spring service cred map found for " + this.serviceKey + springMapping ? JSON.stringify(springMapping, null, 3) : springMapping)
-			}
-		}
-
-		for (let i = 0; i < credentialKeys.length; i++) {
-			localCredentialKeys[i] = []
-			localCredentialKeys[i][0] = credentialKeys[i]
-			if (springMapping) {
-				let mappedKey = credentialKeys[i]
-				if (credentialKeys[i] in springMapping) {
-					localCredentialKeys[i][1] = springMapping[credentialKeys[i]]
-				}
-				else {
-					localCredentialKeys[i][1] = credentialKeys[i]
-				}
-				localCredentialKeys.push(mappedKey ? mappedKey : credentialKeys[i]);
-			}
-			else {
-				localCredentialKeys[i][1] = credentialKeys[i]
-			}
-		}
-
-		let context = {
-			serviceName: serviceCredentials.serviceInfo.name,
-			serviceKey: this.serviceKey.replace(/-/g, '_'),
-			localServiceKey: localServiceKey.replace(/-/g, '_'),
-			serviceKeySeparator: serviceKeySeparator,
-			credentialKeys: localCredentialKeys,
-			map: credKeysToScaffolderKeysMap,
-			cloudFoundryKey: this.cloudFoundryName,
-			cloudFoundryIsArray: true,
-			localDevConfigFP: ServiceUtils.localDevConfigFilepathMap[this.options.context.application.language]
-		};
-
-		let generatedMappingString = this._sanitizeJSONString(template(context));
-		let mappings = JSON.parse(generatedMappingString);
+		const mappings = this._generateMappingsJson(this.context, this.scaffolderName);
 
 		this.context.addMappings(mappings);
 	}
 
+	// Create mappings.json file for consuming service credentials
+	_generateMappingsJson(context, serviceId) {
+		const credentials = context?.application?.service_credentials;
+
+		if (typeof credentials === "object" && Object.keys(credentials).length > 0) {
+			const localDevConfigFilePath = ServiceUtils.localDevConfigFilepathMap[context.application.language];
+			let mappings = {};
+
+			const cfLabel = context?.deploy_options?.cloud_foundry?.service_bindings?.[serviceId]?.label;
+			const kubeSecret = context?.deploy_options?.kube?.service_bindings?.[serviceId];
+			const cePrefix = context?.deploy_options?.code_engine?.service_bindings?.[serviceId];
+
+			// loop over all keys in credential object
+			for (const key in credentials[serviceId]) {
+				// key is a credential key inside a credential object
+				const mapKey = serviceId + '_' + key;
+				mappings[mapKey] = {
+					searchPatterns: []
+				};
+
+				// add CF search pattern if CF deployment
+				if (cfLabel) {
+					// example: "cloudfoundry:$['cloudantNoSQLDB'][0].credentials.url"
+					mappings[mapKey].searchPatterns.push('cloudfoundry:$[\'' + cfLabel + '\'][0].credentials.' + key);
+				}
+
+				// add Kube search pattern if Kube deployment
+				if (kubeSecret) {
+					// example: "env:service_cloudant:$.apikey"
+					mappings[mapKey].searchPatterns.push('env:service_' + serviceId + ':$.' + key);
+				}
+
+				// add Code Engine search pattern if Code Engine deployment
+				if (cePrefix) {
+					mappings[mapKey].searchPatterns.push('env:' + cePrefix + "_SECRET_" + key.toUpperCase());
+				}
+
+				// always add file search pattern for local dev config
+				// example: "file:/server/localdev-config.json:$.cloudant_apikey"
+				mappings[mapKey].searchPatterns.push('file:/' + localDevConfigFilePath + ':$.' + serviceId + '_' + key);
+			}
+
+			return mappings;
+		}
+		else {
+			this.logger.info("Application does not contain credentials, not creating mappings.json");
+
+			return {};
+		}
+	}
 
 	_addLocalDevConfig() {
 		this.logger.info(`Adding local dev config for ${this.scaffolderName}`);
 		let templateContent;
-		let serviceCredentials = Array.isArray(this.context.application.service_credentials[this.scaffolderName])
-			? this.context.application.service_credentials[this.scaffolderName][0] : this.context.application.service_credentials[this.scaffolderName];
+		let serviceCredentials = Array.isArray(this.context.application.service_credentials[this.scaffolderName]) ? this.context.application.service_credentials[this.scaffolderName][0] : this.context.application.service_credentials[this.scaffolderName];
 		templateContent = this._setCredentialMapping({}, serviceCredentials, this.serviceKey);
 
 
@@ -273,8 +245,7 @@ module.exports = class extends Generator {
 	}
 
 	_setCredentialMapping(templateContent, serviceCredentials, currentKey) {
-		let key,
-			keys = Object.keys(serviceCredentials);
+		let key, keys = Object.keys(serviceCredentials);
 		for (let i = 0; i < keys.length; i++) {
 			key = keys[i];
 			let value = serviceCredentials[key];
