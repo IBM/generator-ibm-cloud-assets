@@ -195,9 +195,9 @@ module.exports = class extends Generator {
 			const kubeSecret = context?.deploy_options?.kube?.service_bindings?.[serviceId];
 			const cePrefix = context?.deploy_options?.code_engine?.service_bindings?.[serviceId];
 
-			// loop over all keys in credentials
+			// loop over all keys in credential object
 			for (const key in credentials[serviceId]) {
-				// key is a credentials key inside a credentials object
+				// key is a credential key inside a credential object
 				const mapKey = serviceId + '_' + key;
 				mappings[mapKey] = {
 					searchPatterns: []
@@ -224,25 +224,6 @@ module.exports = class extends Generator {
 				// example: "file:/server/localdev-config.json:$.cloudant_apikey"
 				mappings[mapKey].searchPatterns.push('file:/' + localDevConfigFilePath + ':$.' + serviceId + '_' + key);
 			}
-
-			// add a search pattern for the overall credentials object
-			// 		"cloudant": {
-			//   "credentials": {
-			//     "searchPatterns": [
-			//       "user-provided::username",
-			//       "cloudfoundry:cloudant",
-			//       "env:cloudant_credentials",
-			//       "file:/server/localdev-config.json:cloudant_credentials"
-			//     ]
-			//   }
-			// }
-			// mappings[serviceId] = {
-			// 	credentials: {
-			// 		searchPatterns: [
-			// 			"cloudfoundry:" +
-			// 		]
-			// 	}
-			// };
 
 			return mappings;
 		}
