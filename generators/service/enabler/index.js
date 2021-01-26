@@ -217,7 +217,7 @@ module.exports = class extends Generator {
 
 				// add Code Engine search pattern if Code Engine deployment
 				if (cePrefix) {
-					mappings[mapKey].searchPatterns.push('env:' + cePrefix + "_SECRET_" + key.toUpperCase());
+					mappings[mapKey].searchPatterns.push('env:' + cePrefix + "_" + key.toUpperCase());
 				}
 
 				// always add file search pattern for local dev config
