@@ -3,36 +3,14 @@
 set -e
 
 echo "========================================================================="
-echo "Testing spring knative no svc"
+echo "Testing liberty helm no svc"
 echo "========================================================================="
-./test-combo.sh test-genv2-app-spring-knative-no-svc.json meta
+./test-combo.sh test-genv2-app-liberty-helm-no-svc.json meta
 
 echo "========================================================================="
-echo "Testing spring knative cloudant"
+echo "Testing liberty helm cloudant"
 echo "========================================================================="
-./test-combo.sh test-genv2-app-spring-knative-cloudant.json meta
-
-echo "========================================================================="
-echo "Testing spring knative appid"
-echo "========================================================================="
-./test-combo.sh test-genv2-app-spring-knative-appid.json meta
-
-echo "========================================================================="
-echo "Testing spring knative cos"
-echo "========================================================================="
-./test-combo.sh test-genv2-app-spring-knative-cos.json meta
-
-
-
-echo "========================================================================="
-echo "Testing liberty knative no svc"
-echo "========================================================================="
-./test-combo.sh test-genv2-app-liberty-knative-no-svc.json meta
-
-echo "========================================================================="
-echo "Testing liberty knative cloudant"
-echo "========================================================================="
-./test-combo.sh test-genv2-app-liberty-knative-cloudant.json meta
+./test-combo.sh test-genv2-app-liberty-helm-cloudant.json meta
 
 
 
@@ -59,69 +37,52 @@ echo "========================================================================="
 
 
 echo "========================================================================="
-echo "Testing go knative no svc"
+echo "Testing go helm no svc"
 echo "========================================================================="
-./test-combo.sh test-genv2-app-go-knative-no-svc.json meta
+./test-combo.sh test-genv2-app-go-helm-no-svc.json meta
 
 echo "========================================================================="
-echo "Testing go knative cloudant"
+echo "Testing go helm cloudant"
 echo "========================================================================="
-./test-combo.sh test-genv2-app-go-knative-cloudant.json meta
+./test-combo.sh test-genv2-app-go-helm-cloudant.json meta
 
 echo "========================================================================="
-echo "Testing go knative appid"
+echo "Testing go helm appid"
 echo "========================================================================="
-./test-combo.sh test-genv2-app-go-knative-appid.json meta
-
-
-
-echo "========================================================================="
-echo "Testing node express knative no svc"
-echo "========================================================================="
-./test-combo.sh test-genv2-app-express-knative-no-svc.json meta
-
-echo "========================================================================="
-echo "Testing node express knative cloudant"
-echo "========================================================================="
-./test-combo.sh test-genv2-app-express-knative-cloudant.json meta
-
-echo "========================================================================="
-echo "Testing node express knative appid"
-echo "========================================================================="
-./test-combo.sh test-genv2-app-express-knative-appid.json meta
-
-
-echo "========================================================================="
-echo "Testing swift knative no svc"
-echo "========================================================================="
-./test-combo.sh test-genv2-app-swift-knative-no-svc.json meta
-
-echo "========================================================================="
-echo "Testing swift knative cloudant"
-echo "========================================================================="
-./test-combo.sh test-genv2-app-swift-knative-cloudant.json meta
-
-echo "========================================================================="
-echo "Testing swift knative appid"
-echo "========================================================================="
-./test-combo.sh test-genv2-app-swift-knative-appid.json meta
+./test-combo.sh test-genv2-app-go-helm-appid.json meta
 
 
 
 echo "========================================================================="
-echo "Testing flask knative no svc"
+echo "Testing node express helm no svc"
 echo "========================================================================="
-./test-combo.sh test-genv2-app-python-knative-no-svc.json meta
+./test-combo.sh test-genv2-app-express-helm-no-svc.json meta
 
 echo "========================================================================="
-echo "Testing flask knative cloudant"
+echo "Testing node express helm cloudant"
 echo "========================================================================="
-./test-combo.sh test-genv2-app-python-knative-cloudant.json meta
+./test-combo.sh test-genv2-app-express-helm-cloudant.json meta
 
 echo "========================================================================="
-echo "Testing flask knative appid"
+echo "Testing node express helm appid"
 echo "========================================================================="
-./test-combo.sh test-genv2-app-python-knative-appid.json meta
+./test-combo.sh test-genv2-app-express-helm-appid.json meta
+
+
+echo "========================================================================="
+echo "Testing swift helm no svc"
+echo "========================================================================="
+./test-combo.sh test-genv2-app-swift-helm-no-svc.json meta
+
+echo "========================================================================="
+echo "Testing swift helm cloudant"
+echo "========================================================================="
+./test-combo.sh test-genv2-app-swift-helm-cloudant.json meta
+
+echo "========================================================================="
+echo "Testing swift helm appid"
+echo "========================================================================="
+./test-combo.sh test-genv2-app-swift-helm-appid.json meta
 
 
 echo "========================================================================="

@@ -3,7 +3,6 @@
     "kube": {
       "cluster_name": "gv-devx-classic-dal1",
       "region": "ibm:ys1:us-south",
-      "type": "HELM",
       "service_bindings": {
           "cloudObjectStorage": "cos-testing"
       }

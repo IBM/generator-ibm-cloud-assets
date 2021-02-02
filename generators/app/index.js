@@ -115,17 +115,6 @@ module.exports = class extends Generator {
 		});
 
 		prompts.push({
-			type: 'list',
-			name: 'kubeDeploymentType',
-			message: 'Kube Deployment Type',
-			choices: [
-				'KNATIVE',
-				'HELM'
-			],
-			default: "KNATIVE"
-		});
-
-		prompts.push({
 			type: 'input',
 			name: 'cluster_name',
 			message: 'Cluster name if KUBE',
@@ -155,13 +144,8 @@ module.exports = class extends Generator {
 
 		if (this.opts.deploy_options) {
 			if (this.opts.deploy_options.kube) {
-				if (this.opts.deploy_options.kube.type == "KNATIVE") {
-					logger.debug("write Knative");
-					this.composeWith(require.resolve('../knative'), this.opts);
-				} else {
-					logger.debug("write Helm");
-					this.composeWith(require.resolve('../kubernetes'), this.opts);
-				}
+				logger.debug("write Helm");
+				this.composeWith(require.resolve('../kubernetes'), this.opts);
 			} else if (this.opts.deploy_options.cloud_foundry) {
 				logger.debug("write CF");
 				this.composeWith(require.resolve('../cloud_foundry'), this.opts);
@@ -195,7 +179,6 @@ module.exports = class extends Generator {
 				"kube": {
 					"cluster_name": answers.cluster_name,
 					"region": answers.region,
-					"type": answers.kubeDeploymentType,
 					"service_bindings": {}
 				}
 			}

@@ -61,10 +61,10 @@ describe('cloud-assets:clitools', function () {
 		beforeEach(function () {
 			return helpers.run(path.join(__dirname, '../generators/app'))
 				.inDir(path.join(__dirname, './tmp'))
-				.withOptions(utils.generateTestPayload("knative", "NODE", ['appid', 'cloudant']))
+				.withOptions(utils.generateTestPayload("helm", "NODE", ['appid', 'cloudant']))
 		});
 
-		let applicationName = `testgenv2appknativenode`;
+		let applicationName = `testgenv2apphelmnode`;
 
 		it('create Dockerfile for running', function () {
 			assert.file('cli-config.yml');
@@ -119,7 +119,7 @@ describe('cloud-assets:clitools', function () {
 		beforeEach(function () {
 			return helpers.run(path.join(__dirname, '../generators/app'))
 				.inDir(path.join(__dirname, './tmp'))
-				.withOptions(utils.generateTestPayload("knative", "PYTHON", ['appid', 'cloudant']))
+				.withOptions(utils.generateTestPayload("helm", "PYTHON", ['appid', 'cloudant']))
 		});
 
 		it('should have Dockerfile and Dockerfile-tools as the docker run commands', function() {
@@ -130,8 +130,8 @@ describe('cloud-assets:clitools', function () {
 		it('create CLI-config file', function () {
 			assert.file(['cli-config.yml']);
 			assert.fileContent('cli-config.yml', 'python manage.py');
-			assert.fileContent('cli-config.yml', 'testgenv2appknativepython-flask-run');
-			assert.fileContent('cli-config.yml', `chart-path : "chart/testgenv2appknativepython"`);
+			assert.fileContent('cli-config.yml', 'testgenv2apphelmpython-flask-run');
+			assert.fileContent('cli-config.yml', `chart-path : "chart/testgenv2apphelmpython"`);
 		});
 
 	});
@@ -140,14 +140,14 @@ describe('cloud-assets:clitools', function () {
 		beforeEach(function () {
 			return helpers.run(path.join(__dirname, '../generators/app'))
 				.inDir(path.join(__dirname, './tmp'))
-				.withOptions(utils.generateTestPayload("knative", "PYTHON", ['appid', 'cloudant']))
+				.withOptions(utils.generateTestPayload("helm", "PYTHON", ['appid', 'cloudant']))
 		});
-		
+
 		it('create CLI-config file', function () {
 			assert.file(['cli-config.yml']);
 			assert.fileContent('cli-config.yml', 'python manage.py');
-			assert.fileContent('cli-config.yml', 'testgenv2appknativepython-flask-run');
-			assert.fileContent('cli-config.yml', `chart-path : "chart/testgenv2appknativepython"`);
+			assert.fileContent('cli-config.yml', 'testgenv2apphelmpython-flask-run');
+			assert.fileContent('cli-config.yml', `chart-path : "chart/testgenv2apphelmpython"`);
 		});
 
 	});
@@ -156,14 +156,14 @@ describe('cloud-assets:clitools', function () {
 		beforeEach(function () {
 			return helpers.run(path.join(__dirname, '../generators/app'))
 				.inDir(path.join(__dirname, './tmp'))
-				.withOptions(utils.generateTestPayload("knative", "DJANGO", ['appid', 'cloudant']))
+				.withOptions(utils.generateTestPayload("helm", "DJANGO", ['appid', 'cloudant']))
 		});
 
 		it('create CLI-config file', function () {
 			assert.file(['cli-config.yml']);
 			assert.fileContent('cli-config.yml', 'python manage.py runserver --noreload');
-			assert.fileContent('cli-config.yml', 'testgenv2appknativedjango-django-run');
-			assert.fileContent('cli-config.yml', `chart-path : "chart/testgenv2appknativedjango"`);
+			assert.fileContent('cli-config.yml', 'testgenv2apphelmdjango-django-run');
+			assert.fileContent('cli-config.yml', `chart-path : "chart/testgenv2apphelmdjango"`);
 			assert.fileContent('cli-config.yml', 'dockerfile-run : "Dockerfile"');
 			assert.fileContent('cli-config.yml', 'dockerfile-tools : "Dockerfile-tools"');
 		});
@@ -175,7 +175,7 @@ describe('cloud-assets:clitools', function () {
 		beforeEach(function () {
 			return helpers.run(path.join(__dirname, '../generators/app'))
 				.inDir(path.join(__dirname, './tmp'))
-				.withOptions(utils.generateTestPayload("knative", "GO", ['appid', 'cloudant']))
+				.withOptions(utils.generateTestPayload("helm", "GO", ['appid', 'cloudant']))
 		});
 
 		it('should have Dockerfile and Dockerfile-tools as the docker run commands', function() {
@@ -194,7 +194,7 @@ describe('cloud-assets:clitools', function () {
 		});
 
 		it('should have the chart-path property set in cli-config.yml', function () {
-			assert.fileContent('cli-config.yml', `chart-path : "chart/testgenv2appknativego"`);
+			assert.fileContent('cli-config.yml', `chart-path : "chart/testgenv2apphelmgo"`);
 		});
 	});
 
@@ -205,7 +205,7 @@ describe('cloud-assets:clitools', function () {
 					.inDir(path.join(__dirname, './tmp'))
 					.withOptions(utils.generateTestPayload("none", language, ['appid', 'cloudant']))
 			});
-	
+
 			it('mobile should have no cli-config', function() {
 				assert.noFile('cli-config.yml')
 			});
