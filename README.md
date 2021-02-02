@@ -21,10 +21,10 @@
 
 Creates the files required to deploy projects to Kubernetes (using Helm Charts) and/or Cloud Foundry (using a generated manifest). Also, provides scripts to initiate IBM Cloud’s DevOps Toolchain.
 
-## Pre-requisites 
+## Pre-requisites
 
 Install [Yeoman](http://yeoman.io)
-Install [Helm](https://github.com/kubernetes/helm#install) 
+Install [Helm](https://github.com/kubernetes/helm#install)
  * Required to run unit tests
 ```bash
 npm install -g yo
@@ -48,7 +48,7 @@ Following command line arguments are supported:
 sample command with payload:
 
 ```bash
-yo ibm-cloud-assets --deploy_options '{"kube":{"cluster_name":"gv-devx-classic-dal1","region":"ibm:ys1:us-south","type":"KNATIVE","service_bindings":{"cloudant":"cloudant-gv-spring-ms-test-co1436hv30tbd0j"}}}' --application '{"app_id":"4b3e5cc4-5149-48e2-b711-b3dd80cf3f11","name":"test-genv2-app","language":"NODE","service_credentials":{"cloudant":{"apikey":"REPLACEME.UNKNOWN_SERVICE_NAME.apikey","host":"REPLACEME.UNKNOWN_SERVICE_NAME.host","iam_apikey_description":"REPLACEME.UNKNOWN_SERVICE_NAME.iam_apikey_description","iam_apikey_name":"REPLACEME.UNKNOWN_SERVICE_NAME.iam_apikey_name","iam_role_crn":"crn:v1:bluemix:public:iam::::serviceRole:Manager","iam_serviceid_crn":"REPLACEME.UNKNOWN_SERVICE_NAME.iam_serviceid_crn","password":"REPLACEME.UNKNOWN_SERVICE_NAME.password","port":443,"url":"REPLACEME.UNKNOWN_SERVICE_NAME.url","username":"REPLACEME.UNKNOWN_SERVICE_NAME.username"}}}'
+yo ibm-cloud-assets --deploy_options '{"kube":{"cluster_name":"gv-devx-classic-dal1","region":"ibm:ys1:us-south","service_bindings":{"cloudant":"cloudant-gv-spring-ms-test-co1436hv30tbd0j"}}}' --application '{"app_id":"4b3e5cc4-5149-48e2-b711-b3dd80cf3f11","name":"test-genv2-app","language":"NODE","service_credentials":{"cloudant":{"apikey":"REPLACEME.UNKNOWN_SERVICE_NAME.apikey","host":"REPLACEME.UNKNOWN_SERVICE_NAME.host","iam_apikey_description":"REPLACEME.UNKNOWN_SERVICE_NAME.iam_apikey_description","iam_apikey_name":"REPLACEME.UNKNOWN_SERVICE_NAME.iam_apikey_name","iam_role_crn":"crn:v1:bluemix:public:iam::::serviceRole:Manager","iam_serviceid_crn":"REPLACEME.UNKNOWN_SERVICE_NAME.iam_serviceid_crn","password":"REPLACEME.UNKNOWN_SERVICE_NAME.password","port":443,"url":"REPLACEME.UNKNOWN_SERVICE_NAME.url","username":"REPLACEME.UNKNOWN_SERVICE_NAME.username"}}}'
 ```
 
 ## Artifacts
@@ -59,11 +59,10 @@ File  | Purpose
 ---       | ---
 Dockerfile | Configuration file for the run container.
 docker-compose.yml | Configuration for the run container *if services option is added*
-Dockerfile-tools | Configuration file for the tools container 
-docker-compose-tools.yml | Configuration file for the tool container, *if services option is added* 
-chart/* | Folder containing all the Helm yaml files required to deploy to Kubernetes *if helm selected* 
-service.yaml | yaml file for knative deployments *if knative selected* 
-manifest.yml | markdown file for Cloud Foundry deployments *if cloud foundry selected* 
+Dockerfile-tools | Configuration file for the tools container
+docker-compose-tools.yml | Configuration file for the tool container, *if services option is added*
+chart/* | Folder containing all the Helm yaml files required to deploy to Kubernetes *if helm selected*
+manifest.yml | markdown file for Cloud Foundry deployments *if cloud foundry selected*
 mappings.json | dictates preference order by which the services will look for service credentials
 localdev-config.json | json object with credentials supplied in application options *if service provided with credentials*
 cli-config.yml | Yaml file containing mappings for various commands, files, and settings, utilized by the cli commands

@@ -45,15 +45,6 @@ function validateHelmChart(lang, deploy_type, service, applicationName) {
 	assert.fileContent(valuesFile, `my-service-${service}`);
 }
 
-function validateKnativeService(lang, deploy_type, service) {
-	assert.file([
-		'service.yaml'
-	]);
-
-	assert.fileContent('service.yaml', `service_${SvcInfo[service]["customServiceKey"].replace(/-/g, '_')}`);
-	assert.fileContent('service.yaml', `my-service-${service.toLowerCase()}`);
-}
-
 function validateCF(lang, deploy_type, service, applicationName) {
 	assert.file([
 		'manifest.yml'
@@ -65,9 +56,7 @@ function validateCF(lang, deploy_type, service, applicationName) {
 function validateDeployAssets(lang, deploy_type, service) {
 	let applicationName = `test-genv2-app-${deploy_type}-${lang}`;
 	it('validateDeployAssets', function () {
-		if (deploy_type === "knative") {
-			validateKnativeService(lang, deploy_type, service);
-		} else if (deploy_type === "helm") {
+		if (deploy_type === "helm") {
 			validateHelmChart(lang, deploy_type, service, applicationName);
 		} else if (deploy_type === "cf") {
 			validateCF(lang, deploy_type, service, applicationName);

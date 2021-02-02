@@ -153,51 +153,6 @@ function appendDeploymentYaml(deploymentFilePath, services, resolve, reject) {
 	});
 }
 
-function addServicesToServiceKnativeYamlAsync(args) {
-	return new Promise((resolve) => {
-		let serviceYamlFilePath = "./service.yaml";
-		let services = args.context.deploymentServicesEnv; //array of service objects
-
-		let hasServices = services && services.length > 0;
-		if (!fs.existsSync(serviceYamlFilePath) || !hasServices) {
-			logger.info("Not adding service env to service.yaml");
-			return resolve();
-		}
-
-		let serviceYamlContents = yaml.safeLoad(fs.readFileSync(serviceYamlFilePath, 'utf8'));
-
-		services = services.filter(service => {
-			return service.name && service.keyName && service.valueFrom &&
-				service.valueFrom.secretKeyRef && service.valueFrom.secretKeyRef.key
-		});
-
-		// actual secret key ref objects that go into the yaml
-		services = services.map((service) => {
-			return {
-				name: service.name,
-				valueFrom: {
-					secretKeyRef: {
-						name: service.keyName.toLowerCase(),
-						key: service.valueFrom.secretKeyRef.key
-					}
-				}
-			}
-		});
-
-		if (serviceYamlContents.spec.template.spec.containers[0].env) {
-			serviceYamlContents.spec.template.spec.containers[0].env = _.union(services, serviceYamlContents.spec.template.spec.containers[0].env);
-		}
-		else {
-			serviceYamlContents.spec.template.spec.containers[0].env = services;
-		}
-
-		logger.info("Adding service env to service.yaml");
-		fs.writeFileSync(serviceYamlFilePath, yaml.safeDump(serviceYamlContents));
-
-		return resolve();
-	});
-}
-
 // add services section with secretKeyRefs in values.yaml
 function addServicesEnvToValuesAsync(args) {
 	return new Promise((resolve, reject) => {
@@ -367,7 +322,6 @@ module.exports = {
 	SPRING_BOOT_SERVICE_KEY_SEPARATOR: SPRING_BOOT_SERVICE_KEY_SEPARATOR,
 	addServicesEnvToHelmChartAsync: addServicesEnvToHelmChartAsync,
 	addServicesEnvToValuesAsync: addServicesEnvToValuesAsync,
-	addServicesToServiceKnativeYamlAsync: addServicesToServiceKnativeYamlAsync,
 	credentialsFilepathMap: _credentialsFilepathMap,
 	localDevConfigFilepathMap: _localDevConfigFilepathMap,
 	mappingsFilepathMap: _mappingsFilepathMap,

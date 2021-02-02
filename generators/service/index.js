@@ -151,9 +151,6 @@ module.exports = class extends Generator {
 		}).then(() => ServiceUtils.addServicesEnvToValuesAsync({
 			context: this.context,
 			destinationPath: this.destinationPath()
-		})).then(() => ServiceUtils.addServicesToServiceKnativeYamlAsync({
-			context: this.context,
-			destinationPath: this.destinationPath(Utils.PATH_KNATIVE_YAML)
 		}));
 	}
 };

@@ -160,7 +160,7 @@ module.exports = class extends Generator {
 
 	_addMappings() {
 		// This section basically sets a serviceInfo object
-		// that is used when updating Kube/Knative ymls to
+		// that is used when updating Kube ymls to
 		// include service binding
 		// It's dumb and has nothing to do with mappings.json,
 		// but leaving it here due to legacy code.
