@@ -16,8 +16,6 @@ const Log4js = require('log4js');
 const logger = Log4js.getLogger("generator-ibm-cloud-assets:ServiceUtils");
 const readline = require('readline');
 const fs = require('fs');
-const yaml = require('js-yaml');
-const _ = require('lodash');
 const path = require('path');
 
 const SPRING_BOOT_SERVICE_NAME = "spring_boot_service_name";

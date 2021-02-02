@@ -23,7 +23,6 @@ const plist = require('plist');
 const fs = require('fs');
 
 const ServiceUtils = require('../lib/service-utils');
-const Utils = require('../lib/utils');
 
 const Bundle = require("./../../package.json");
 
