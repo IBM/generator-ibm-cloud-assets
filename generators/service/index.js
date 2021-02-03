@@ -23,7 +23,6 @@ const plist = require('plist');
 const fs = require('fs');
 
 const ServiceUtils = require('../lib/service-utils');
-const Utils = require('../lib/utils');
 
 const Bundle = require("./../../package.json");
 
@@ -151,9 +150,6 @@ module.exports = class extends Generator {
 		}).then(() => ServiceUtils.addServicesEnvToValuesAsync({
 			context: this.context,
 			destinationPath: this.destinationPath()
-		})).then(() => ServiceUtils.addServicesToServiceKnativeYamlAsync({
-			context: this.context,
-			destinationPath: this.destinationPath(Utils.PATH_KNATIVE_YAML)
 		}));
 	}
 };

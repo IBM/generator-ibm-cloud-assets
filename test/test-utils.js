@@ -56,13 +56,6 @@ function generateDeployOpts() {
 		},
 		"helm": {
 			"kube": {
-				"type": "HELM",
-				"service_bindings": {}
-			}
-		},
-		"knative": {
-			"kube": {
-				"type": "KNATIVE",
 				"service_bindings": {}
 			}
 		}

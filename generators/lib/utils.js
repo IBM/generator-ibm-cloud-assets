@@ -23,8 +23,6 @@ const prettifyxml = require('prettify-xml');
 const REGEX_LEADING_ALPHA = /^[^a-zA-Z]*/;
 const REGEX_ALPHA_NUM = /[^a-zA-Z0-9]/g;
 
-const PATH_KNATIVE_YAML = "./service.yaml";
-
 const _sanitizeAlphaNumLowerCase = (name) => {
 	let cleanName = '';
 	if (name != undefined) {
@@ -116,7 +114,6 @@ function addJavaDependencies() {
 
 module.exports = {
 	sanitizeAlphaNumLowerCase: _sanitizeAlphaNumLowerCase,
-	PATH_KNATIVE_YAML: PATH_KNATIVE_YAML,
 	addJavaDependencies: addJavaDependencies,
 	portDefault: _portDefault
 };
