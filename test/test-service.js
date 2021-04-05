@@ -96,6 +96,7 @@ function validateCreds(lang, service) {
 			, "textToSpeech", "toneAnalyzer" , "visualRecognition"].includes(service)) {
 			// assert.fileContent(mappings_path, testUtils.PREFIX_SVC_BINDING_NAME + services);
 			assert.fileContent(mappings_path, service.replace(/-/g, '_'));
+			assert.fileContent(mappings_path, 'cloudfoundry:$.application_name');
 		}
 
 		if (lang == "SWIFT") {

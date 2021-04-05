@@ -185,11 +185,19 @@ module.exports = class extends Generator {
 
 	// Create mappings.json file for consuming service credentials
 	_generateMappingsJson(context, serviceId) {
+		// always add a search path for app-name
+		// it's a snowflake to make app name available for Node-RED app
+		let mappings = {};
+		mappings.application_name = {
+			searchPatterns: [
+				'cloudfoundry:$.application_name' // Cloud Foundry
+			]
+		};
+
 		const credentials = context?.application?.service_credentials;
 
 		if (typeof credentials === "object" && Object.keys(credentials).length > 0) {
 			const localDevConfigFilePath = ServiceUtils.localDevConfigFilepathMap[context.application.language];
-			let mappings = {};
 
 			const cfLabel = context?.deploy_options?.cloud_foundry?.service_bindings?.[serviceId]?.label;
 			const kubeSecret = context?.deploy_options?.kube?.service_bindings?.[serviceId];
