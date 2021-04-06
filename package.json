@@ -39,7 +39,7 @@
     "log4js": "^6.3.0",
     "node-pre-gyp": "^0.17.0",
     "npm": "^6.14.10",
-    "plist": "^3.0.1",
+    "plist": "^3.0.2",
     "prettify-xml": "^1.2.0",
     "xml-js": "^1.6.11",
     "xmlbuilder": "^15.1.1",
