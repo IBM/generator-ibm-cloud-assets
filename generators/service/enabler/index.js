@@ -190,7 +190,8 @@ module.exports = class extends Generator {
 		let mappings = {};
 		mappings.application_name = {
 			searchPatterns: [
-				'cloudfoundry:$.application_name' // Cloud Foundry
+				'cloudfoundry:$.application_name', // Cloud Foundry
+				'env:K_SERVICE' // Code Engine
 			]
 		};
 
