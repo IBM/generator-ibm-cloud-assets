@@ -29,7 +29,7 @@ function testOutput(applicationName, chartLocation) {
 	it('has kubernetes config for Chart.yaml', function () {
 		let chartFile = chartLocation + '/Chart.yaml';
 		assert.file(chartFile);
-		let chartyml = yml.safeLoad(fs.readFileSync(chartFile, 'utf8'));
+		let chartyml = yml.load(fs.readFileSync(chartFile, 'utf8'));
 		assertYmlContent(chartyml.name, applicationName.toLowerCase(), 'chartyml.name');
 	});
 
@@ -69,7 +69,7 @@ function testOutput(applicationName, chartLocation) {
 				done(new Error(stdout))
 			} else {
 				// template command will render two charts: service and Deployment
-				let charts = yml.safeLoadAll(stdout);
+				let charts = yml.loadAll(stdout);
 				assertYmlContent(charts[1].kind, 'Deployment', 'charts[1].kind');
 				done();
 			}
@@ -97,7 +97,7 @@ function getSafeYaml(fileName) {
 		.replace(/^{{(-? end)/gm, '#$1')
 		.replace(/{{.Files/, '#.Files');
 
-	return yml.safeLoad(newyml);
+	return yml.load(newyml);
 }
 
 function assertHpaYmlContent(chartLocation) {
