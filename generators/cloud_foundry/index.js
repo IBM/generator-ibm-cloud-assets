@@ -102,9 +102,9 @@ module.exports = class extends Generator {
 		const bytesMap = {
 			k: 1024,
 			m: 1048576,
-			g: 1073741824, 
-			K: 1024, 
-			M: 1048576, 
+			g: 1073741824,
+			K: 1024,
+			M: 1048576,
 			G: 1073741824
 		};
 		const manifestValue = parseInt(manifestMemoryConfig.replace(/[M,m,G,g,K,k]/g, ''));
@@ -144,7 +144,7 @@ module.exports = class extends Generator {
 		this.manifestConfig.env.GOPACKAGENAME = this.opts.application.sanitizedName;
 		try {
 			// pattern type skits need a static GOPACKAGE name specified in static manifest for server.go imports
-			let manifestyml = jsyaml.safeLoad(fs.readFileSync('manifest.yml', 'utf8'));
+			let manifestyml = jsyaml.load(fs.readFileSync('manifest.yml', 'utf8'));
 			if (manifestyml.applications[0].env.GOPACKAGENAME) {
 				this.manifestConfig.env.GOPACKAGENAME = manifestyml.applications[0].env.GOPACKAGENAME
 			}
@@ -161,7 +161,7 @@ module.exports = class extends Generator {
 		// if there is a `command` in manifest.yml already, keep it. Otherwise, this is the default command string:
 		let manifestCommand = this.opts.application.name ? ("\'" + `${this.opts.application.name}` + "\'") : undefined;
 		try {
-			let manifestyml = jsyaml.safeLoad(fs.readFileSync('manifest.yml', 'utf8'));
+			let manifestyml = jsyaml.load(fs.readFileSync('manifest.yml', 'utf8'));
 			manifestCommand = manifestyml.applications[0].command ? manifestyml.applications[0].command : manifestCommand;
 		} catch (err) {
 			// cannot read file or find a command, return to default behavior
@@ -234,7 +234,7 @@ module.exports = class extends Generator {
 		this.manifestConfig.command = this.opts.enable ?
 			'echo No run command specified in manifest.yml' :
 			'python manage.py start 0.0.0.0:$PORT';
-		this.manifestConfig.memory = this.manifestConfig.memory || '64M'; 
+		this.manifestConfig.memory = this.manifestConfig.memory || '64M';
 		this.manifestConfig.env.FLASK_APP = 'server';
 		this.manifestConfig.env.FLASK_DEBUG = 'false';
 		this.cfIgnoreContent = ['.pyc', '.egg-info'];
@@ -246,7 +246,7 @@ module.exports = class extends Generator {
 		// if there is a `command` in manifest.yml already, keep it. Otherwise, this is the default command string:
 		let manifestCommand = `gunicorn --env DJANGO_SETTINGS_MODULE=pythondjangoapp.settings.production pythondjangoapp.wsgi -b 0.0.0.0:$PORT`;
 		try {
-			let manifestyml = jsyaml.safeLoad(fs.readFileSync('manifest.yml', 'utf8'));
+			let manifestyml = jsyaml.load(fs.readFileSync('manifest.yml', 'utf8'));
 			manifestCommand = manifestyml.applications[0].command ? manifestyml.applications[0].command : manifestCommand;
 		} catch (err) {
 			// cannot read file or find a command, return to default behavior
@@ -272,7 +272,7 @@ module.exports = class extends Generator {
 		if (this.manifestConfig.services && !_.isEmpty(this.manifestConfig.services) ) {
 			this.manifestConfig.hasServices = true;
 		}
-		
+
 		logger.trace( `Generating manifest.yml for ${this.opts.application.language} with manifestConfig: ${JSON.stringify(this.manifestConfig,null,3)}` )
 		this._writeHandlebarsFile('manifest_master.yml', 'manifest.yml', this.manifestConfig)
 

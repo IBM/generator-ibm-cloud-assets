@@ -140,7 +140,7 @@ describe('cloud-enablement:cloudfoundry', function () {
 
 				it('manifest.yml is generated with correct content', function () {
 					assert.file('manifest.yml');
-					let manifestyml = yml.safeLoad(fs.readFileSync('manifest.yml', 'utf8'));
+					let manifestyml = yml.load(fs.readFileSync('manifest.yml', 'utf8'));
 
 					if (language === 'JAVA' || language === 'libertyBeta') {
 						let targetDir = buildType === 'maven' ? 'target' : 'build'
@@ -191,7 +191,7 @@ describe('cloud-enablement:cloudfoundry', function () {
 
 		it('manifest.yml is generated with correct content', function () {
 			assert.file('manifest.yml');
-			let manifestyml = yml.safeLoad(fs.readFileSync('manifest.yml', 'utf8'));
+			let manifestyml = yml.load(fs.readFileSync('manifest.yml', 'utf8'));
 			if(manifestyml.applications[0].env) {
 				assertYmlContent(manifestyml.applications[0].env.services_autoconfig_excludes, undefined, 'manifestyml.applications[0].env.services_autoconfig_excludes');
 			}
