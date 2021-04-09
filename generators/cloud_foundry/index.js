@@ -132,7 +132,7 @@ module.exports = class extends Generator {
 			this.manifestConfig.command = 'npm start';
 		}
 		this.manifestConfig.env.OPTIMIZE_MEMORY = true;
-		this.manifestConfig.buildpack = 'sdk-for-nodejs';
+		this.manifestConfig.buildpack = 'nodejs_buildpack';
 		this.manifestConfig.memory = this._getHighestMemorySize(this.manifestConfig.memory, this.opts.nodeCFMinMemory);
 		this.cfIgnoreContent = ['node_modules/', 'node_modules_linux', 'test/', 'vcap-local.js', '.npm/', '.npm-global/'];
 	}
