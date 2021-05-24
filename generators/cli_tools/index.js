@@ -195,7 +195,7 @@ module.exports = class extends Generator {
 			stopCmd: '',
 			debugCmd: this.opts.enable
 				? 'echo No debug command specified in cli-config'
-				: 'pipenv run python manage.py debug',
+				: 'python manage.py debug',
 			chartPath: `chart/${applicationName.toLowerCase()}`,
 			applicationId: `${this.opts.application.app_id}`,
 			credentialsFilepath: (!_.isEmpty(this.opts.application.service_credentials)) ? ServiceUtils.credentialsFilepathMap.PYTHON : ""
