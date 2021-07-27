@@ -23,6 +23,7 @@ const Utils = require('../../lib/utils');
 const ServiceUtils = require('../../lib/service-utils');
 
 const SvcInfo = require('../templates/serviceInfo.json');
+const { logger } = require('handlebars');
 
 const REGEX_HYPHEN = /-/g;
 
@@ -34,7 +35,7 @@ module.exports = class extends Generator {
 		this.serviceKey = serviceMappings["customServiceKey"] || this.scaffolderName;
 		this.logger = log4js.getLogger("generator-ibm-cloud-assets:" + this.scaffolderName);
 		this.context = opts.context;
-		this.config = {};
+		//this.config = {};
 		this.cloudFoundryName = this.context.cloudLabel || serviceMappings["cfServiceName"] || this.scaffolderName;
 		this.serviceName = serviceMappings["customServiceKey"] ? `service-${serviceMappings["customServiceKey"]}` : `service-${this.scaffolderName}`;
 		this.logger.level = this.context.loggerLevel;
@@ -56,6 +57,7 @@ module.exports = class extends Generator {
 	*/
 	configuring() {
 		this.hasSvcProperty = Object.prototype.hasOwnProperty.call(this.context.application.service_credentials, this.scaffolderName);
+
 		if (this.hasSvcProperty) {
 			this.logger.info(`${this.scaffolderName} in ${this.context.application.language}; configuring credentials only`);
 			this._addMappings(this.config);
@@ -65,6 +67,7 @@ module.exports = class extends Generator {
 			return;
 		}
 		let serviceInfo = this._getServiceInfo();
+
 		this.logger.debug(`configuring - serviceInfo=${JSON.stringify(serviceInfo, null, 3)}`);
 
 		if (serviceInfo && this.scaffolderName !== "autoscaling") {
