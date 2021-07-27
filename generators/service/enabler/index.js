@@ -35,7 +35,6 @@ module.exports = class extends Generator {
 		this.serviceKey = serviceMappings["customServiceKey"] || this.scaffolderName;
 		this.logger = log4js.getLogger("generator-ibm-cloud-assets:" + this.scaffolderName);
 		this.context = opts.context;
-		//this.config = {};
 		this.cloudFoundryName = this.context.cloudLabel || serviceMappings["cfServiceName"] || this.scaffolderName;
 		this.serviceName = serviceMappings["customServiceKey"] ? `service-${serviceMappings["customServiceKey"]}` : `service-${this.scaffolderName}`;
 		this.logger.level = this.context.loggerLevel;
