@@ -23,7 +23,6 @@ const Utils = require('../../lib/utils');
 const ServiceUtils = require('../../lib/service-utils');
 
 const SvcInfo = require('../templates/serviceInfo.json');
-const { logger } = require('handlebars');
 
 const REGEX_HYPHEN = /-/g;
 
