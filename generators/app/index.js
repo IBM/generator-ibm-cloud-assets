@@ -35,7 +35,7 @@ module.exports = class extends Generator {
 		if (this.opts.deployOptions && this.opts.deployOptions !== true) { this.opts.deploy_options = this.opts.deployOptions }
 		this._sanitizeOption(this.options, DEPLOY_OPTIONS);
 		this._sanitizeOption(this.options, APPLICATION_OPTIONS);
-		logger.debug("THIS.OPTS: " + JSON.stringify(this.opts, null, 3));
+		
 		if (this.opts.deployOptions) { delete this.opts.deployOptions; }
 		if (this.opts["deploy-options"]) { delete this.opts["deploy-options"]; }
 
