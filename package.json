@@ -27,7 +27,7 @@
     "version": "standard-version"
   },
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=16.0.0"
   },
   "dependencies": {
     "fs-extra": "^10.0.0",
