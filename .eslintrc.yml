@@ -4,7 +4,10 @@ env:
   mocha: true
 
 # need babel-eslint because default eslint doesn't support optional chaining
-parser: babel-eslint
+parser: "@babel/eslint-parser"
+parserOptions: {
+  requireConfigFile: false
+}
 
 rules:
   strict: 0
@@ -16,5 +19,3 @@ rules:
   indent: ["warn", "tab", { "SwitchCase": 1}]
 
 extends: eslint:recommended
-
-plugins: [ejs]
