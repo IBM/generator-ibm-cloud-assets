@@ -64,3 +64,4 @@ dump.rdb
 manual/test.json
 manual/*.dir
 
+cra-bom.json
