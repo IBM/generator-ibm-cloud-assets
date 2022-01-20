@@ -44,7 +44,7 @@
     "xmlbuilder": "^15.1.1",
     "xmlserializer": "^0.6.1",
     "yeoman-environment": "^3.9.1",
-    "yeoman-generator": "^5.6.0"
+    "yeoman-generator": "^5.6.1"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.16.5",
