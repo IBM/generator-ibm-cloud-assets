@@ -1,0 +1,10 @@
+[
+    {
+        "cve": "SNYK-JS-ANSIREGEX-1583908",
+        "alwaysOmit": true
+    },
+    {
+        "cve": "SNYK-JS-NWSAPI-2841516",
+        "untilRemediationAvailable": true
+    }
+]
