@@ -38,7 +38,7 @@
     "jsdom": "^20.0.0",
     "lodash": "^4.17.21",
     "log4js": "^6.6.0",
-    "plist": "^3.0.5",
+    "plist": "^3.0.6",
     "prettify-xml": "^1.2.0",
     "xml-js": "^1.6.11",
     "xmlbuilder": "^15.1.1",
