@@ -30,7 +30,7 @@
     "node": ">=16.0.0"
   },
   "dependencies": {
-    "@mapbox/node-pre-gyp": "^1.0.9",
+    "@mapbox/node-pre-gyp": "^1.0.10",
     "fs-extra": "^10.0.1",
     "glob": "^8.0.3",
     "handlebars": "^4.7.7",
