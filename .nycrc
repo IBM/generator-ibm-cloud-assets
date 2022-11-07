@@ -3,7 +3,7 @@
     "statements": 82,
     "branches": 65.5,
     "functions": 90,
-    "lines": 82.89,
+    "lines": 82.85,
     "include": [
         "generators/**/*.js"
     ],
