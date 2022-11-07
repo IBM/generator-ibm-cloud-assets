@@ -14,9 +14,7 @@
 'use strict';
 
 const logger = require('log4js').getLogger("generator-ibm-cloud-assets:utils");
-const jsdom = require('jsdom');
-const { JSDOM } = jsdom;
-const DOMParser = new JSDOM().window.DOMParser;
+const { DOMParser } = require('@xmldom/xmldom');
 const XMLSerializer = require('xmlserializer');
 const prettifyxml = require('prettify-xml');
 
