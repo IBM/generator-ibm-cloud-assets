@@ -27,7 +27,7 @@
     "version": "standard-version"
   },
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=18.0.0"
   },
   "dependencies": {
     "@mapbox/node-pre-gyp": "^1.0.10",
