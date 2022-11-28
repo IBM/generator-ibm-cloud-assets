@@ -37,7 +37,7 @@
     "handlebars": "^4.7.7",
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.21",
-    "log4js": "^6.7.0",
+    "log4js": "^6.7.1",
     "plist": "^3.0.6",
     "prettify-xml": "^1.2.0",
     "xml-js": "^1.6.11",
