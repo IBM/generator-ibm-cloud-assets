@@ -43,13 +43,13 @@
     "xml-js": "^1.6.11",
     "xmlbuilder": "^15.1.1",
     "xmlserializer": "^0.6.1",
-    "yeoman-environment": "^3.14.0",
-    "yeoman-generator": "^5.7.0"
+    "yeoman-environment": "^3.14.1",
+    "yeoman-generator": "^5.7.1"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.19.1",
     "coveralls": "^3.1.1",
-    "eslint": "^8.33.0",
+    "eslint": "^8.34.0",
     "mocha": "^10.2.0",
     "mocha-multi-reporters": "^1.5.1",
     "nyc": "^15.1.0",
